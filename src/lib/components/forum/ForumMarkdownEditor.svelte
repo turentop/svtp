@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
+	import { isDark } from '$lib/stores/theme';
 	import { type ForumUploadType, uploadFile } from '$lib/forum/api/auth';
 	import { ForumApiError } from '$lib/forum/types/api';
 	import {
@@ -183,7 +184,7 @@
 				previewStyle: 'vertical',
 				initialValue: value,
 				placeholder,
-				theme: 'dark',
+				theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
 				usageStatistics: false,
 				hideModeSwitch: true,
 				toolbarItems: toolbarMap[mode],

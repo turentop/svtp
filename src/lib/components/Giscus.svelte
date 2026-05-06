@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Alert, AlertTitle, AlertDescription } from '$lib/components/ui/alert';
 	import Icon from '@iconify/svelte';
+	import { isDark } from '$lib/stores/theme';
 
 	let loaded = $state(false);
 
@@ -46,7 +47,20 @@
 		};
 	});
 
+	// Listen for theme changes and update giscus
+	$effect(() => {
+		const dark = $isDark;
+		const frame = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
+		if (frame?.contentWindow) {
+			frame.contentWindow.postMessage(
+				{ giscus: { setConfig: { theme: dark ? 'dark_protanopia' : 'light_protanopia' } } },
+				'https://giscus.app'
+			);
+		}
+	});
+
 	function loadGiscus() {
+		const dark = document.documentElement.classList.contains('dark');
 		const script = document.createElement('script');
 		script.src = 'https://giscus.app/client.js';
 		script.setAttribute('data-repo', 'afoim/giscus-fuwari');
@@ -58,7 +72,7 @@
 		script.setAttribute('data-reactions-enabled', '1');
 		script.setAttribute('data-emit-metadata', '0');
 		script.setAttribute('data-input-position', 'top');
-		script.setAttribute('data-theme', 'light_protanopia');
+		script.setAttribute('data-theme', dark ? 'dark_protanopia' : 'light_protanopia');
 		script.setAttribute('data-lang', 'zh-CN');
 		script.setAttribute('data-loading', 'lazy');
 		script.setAttribute('crossorigin', 'anonymous');

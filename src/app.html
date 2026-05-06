@@ -5,6 +5,18 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="text-scale" content="scale" />
 		<meta name="theme-color" content="#ffffff" />
+		<script>
+			(function () {
+				try {
+					var t = localStorage.getItem('theme');
+					var dark = t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme:dark)').matches);
+					if (dark) {
+						document.documentElement.classList.add('dark');
+						document.querySelector('meta[name="theme-color"]').content = '#0a0a0a';
+					}
+				} catch (e) {}
+			})();
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

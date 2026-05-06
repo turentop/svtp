@@ -10,6 +10,7 @@
 	import TimetableCard from '$lib/components/TimetableCard.svelte';
 	import SponsorBanners from '$lib/components/SponsorBanners.svelte';
 	import Announcement from '$lib/components/Announcement.svelte';
+	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	
 	let isLive = $state<boolean>(false);
 	
@@ -110,6 +111,9 @@
 </svelte:head>
 
 <div class="flex min-h-screen flex-col items-center justify-center gap-6 px-4">
+	<div class="fixed top-4 right-4 z-50">
+		<ThemeToggle />
+	</div>
 	<Announcement />
 
 	<div class="live-avatar-container">

@@ -3,7 +3,8 @@
 
 const VER = '11.11.1';
 const BASE = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/${VER}`;
-const THEME_URL = `${BASE}/styles/github.min.css`;
+const THEME_LIGHT = `${BASE}/styles/github.min.css`;
+const THEME_DARK = `${BASE}/styles/github-dark.min.css`;
 const CORE_URL = `${BASE}/highlight.min.js`;
 
 // cdnjs 的 highlight.min.js 已内置以下"common"语言，不需要再单独加载脚本
@@ -92,6 +93,10 @@ let langsPromise: Promise<void> | null = null;
 let themeInjected = false;
 const loadedLangs = new Set<string>();
 
+function isDarkMode(): boolean {
+	return document.documentElement.classList.contains('dark');
+}
+
 const LANG_ALIASES: Record<string, string> = {
 	js: 'javascript',
 	ts: 'typescript',
@@ -129,20 +134,28 @@ function loadScript(src: string): Promise<void> {
 }
 
 function ensureTheme() {
-	if (themeInjected) return;
-	if (document.querySelector('link[data-hljs-theme]')) {
-		themeInjected = true;
+	const dark = isDarkMode();
+	const targetTheme = dark ? 'github-dark' : 'github';
+	const targetUrl = dark ? THEME_DARK : THEME_LIGHT;
+
+	const existing = document.querySelector<HTMLLinkElement>('link[data-hljs-theme]');
+	if (existing) {
+		if (existing.getAttribute('data-hljs-theme') !== targetTheme) {
+			existing.href = targetUrl;
+			existing.setAttribute('data-hljs-theme', targetTheme);
+			console.log('[hljs] theme switched to:', targetTheme);
+		}
 		return;
 	}
 	const link = document.createElement('link');
 	link.rel = 'stylesheet';
-	link.href = THEME_URL;
-	link.setAttribute('data-hljs-theme', 'github');
+	link.href = targetUrl;
+	link.setAttribute('data-hljs-theme', targetTheme);
 	link.onload = () => console.log('[hljs] theme CSS loaded');
 	link.onerror = (e) => console.error('[hljs] theme CSS failed', e);
 	document.head.appendChild(link);
 	themeInjected = true;
-	console.log('[hljs] theme link appended:', THEME_URL);
+	console.log('[hljs] theme link appended:', targetUrl);
 }
 
 async function getCore(): Promise<HljsLike> {
