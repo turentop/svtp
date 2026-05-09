@@ -196,7 +196,7 @@
 			prose-headings:text-foreground
 			prose-p:text-foreground
 			prose-strong:text-foreground
-			prose-a:text-primary prose-a:underline prose-a:underline-offset-4 prose-a:break-all hover:prose-a:opacity-80
+			prose-a:text-primary prose-a:underline prose-a:underline-offset-4 prose-a:break-all prose-a:transition-opacity prose-a:hover:opacity-80
 			prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground
 			prose-code:bg-muted prose-code:text-foreground prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:before:content-none prose-code:after:content-none
 			prose-pre:bg-transparent prose-pre:p-0 prose-pre:text-foreground prose-pre:overflow-x-auto
