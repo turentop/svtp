@@ -14,6 +14,10 @@ declare global {
 
 let mermaidPromise: Promise<MermaidLike> | null = null;
 let initialized = false;
+let lastTheme: 'dark' | 'default' | null = null;
+
+// 存储已渲染的 mermaid 块的原始代码，用于主题切换时重新渲染
+const renderedBlocks = new Map<HTMLElement, string>();
 
 function loadScript(src: string): Promise<void> {
 	return new Promise((resolve, reject) => {
@@ -85,9 +89,10 @@ export async function renderMermaidIn(container: HTMLElement | null | undefined)
 	const mermaid = await getMermaid();
 	if (!initialized) {
 		const isDark = document.documentElement.classList.contains('dark');
+		lastTheme = isDark ? 'dark' : 'default';
 		mermaid.initialize({
 			startOnLoad: false,
-			theme: isDark ? 'dark' : 'default',
+			theme: lastTheme,
 			securityLevel: 'loose',
 			fontFamily: 'inherit'
 		});
@@ -104,6 +109,7 @@ export async function renderMermaidIn(container: HTMLElement | null | undefined)
 			const wrapper = document.createElement('div');
 			wrapper.className = 'mermaid-rendered flex justify-center my-4 not-prose';
 			wrapper.innerHTML = svg;
+			renderedBlocks.set(wrapper, code);
 			pre.replaceWith(wrapper);
 			console.log(`[mermaid] block ${i}: rendered`);
 		} catch (err) {
@@ -114,4 +120,49 @@ export async function renderMermaidIn(container: HTMLElement | null | undefined)
 			pre.replaceWith(errEl);
 		}
 	}
+}
+
+/**
+ * 重新渲染所有已渲染的 mermaid 块（用于主题切换）
+ */
+export async function rerenderAllMermaid() {
+	const mermaid = await getMermaid();
+	const isDark = document.documentElement.classList.contains('dark');
+	const newTheme = isDark ? 'dark' : 'default';
+	if (newTheme === lastTheme) return;
+
+	initialized = false;
+	lastTheme = newTheme;
+	mermaid.initialize({
+		startOnLoad: false,
+		theme: newTheme,
+		securityLevel: 'loose',
+		fontFamily: 'inherit'
+	});
+	initialized = true;
+
+	let i = 0;
+	for (const [wrapper, code] of renderedBlocks) {
+		const id = `mermaid-rerender-${Date.now()}-${i++}`;
+		try {
+			const { svg } = await mermaid.render(id, code);
+			wrapper.innerHTML = svg;
+		} catch (err) {
+			console.error('[mermaid] re-render failed:', err);
+		}
+	}
+}
+
+/**
+ * 监听明暗主题变化，自动重新渲染 mermaid 块
+ */
+export function watchMermaidTheme() {
+	const observer = new MutationObserver(() => {
+		rerenderAllMermaid();
+	});
+	observer.observe(document.documentElement, {
+		attributes: true,
+		attributeFilter: ['class']
+	});
+	return () => observer.disconnect();
 }
