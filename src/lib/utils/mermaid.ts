@@ -19,6 +19,10 @@ let lastTheme: 'dark' | 'default' | null = null;
 // 存储已渲染的 mermaid 块的原始代码，用于主题切换时重新渲染
 const renderedBlocks = new Map<HTMLElement, string>();
 
+// 渲染完成守卫，避免在首次渲染完成前触发重渲染
+let renderDone: Promise<void> = Promise.resolve();
+let renderDoneResolve: (() => void) | null = null;
+
 function loadScript(src: string): Promise<void> {
 	return new Promise((resolve, reject) => {
 		if (document.querySelector(`script[data-mermaid-src="${src}"]`)) {
@@ -72,6 +76,11 @@ function decodeText(pre: HTMLElement): string {
 export async function renderMermaidIn(container: HTMLElement | null | undefined) {
 	if (!container) return;
 
+	// 创建新的守卫 Promise
+	let resolveRender: () => void;
+	renderDone = new Promise<void>((r) => { resolveRender = r; });
+	renderDoneResolve = resolveRender!;
+
 	const candidates = new Set<HTMLElement>();
 	for (const el of Array.from(
 		container.querySelectorAll<HTMLElement>('pre[data-language="mermaid"]')
@@ -121,12 +130,15 @@ export async function renderMermaidIn(container: HTMLElement | null | undefined)
 			pre.replaceWith(errEl);
 		}
 	}
+
+	renderDoneResolve?.();
 }
 
 /**
  * 重新渲染所有已渲染的 mermaid 块（用于主题切换）
  */
 export async function rerenderAllMermaid() {
+	await renderDone;
 	const mermaid = await getMermaid();
 	const isDark = document.documentElement.classList.contains('dark');
 	const newTheme = isDark ? 'dark' : 'default';
