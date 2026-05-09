@@ -226,19 +226,6 @@
 							</Button>
 						</a>
 					{/each}
-
-					<a href="/posts/privacy-policy/">
-						<Button variant="outline" class="flex items-center gap-2">
-							<Icon icon="mdi:shield-lock" class="w-5 h-5" />
-							隐私政策
-						</Button>
-					</a>
-					<a href="#" id="open_preferences_center">
-						<Button variant="outline" class="flex items-center gap-2">
-							<Icon icon="mdi:cookie-settings" class="w-5 h-5" />
-							Cookie 设置
-						</Button>
-					</a>
 				</div>
 			</CardContent>
 		</Card>
