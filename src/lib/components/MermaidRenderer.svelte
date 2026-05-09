@@ -9,11 +9,11 @@
 		await tick();
 		const container = document.querySelector(selector) as HTMLElement | null;
 		renderMermaidIn(container);
-	});
 
-	$effect(() => {
-		const dark = $isDark;
-		console.log(`[mermaid] $effect fired, isDark=${dark}`);
-		rerenderAllMermaid();
+		const unsub = isDark.subscribe((dark) => {
+			console.log(`[mermaid] isDark.subscribe fired, dark=${dark}`);
+			rerenderAllMermaid();
+		});
+		return unsub;
 	});
 </script>
