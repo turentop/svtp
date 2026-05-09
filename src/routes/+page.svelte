@@ -165,7 +165,7 @@
 	</div>
 
 	<!-- 社交媒体链接 -->
-	<div class="flex flex-wrap gap-3 justify-center mo-stagger" use:staggerChildren>
+	<div class="flex flex-wrap gap-3 justify-center max-w-2xl mx-auto mo-stagger" use:staggerChildren>
 		{#each siteConfig.bio.links as link}
 			{@const isLocalImage = link.icon.startsWith('/')}
 			<a href={link.url} target="_blank" rel="noopener noreferrer">
@@ -185,10 +185,10 @@
 		{/each}
 	</div>
 
-	<div class="mx-auto max-w-xs mo-fade-in" use:fadeIn><hr class="h-px bg-border border-0" /></div>
+	<p class="text-center text-muted-foreground text-sm mo-fade-in" use:fadeIn>─────────────────────</p>
 
 	<!-- 导航按钮 -->
-	<div class="flex flex-wrap gap-3 justify-center mo-stagger" use:staggerChildren>
+	<div class="flex flex-wrap gap-3 justify-center max-w-2xl mx-auto mo-stagger" use:staggerChildren>
 		{#each siteConfig.navLinks as link}
 			{@const isExternal = link.href.startsWith('http')}
 			<a href={link.href} {...isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {}}>
@@ -222,7 +222,7 @@
 		</a>
 	</div>
 
-	<div class="mx-auto max-w-xs mo-fade-in" use:fadeIn><hr class="h-px bg-border border-0" /></div>
+	<p class="text-center text-muted-foreground text-sm mo-fade-in" use:fadeIn>─────────────────────</p>
 
 	<SponsorBanners />
 </div>
