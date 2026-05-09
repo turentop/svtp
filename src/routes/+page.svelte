@@ -170,11 +170,11 @@
 
 	<!-- 社交媒体链接 -->
 	<div class="w-full max-w-2xl mx-auto mo-fade-in-up" use:fadeInUp={{ delay: 0.2 }}>
-		<Card>
-			<CardHeader>
-				<CardTitle class="text-center text-muted-foreground">社交</CardTitle>
+		<Card class="relative overflow-hidden">
+			<CardHeader class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+				<CardTitle class="text-center text-5xl font-black tracking-widest text-foreground/[0.04] dark:text-foreground/[0.06] select-none">社交</CardTitle>
 			</CardHeader>
-			<CardContent>
+			<CardContent class="relative z-10">
 				<div class="flex flex-wrap gap-3 justify-center">
 					{#each siteConfig.bio.links as link}
 						{@const isLocalImage = link.icon.startsWith('/')}
@@ -200,11 +200,11 @@
 
 	<!-- 导航按钮 -->
 	<div class="w-full max-w-2xl mx-auto mo-fade-in-up" use:fadeInUp={{ delay: 0.3 }}>
-		<Card>
-			<CardHeader>
-				<CardTitle class="text-center text-muted-foreground">导航</CardTitle>
+		<Card class="relative overflow-hidden">
+			<CardHeader class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+				<CardTitle class="text-center text-5xl font-black tracking-widest text-foreground/[0.04] dark:text-foreground/[0.06] select-none">导航</CardTitle>
 			</CardHeader>
-			<CardContent>
+			<CardContent class="relative z-10">
 				<div class="flex flex-wrap gap-3 justify-center">
 					{#each siteConfig.navLinks as link}
 						{@const isExternal = link.href.startsWith('http')}
@@ -244,11 +244,11 @@
 
 	<!-- 赞助商 -->
 	<div class="w-full max-w-2xl mx-auto mo-fade-in-up" use:fadeInUp={{ delay: 0.4 }}>
-		<Card>
-			<CardHeader>
-				<CardTitle class="text-center text-muted-foreground">赞助商</CardTitle>
+		<Card class="relative overflow-hidden">
+			<CardHeader class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+				<CardTitle class="text-center text-5xl font-black tracking-widest text-foreground/[0.04] dark:text-foreground/[0.06] select-none">赞助商</CardTitle>
 			</CardHeader>
-			<CardContent class="flex flex-col items-center">
+			<CardContent class="relative z-10 flex flex-col items-center">
 				<SponsorBanners />
 			</CardContent>
 		</Card>
