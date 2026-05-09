@@ -37,7 +37,7 @@
 				onclick={() => tocFloating.toggle()}
 				aria-label="目录"
 				aria-expanded={$tocFloating.open}
-				class="size-12 shadow-lg hover:shadow-xl bg-white text-black dark:bg-black dark:text-white border-border"
+				class="size-12 shadow-lg hover:shadow-xl bg-white text-black dark:bg-black dark:text-white border-2 border-border"
 			>
 				<Icon
 					icon={$tocFloating.open ? 'mdi:close' : 'mdi:format-list-bulleted'}
@@ -52,7 +52,7 @@
 				size="icon-lg"
 				onclick={scrollToComments}
 				aria-label="跳转到评论区"
-				class="size-12 shadow-lg hover:shadow-xl bg-white text-black dark:bg-black dark:text-white border-border"
+				class="size-12 shadow-lg hover:shadow-xl bg-white text-black dark:bg-black dark:text-white border-2 border-border"
 			>
 				<Icon icon="mdi:comment-multiple-outline" class="size-5" />
 			</Button>
@@ -64,7 +64,7 @@
 				size="icon-lg"
 				onclick={scrollToTop}
 				aria-label="回到顶部"
-				class="size-12 shadow-lg hover:shadow-xl bg-white text-black dark:bg-black dark:text-white border-border"
+				class="size-12 shadow-lg hover:shadow-xl bg-white text-black dark:bg-black dark:text-white border-2 border-border"
 			>
 				<Icon icon="mdi:chevron-up" class="size-5" />
 			</Button>
