@@ -158,7 +158,7 @@
 	<!-- 返回按钮 -->
 	<div class="mb-8">
 		<a href="/posts">
-			<Button variant="ghost">← 返回文章列表</Button>
+			<Button variant="ghost">← 返回博客文章</Button>
 		</a>
 	</div>
 
@@ -227,7 +227,7 @@
 	<footer class="mt-12 border-t pt-8">
 		<div class="flex justify-center">
 			<a href="/posts">
-				<Button>← 返回文章列表</Button>
+				<Button>← 返回博客文章</Button>
 			</a>
 		</div>
 	</footer>

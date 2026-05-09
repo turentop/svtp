@@ -289,13 +289,13 @@
 </script>
 
 <svelte:head>
-	<title>文章列表 - {siteConfig.title}</title>
+	<title>博客文章 - {siteConfig.title}</title>
 	<meta name="description" content="浏览所有文章" />
 </svelte:head>
 
 <div class="container mx-auto max-w-4xl px-4 py-12">
 	<div class="mb-12 text-center">
-		<h1 class="mb-4 text-4xl font-bold">文章列表</h1>
+		<h1 class="mb-4 text-4xl font-bold">博客文章</h1>
 		<p class="text-muted-foreground">分享技术、想法和经验</p>
 		<p class="mt-2 text-sm text-muted-foreground">
 			共 {data.totalPosts} 篇文章 · 总计 {data.totalWords.toLocaleString()} 字
@@ -348,7 +348,7 @@
 	<div class="space-y-6 mo-stagger" use:staggerChildren>
 		{#each paginatedPosts as { post, matchedLines }}
 			<a href="/posts/{post.slug}" class="block">
-				<Card.Root class="group transition-all hover:shadow-lg ring-0">
+				<Card.Root class="group transition-all hover:shadow-lg">
 					<Card.Content>
 						<div class="flex flex-col gap-4 md:flex-row">
 							{#if post.metadata.image}

@@ -29,7 +29,7 @@
 	</a>
 
 	<!-- YXvm + NodeSeek (NodeSupport) -->
-	<div class="overflow-hidden rounded-lg ring-1 ring-foreground/10">
+	<div class="overflow-hidden rounded-lg">
 		<div
 			class="space-y-4 border border-[#27344a] p-6"
 			style="background: linear-gradient(to top right, rgb(7 16 45), rgb(58 60 84));"
