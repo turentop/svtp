@@ -349,7 +349,7 @@
 		{#each paginatedPosts as { post, matchedLines }}
 			<a href="/posts/{post.slug}" class="block">
 				<Card.Root class="group transition-all hover:shadow-lg">
-					<Card.Content class="p-6">
+					<Card.Content class="p-4">
 						<div class="flex flex-col gap-4 md:flex-row">
 							{#if post.metadata.image}
 								<div class="md:w-48 md:flex-shrink-0">
