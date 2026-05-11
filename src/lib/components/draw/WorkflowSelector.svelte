@@ -2,15 +2,17 @@
 	import Icon from '@iconify/svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { Badge } from '$lib/components/ui/badge';
-	import { fetchWorkflows, getThumbnailUrl } from '$lib/draw/api/client';
+	import { fetchWorkflows, fetchWorkflowDetail, getThumbnailUrl } from '$lib/draw/api/client';
 	import type { DrawWorkflow } from '$lib/draw/types';
 
 	let {
 		value = $bindable(''),
-		onselect
+		onselect,
+		onpromptload
 	}: {
 		value?: string;
 		onselect?: (wf: DrawWorkflow) => void;
+		onpromptload?: (positive: string, negative: string) => void;
 	} = $props();
 
 	let workflows = $state<DrawWorkflow[]>([]);
@@ -19,6 +21,8 @@
 	let showSearch = $state(false);
 	let loading = $state(true);
 	let error = $state('');
+	let loadingPath = $state('');
+	let abortCtrl: AbortController | null = null;
 
 	const filtered = $derived(() => {
 		if (!search.trim()) return workflows;
@@ -72,6 +76,24 @@
 	function select(wf: DrawWorkflow) {
 		value = wf.path;
 		onselect?.(wf);
+
+		abortCtrl?.abort();
+		abortCtrl = new AbortController();
+		loadingPath = wf.path;
+
+		fetchWorkflowDetail(wf.path, abortCtrl.signal)
+			.then((detail) => {
+				if (!abortCtrl?.signal.aborted) {
+					onpromptload?.(detail.builtin_prompt, detail.builtin_negative_prompt);
+					loadingPath = '';
+				}
+			})
+			.catch((e) => {
+				if (e?.name === 'AbortError') return;
+				if (!abortCtrl?.signal.aborted) {
+					loadingPath = '';
+				}
+			});
 	}
 </script>
 
@@ -121,6 +143,7 @@
 							<button
 								class="inline-flex items-center gap-1.5 p-1.5 rounded-md border text-left text-xs transition-all hover:bg-accent {value === wf.path ? 'border-primary bg-primary/5 ring-1 ring-primary/30' : 'border-border'}"
 								onclick={() => select(wf)}
+								disabled={loadingPath === wf.path}
 							>
 								{#if wf.thumbnail}
 									<img
@@ -133,6 +156,9 @@
 									<div class="size-8 rounded bg-muted flex items-center justify-center shrink-0">
 										<Icon icon="mdi:image-off-outline" class="size-4 text-muted-foreground" />
 									</div>
+								{/if}
+								{#if loadingPath === wf.path}
+									<Icon icon="mdi:loading" class="size-4 shrink-0 animate-spin" />
 								{/if}
 								<span class="truncate">{wf.path.replace('.json', '')}</span>
 							</button>
