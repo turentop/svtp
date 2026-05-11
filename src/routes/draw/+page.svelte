@@ -357,7 +357,7 @@
 		<TabsContent value="generate" class="space-y-4 mt-4">
 			<div class="grid grid-cols-2 gap-4">
 				<WorkflowDialog bind:value={workflowPath} onselect={handleWorkflowSelect} onpromptload={handlePromptLoad} />
-				<StyleDialog bind:value={styleTags} onselect={handleStyleSelect} />
+				<StyleDialog bind:value={styleTags} bind:name={styleName} onselect={handleStyleSelect} />
 			</div>
 
 			<PromptForm

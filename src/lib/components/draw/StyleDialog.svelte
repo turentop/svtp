@@ -6,9 +6,11 @@
 
 	let {
 		value = $bindable(''),
+		name = $bindable(''),
 		onselect
 	}: {
 		value?: string;
+		name?: string;
 		onselect?: (tags: string, name: string) => void;
 	} = $props();
 
@@ -26,7 +28,7 @@
 			<Button variant="outline" class="w-full justify-start gap-2" {...props}>
 				<Icon icon="mdi:palette-outline" class="size-4" />
 				{#if value}
-					<span class="truncate">选择风格</span>
+					<span class="truncate">{name || value}</span>
 				{:else}
 					<span class="text-muted-foreground">选择风格</span>
 				{/if}
