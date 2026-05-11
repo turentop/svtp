@@ -31,6 +31,7 @@
 	let otherNode = $state('');
 	let otherValue = $state(0);
 	let otherMax = $state(0);
+	let otherStage = $state('');
 	let authToken = $state<string | null>(null);
 	let isLoggedIn = $derived(!!authToken);
 
@@ -158,6 +159,7 @@
 				otherNode = (msg as any).node || '';
 				otherValue = (msg as any).value ?? 0;
 				otherMax = (msg as any).max ?? 0;
+				otherStage = (msg as any).stage || '';
 				break;
 			case 'online':
 				onlineCount = msg.count;
@@ -403,6 +405,7 @@
 				bind:otherNode
 				bind:otherValue
 				bind:otherMax
+				bind:otherStage
 			/>
 
 			<ProgressPanel

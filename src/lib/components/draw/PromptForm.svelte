@@ -28,6 +28,7 @@
 		otherNode = $bindable(''),
 		otherValue = $bindable(0),
 		otherMax = $bindable(0),
+		otherStage = $bindable(''),
 	}: {
 		directPrompt?: string;
 		negativePrompt?: string;
@@ -42,6 +43,7 @@
 		otherNode?: string;
 		otherValue?: number;
 		otherMax?: number;
+		otherStage?: string;
 	} = $props();
 
 	let resolutions = $state<DrawResolution[]>([]);
@@ -193,16 +195,14 @@
 		onclick={handleSubmit}
 		{disabled}
 	>
-		{#if busy && otherMax > 0}
-			<div class="w-full flex flex-col items-center gap-0.5">
-				<span class="text-xs">{otherNode}: {otherValue}/{otherMax}</span>
-				<div class="w-full bg-primary-foreground/20 rounded-full h-1.5">
-					<div class="bg-primary-foreground h-1.5 rounded-full transition-all" style="width: {Math.round(otherValue / otherMax * 100)}%"></div>
-				</div>
-			</div>
-		{:else if busy}
+		{#if busy}
 			<Icon icon="mdi:loading" class="size-4 animate-spin" />
-			他人生成中...
+			他人生图中...
+			{#if otherStage === 'llm'}
+				<span class="text-[10px] opacity-70">(LLM处理)</span>
+			{:else if otherMax > 0}
+				<span class="text-[10px] opacity-70">({Math.round(otherValue / otherMax * 100)}%)</span>
+			{/if}
 		{:else}
 			<Icon icon="mdi:sparkles" class="size-5 mr-1.5" />
 			开始生成
