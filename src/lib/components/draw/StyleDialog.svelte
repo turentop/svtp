@@ -33,14 +33,14 @@
 			</Button>
 		{/snippet}
 	</Dialog.Trigger>
-	<Dialog.Content class="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+	<Dialog.Content class="max-w-full w-full h-full max-h-full m-0 rounded-none p-4 flex flex-col">
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
 				<Icon icon="mdi:palette-outline" class="size-5" />
 				选择风格
 			</Dialog.Title>
 		</Dialog.Header>
-		<div class="flex-1 overflow-y-auto pr-2">
+		<div class="flex-1 overflow-y-auto">
 			<StyleSelector bind:value onselect={handleSelect} />
 		</div>
 	</Dialog.Content>
