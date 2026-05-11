@@ -1,0 +1,54 @@
+<script lang="ts">
+	import Icon from '@iconify/svelte';
+	import { Button } from '$lib/components/ui/button';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import WorkflowSelector from './WorkflowSelector.svelte';
+	import type { DrawWorkflow } from '$lib/draw/types';
+
+	let {
+		value = $bindable(''),
+		onselect,
+		onpromptload
+	}: {
+		value?: string;
+		onselect?: (wf: DrawWorkflow) => void;
+		onpromptload?: (positive: string, negative: string) => void;
+	} = $props();
+
+	let open = $state(false);
+
+	function handleSelect(wf: DrawWorkflow) {
+		onselect?.(wf);
+		open = false;
+	}
+
+	function handlePromptLoad(positive: string, negative: string) {
+		onpromptload?.(positive, negative);
+	}
+</script>
+
+<Dialog.Root bind:open>
+	<Dialog.Trigger>
+		{#snippet child({ props })}
+			<Button variant="outline" class="w-full justify-start gap-2" {...props}>
+				<Icon icon="mdi:cog-outline" class="size-4" />
+				{#if value}
+					<span class="truncate">{value.replace('.json', '')}</span>
+				{:else}
+					<span class="text-muted-foreground">选择工作流</span>
+				{/if}
+			</Button>
+		{/snippet}
+	</Dialog.Trigger>
+	<Dialog.Content class="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+		<Dialog.Header>
+			<Dialog.Title class="flex items-center gap-2">
+				<Icon icon="mdi:cog-outline" class="size-5" />
+				选择工作流
+			</Dialog.Title>
+		</Dialog.Header>
+		<div class="flex-1 overflow-y-auto pr-2">
+			<WorkflowSelector bind:value onselect={handleSelect} onpromptload={handlePromptLoad} />
+		</div>
+	</Dialog.Content>
+</Dialog.Root>

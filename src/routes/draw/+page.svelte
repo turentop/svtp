@@ -13,8 +13,8 @@
 	import type { WsRunMessage, WsStatusEvent, WsRunPayload, DrawWorkflow, DrawRecommendation } from '$lib/draw/types';
 
 	import EnvironmentSwitcher from '$lib/components/draw/EnvironmentSwitcher.svelte';
-	import WorkflowSelector from '$lib/components/draw/WorkflowSelector.svelte';
-	import StyleSelector from '$lib/components/draw/StyleSelector.svelte';
+	import WorkflowDialog from '$lib/components/draw/WorkflowDialog.svelte';
+	import StyleDialog from '$lib/components/draw/StyleDialog.svelte';
 	import PromptForm from '$lib/components/draw/PromptForm.svelte';
 	import ProgressPanel from '$lib/components/draw/ProgressPanel.svelte';
 	import ResultGrid from '$lib/components/draw/ResultGrid.svelte';
@@ -330,8 +330,8 @@
 		<!-- Generate Tab -->
 		<TabsContent value="generate" class="space-y-4 mt-4">
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<WorkflowSelector bind:value={workflowPath} onselect={handleWorkflowSelect} onpromptload={handlePromptLoad} />
-				<StyleSelector bind:value={styleTags} onselect={handleStyleSelect} />
+				<WorkflowDialog bind:value={workflowPath} onselect={handleWorkflowSelect} onpromptload={handlePromptLoad} />
+				<StyleDialog bind:value={styleTags} onselect={handleStyleSelect} />
 			</div>
 
 			<PromptForm
