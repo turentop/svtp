@@ -1,8 +1,6 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import { siteConfig } from '$lib/config/site';
-	import PhotoSwipe from 'photoswipe';
-	import 'photoswipe/style.css';
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
 	import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -17,6 +15,7 @@
 	import * as admin from '$lib/draw/api/admin';
 	import { getImageProxyUrl, getImageUrl, getThumbnailUrl, forkOutputImage } from '$lib/draw/api/client';
 	import { pendingFork } from '$lib/draw/stores/fork';
+	import ImageLightbox from '$lib/components/draw/ImageLightbox.svelte';
 	import type {
 		AdminRecentImage,
 		AdminReport,
@@ -94,46 +93,28 @@
 	let wfUploadTarget = $state('');
 
 	// Lightbox
+	let lbOpen = $state(false);
+	let lbImages = $state<{ src: string; creator_id?: string }[]>([]);
+
 	function openLb(path: string) {
-		const url = getImageUrl(path);
-		const img = new Image();
-		img.onload = () => openPswp(url, img.naturalWidth, img.naturalHeight, path);
-		img.onerror = () => openPswp(url, 1600, 1200, path);
-		img.src = url;
+		lbImages = [{ src: getImageUrl(path), creator_id: '' }];
+		lbOpen = true;
 	}
 
-	function openPswp(url: string, w: number, h: number, path: string) {
-		const pswp = new PhotoSwipe({
-			dataSources: [{ src: url, width: w || 1600, height: h || 1200, alt: path }],
-			index: 0,
-			bgOpacity: 0.9
-		});
-		pswp.on('uiRegister', () => {
-			pswp.ui.registerElement({
-				name: 'fork-button',
-				order: 9,
-				isButton: true,
-				title: 'Fork 工作流',
-				html: '<svg width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"/><path d="M12 12v3"/></svg>',
-				onClick: async () => {
-					pswp.close();
-					try {
-						const res = await forkOutputImage(path);
-						pendingFork.set({
-							workflow: res.workflow,
-							builtin_prompt: res.builtin_prompt,
-							builtin_negative_prompt: res.builtin_negative_prompt,
-							default_width: res.default_width,
-							default_height: res.default_height
-						});
-						window.location.href = '/draw';
-					} catch (e) {
-						alert(e instanceof Error ? e.message : 'Fork 失败');
-					}
-				}
+	async function handleAdminFork(path: string) {
+		try {
+			const res = await forkOutputImage(path);
+			pendingFork.set({
+				workflow: res.workflow,
+				builtin_prompt: res.builtin_prompt,
+				builtin_negative_prompt: res.builtin_negative_prompt,
+				default_width: res.default_width,
+				default_height: res.default_height
 			});
-		});
-		pswp.init();
+			window.location.href = '/draw';
+		} catch (e) {
+			alert(e instanceof Error ? e.message : 'Fork 失败');
+		}
 	}
 
 	$effect(() => {
@@ -1499,6 +1480,14 @@
 		</Tabs>
 	{/if}
 </div>
+
+<ImageLightbox
+	open={lbOpen}
+	images={lbImages}
+	index={0}
+	onclose={() => (lbOpen = false)}
+	onfork={handleAdminFork}
+/>
 
 {#snippet limitField(label: string, key: keyof AdminLimits, type: 'number' | 'text')}
 	{#if limits}

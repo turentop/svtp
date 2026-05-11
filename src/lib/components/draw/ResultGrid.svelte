@@ -1,9 +1,7 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
-	import { onMount } from 'svelte';
-	import PhotoSwipeLightbox from 'photoswipe/lightbox';
-	import 'photoswipe/style.css';
 	import { getImageProxyUrl, getImageUrl } from '$lib/draw/api/client';
+	import ImageLightbox from '$lib/components/draw/ImageLightbox.svelte';
 
 	let {
 		images = [],
@@ -13,60 +11,14 @@
 		onFork?: (path: string) => void;
 	} = $props();
 
-	let galleryEl: HTMLElement;
-	let lightbox: PhotoSwipeLightbox | null = null;
+	let lbOpen = $state(false);
+	let lbIndex = $state(0);
+	let lbImages = $derived(images.map((img) => ({ src: getImageUrl(img.filename), creator_id: '' })));
 
-	function initLightbox() {
-		lightbox?.destroy();
-		if (!galleryEl) return;
-		lightbox = new PhotoSwipeLightbox({
-			gallery: galleryEl,
-			children: 'a',
-			pswpModule: () => import('photoswipe')
-		});
-		lightbox.addFilter('itemData', (itemData) => {
-			const a = itemData.element as HTMLAnchorElement;
-			const img = a?.querySelector('img') as HTMLImageElement | null;
-			return {
-				src: a.href,
-				width: img?.naturalWidth || 1600,
-				height: img?.naturalHeight || 1200,
-				alt: img?.alt || ''
-			};
-		});
-		if (onFork) addForkButton(lightbox);
-		lightbox.init();
+	function openLightbox(i: number) {
+		lbIndex = i;
+		lbOpen = true;
 	}
-
-	function addForkButton(lb: PhotoSwipeLightbox) {
-		lb.on('uiRegister', () => {
-			lb.pswp.ui.registerElement({
-				name: 'fork-button',
-				order: 9,
-				isButton: true,
-				title: 'Fork 工作流',
-				html: '<svg width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"/><path d="M12 12v3"/></svg>',
-				onClick: (_e, _el, pswp) => {
-					const src = pswp.currSlide?.data?.src;
-					if (!src) return;
-					const p = new URL(src, location.origin).searchParams.get('path');
-					if (p) onFork!(p);
-					pswp.close();
-				}
-			});
-		});
-	}
-
-	onMount(() => {
-		initLightbox();
-		return () => lightbox?.destroy();
-	});
-
-	$effect(() => {
-		if (images.length > 0) {
-			queueMicrotask(initLightbox);
-		}
-	});
 </script>
 
 {#if images.length > 0}
@@ -76,11 +28,12 @@
 			生成结果
 			<span class="text-xs text-muted-foreground">({images.length})</span>
 		</h3>
-		<div bind:this={galleryEl} class="grid grid-cols-2 md:grid-cols-3 gap-2">
-			{#each images as img}
-				<a
-					href={getImageUrl(img.filename)}
-					class="aspect-square rounded-lg overflow-hidden border hover:ring-2 hover:ring-primary/50 transition-all block"
+		<div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+			{#each images as img, i}
+				<button
+					type="button"
+					class="aspect-square rounded-lg overflow-hidden border hover:ring-2 hover:ring-primary/50 transition-all cursor-pointer"
+					onclick={() => openLightbox(i)}
 				>
 					<img
 						src={getImageProxyUrl(img.filename)}
@@ -88,8 +41,16 @@
 						class="w-full h-full object-cover"
 						loading="lazy"
 					/>
-				</a>
+				</button>
 			{/each}
 		</div>
 	</div>
 {/if}
+
+<ImageLightbox
+	open={lbOpen}
+	images={lbImages}
+	index={lbIndex}
+	onclose={() => (lbOpen = false)}
+	onfork={onFork}
+/>

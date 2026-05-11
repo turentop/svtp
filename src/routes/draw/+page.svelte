@@ -1,9 +1,6 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import { siteConfig } from '$lib/config/site';
-	import { onMount } from 'svelte';
-	import PhotoSwipeLightbox from 'photoswipe/lightbox';
-	import 'photoswipe/style.css';
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
@@ -24,6 +21,7 @@
 	import GalleryTab from '$lib/components/draw/GalleryTab.svelte';
 	import FeaturedTab from '$lib/components/draw/FeaturedTab.svelte';
 	import StatusMonitor from '$lib/components/draw/StatusMonitor.svelte';
+	import ImageLightbox from '$lib/components/draw/ImageLightbox.svelte';
 
 	// State
 	let currentBaseUrl = $state('');
@@ -56,8 +54,11 @@
 	let myImagesTotal = $state(0);
 	let myImagesLoading = $state(false);
 	let myImagesLoaded = $state(false);
-	let myGalleryEl: HTMLElement;
-	let myLightbox: PhotoSwipeLightbox | null = null;
+
+	// My images lightbox
+	let myLbOpen = $state(false);
+	let myLbIndex = $state(0);
+	let myLbImages = $derived(myImages.map((it) => ({ src: getImageUrl(it.path), creator_id: '' })));
 
 	// WebSocket refs
 	let statusConn: ReturnType<typeof connectStatusWs> | null = null;
@@ -219,48 +220,11 @@
 			myImages = res.items;
 			myImagesTotal = res.total;
 			myImagesLoaded = true;
-			queueMicrotask(initMyLightbox);
 		} catch {
 			myImages = [];
 		} finally {
 			myImagesLoading = false;
 		}
-	}
-
-	function initMyLightbox() {
-		myLightbox?.destroy();
-		if (!myGalleryEl) return;
-		myLightbox = new PhotoSwipeLightbox({
-			gallery: myGalleryEl,
-			children: 'a',
-			pswpModule: () => import('photoswipe')
-		});
-		myLightbox.addFilter('itemData', (itemData) => {
-			const a = itemData.element as HTMLAnchorElement;
-			const img = a?.querySelector('img') as HTMLImageElement | null;
-			return {
-				src: a.href,
-				width: img?.naturalWidth || 1600,
-				height: img?.naturalHeight || 1200,
-				alt: img?.alt || ''
-			};
-		});
-		myLightbox.on('uiRegister', () => {
-			myLightbox.pswp.ui.registerElement({
-				name: 'fork-button',
-				order: 9,
-				isButton: true,
-				html: '<svg width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"/><path d="M12 12v3"/></svg>',
-				onClick: (_e, _el, pswp) => {
-					const src = pswp.currSlide?.data?.src;
-					if (!src) return;
-					const p = new URL(src, location.origin).searchParams.get('path');
-					if (p) handleFork(p);
-					pswp.close();
-				}
-			});
-		});
-		myLightbox.init();
 	}
 </script>
 
@@ -395,11 +359,12 @@
 						{:else if myImages.length === 0}
 							<div class="text-xs text-muted-foreground py-8 text-center">你还没有生成过图片</div>
 						{:else}
-							<div bind:this={myGalleryEl} class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5">
-								{#each myImages as item}
-									<a
-										href={getImageUrl(item.path)}
-										class="aspect-square rounded-md overflow-hidden border hover:ring-2 hover:ring-primary/50 transition-all block"
+							<div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5">
+								{#each myImages as item, i}
+									<button
+										type="button"
+										class="aspect-square rounded-md overflow-hidden border hover:ring-2 hover:ring-primary/50 transition-all cursor-pointer"
+										onclick={() => { myLbIndex = i; myLbOpen = true; }}
 									>
 										<img
 											src={getImageProxyUrl(item.path)}
@@ -407,7 +372,7 @@
 											class="w-full h-full object-cover"
 											loading="lazy"
 										/>
-									</a>
+									</button>
 								{/each}
 							</div>
 						{/if}
@@ -431,3 +396,11 @@
 		</TabsContent>
 	</Tabs>
 </div>
+
+<ImageLightbox
+	open={myLbOpen}
+	images={myLbImages}
+	index={myLbIndex}
+	onclose={() => (myLbOpen = false)}
+	onfork={handleFork}
+/>
