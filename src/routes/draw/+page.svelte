@@ -12,6 +12,7 @@
 	import { drawEnv } from '$lib/draw/stores/env';
 	import { connectRunWs, connectStatusWs } from '$lib/draw/api/ws';
 	import { fetchMyImages, getImageUrl, getImageProxyUrl, forkOutputImage } from '$lib/draw/api/client';
+	import { consumeFork } from '$lib/draw/stores/fork';
 	import type { WsRunMessage, WsStatusEvent, WsRunPayload, DrawWorkflow } from '$lib/draw/types';
 
 	import EnvironmentSwitcher from '$lib/components/draw/EnvironmentSwitcher.svelte';
@@ -68,6 +69,19 @@
 	$effect(() => {
 		const u1 = drawEnv.baseUrl.subscribe((v) => (currentBaseUrl = v));
 		authToken = forumAuth.getToken();
+
+		// 检查是否有待消费的 fork 数据（从其他页面跳转过来）
+		const fork = consumeFork();
+		if (fork) {
+			inlineWorkflow = fork.workflow;
+			if (fork.builtin_prompt) directPrompt = fork.builtin_prompt;
+			if (fork.builtin_negative_prompt) negativePrompt = fork.builtin_negative_prompt;
+			if (fork.default_width) width = fork.default_width;
+			if (fork.default_height) height = fork.default_height;
+			workflowPath = '';
+			workflowName = '(fork)';
+			activeTab = 'generate';
+		}
 
 		// Connect status WebSocket
 		statusConn = connectStatusWs(
