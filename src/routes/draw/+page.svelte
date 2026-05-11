@@ -9,7 +9,7 @@
 	import { forumAuth } from '$lib/forum/stores/auth';
 	import { drawEnv } from '$lib/draw/stores/env';
 	import { connectRunWs, connectStatusWs } from '$lib/draw/api/ws';
-	import { fetchMyImages, getImageUrl, getImageProxyUrl, forkOutputImage, recommendImage, fetchMyRecommendations } from '$lib/draw/api/client';
+	import { fetchMyImages, getImageUrl, getImageProxyUrl, forkOutputImage, recommendImage, deleteMyImage, fetchMyRecommendations } from '$lib/draw/api/client';
 	import { consumeFork } from '$lib/draw/stores/fork';
 	import type { WsRunMessage, WsStatusEvent, WsRunPayload, DrawWorkflow, DrawRecommendation } from '$lib/draw/types';
 	import PageViews from '$lib/components/PageViews.svelte';
@@ -26,7 +26,7 @@
 	// State
 	let currentBaseUrl = $state('');
 	let onlineCount = $state(0);
-	let activeCount = $state(0);
+	let globalBusy = $state(false);
 	let isGenerating = $state(false);
 	let authToken = $state<string | null>(null);
 	let isLoggedIn = $derived(!!authToken);
@@ -119,10 +119,10 @@
 
 	function handleStatusMessage(msg: WsStatusEvent) {
 		switch (msg.type) {
-				case 'status':
-					onlineCount = msg.online;
-					activeCount = msg.active;
-					break;
+			case 'status':
+				onlineCount = msg.online;
+				globalBusy = msg.busy;
+				break;
 			case 'online':
 				onlineCount = msg.count;
 				break;
@@ -162,7 +162,7 @@
 	}
 
 	function startGeneration() {
-		if (isGenerating) return;
+		if (isGenerating || globalBusy) return;
 		if (!authToken) {
 			alert('请先在论坛登录');
 			return;
@@ -248,6 +248,16 @@
 		}
 	}
 
+	async function handleDelete(path: string) {
+		if (!confirm("确定删除这张图片？")) return;
+		try {
+			await deleteMyImage(path);
+			myImages = myImages.filter(i => i.path !== path);
+		} catch (e) {
+			alert(e instanceof Error ? e.message : "删除失败");
+		}
+	}
+
 	async function handleRecommend(path: string) {
 		try {
 			await recommendImage(path);
@@ -285,12 +295,9 @@
 					{onlineCount}
 				</Badge>
 			{/if}
-				{#if activeCount > 0}
-					<Badge variant="secondary" class="text-xs">
-						<Icon icon="mdi:lightning-bolt" class="size-3 mr-0.5" />
-						当前{activeCount}个用户正在生图
-					</Badge>
-				{/if}
+			{#if globalBusy}
+				<Badge variant="default" class="text-xs animate-pulse">生成中</Badge>
+			{/if}
 			{#if workflowName || styleName}
 				<span class="text-xs text-muted-foreground">
 					{#if workflowName}{workflowName}{/if}{#if workflowName && styleName} / {/if}{#if styleName}{styleName}{/if}
@@ -349,7 +356,7 @@
 				bind:height
 				bind:safetyRating
 				onsubmit={startGeneration}
-				disabled={isGenerating || !isLoggedIn}
+				disabled={isGenerating || globalBusy || !isLoggedIn}
 			/>
 
 			<ProgressPanel
@@ -436,9 +443,8 @@
 						{:else}
 							<div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5">
 								{#each myImages as item, i}
-									<button
-										type="button"
-										class="aspect-square rounded-md overflow-hidden border hover:ring-2 hover:ring-primary/50 transition-all cursor-pointer"
+									<div role="button" tabindex="0"
+										class="group relative aspect-square rounded-md overflow-hidden border hover:ring-2 hover:ring-primary/50 transition-all cursor-pointer"
 										onclick={() => { myLbIndex = i; myLbOpen = true; }}
 									>
 										<img
@@ -447,7 +453,8 @@
 											class="w-full h-full object-cover"
 											loading="lazy"
 										/>
-									</button>
+									<button type="button" onclick={(e) => { e.stopPropagation(); handleDelete(item.path); }} class="absolute top-1 right-1 size-6 flex items-center justify-center rounded-full bg-background/80 opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-destructive-foreground transition-all"><Icon icon="mdi:trash-can-outline" class="size-3.5" /></button>
+									</div>
 								{/each}
 							</div>
 						{/if}

@@ -156,6 +156,13 @@ export async function forkOutputImage(path: string) {
 	}>('/api/output/fork', { method: 'POST', json: { path } });
 }
 
+export async function deleteMyImage(path: string) {
+	return drawRequest<{ ok: boolean }>('/api/draw/my-images', {
+		method: 'DELETE',
+		json: { path }
+	});
+}
+
 export async function recommendImage(imagePath: string, reason?: string) {
 	return drawRequest<{ ok: boolean; recommendation: DrawRecommendation }>('/api/draw/recommend', {
 		method: 'POST',
