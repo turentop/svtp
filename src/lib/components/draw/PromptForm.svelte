@@ -25,6 +25,9 @@
 		onsubmit,
 		disabled = false,
 		busy = false,
+		otherNode = $bindable(''),
+		otherValue = $bindable(0),
+		otherMax = $bindable(0),
 	}: {
 		directPrompt?: string;
 		negativePrompt?: string;
@@ -36,6 +39,9 @@
 		onsubmit?: () => void;
 		disabled?: boolean;
 		busy?: boolean;
+		otherNode?: string;
+		otherValue?: number;
+		otherMax?: number;
 	} = $props();
 
 	let resolutions = $state<DrawResolution[]>([]);
