@@ -11,7 +11,8 @@
 	import { connectRunWs, connectStatusWs } from '$lib/draw/api/ws';
 	import { fetchMyImages, getImageUrl, getImageProxyUrl, forkOutputImage, recommendImage, deleteMyImage, fetchMyRecommendations } from '$lib/draw/api/client';
 	import { consumeFork } from '$lib/draw/stores/fork';
-	import type { WsRunMessage, WsStatusEvent, WsRunPayload, DrawWorkflow, DrawRecommendation } from '$lib/draw/types';
+	import type { WsRunMessage, WsStatusEvent, WsRunPayload, DrawWorkflow, DrawRecommendation, AdminMaintenance } from '$lib/draw/types';
+	import { getMaintenance } from '$lib/draw/api/admin';
 	import PageViews from '$lib/components/PageViews.svelte';
 
 	import EnvironmentSwitcher from '$lib/components/draw/EnvironmentSwitcher.svelte';
@@ -96,6 +97,10 @@
 	let statusConn: ReturnType<typeof connectStatusWs> | null = null;
 	let runWs: WebSocket | null = null;
 
+	// Maintenance state
+	let maintenance = $state<AdminMaintenance | null>(null);
+	let showMaintenanceDialog = $state(false);
+
 	// Tab state
 	let activeTab = $state('generate');
 
@@ -142,6 +147,19 @@
 			runWs?.close();
 		};
 	});
+
+	// Load maintenance info and show dialog if enabled
+	async function loadMaintenance() {
+		try {
+			maintenance = await getMaintenance();
+			if (maintenance?.enabled) {
+				showMaintenanceDialog = true;
+			}
+		} catch {
+			// silent fail - maintenance is non-critical
+		}
+	}
+	loadMaintenance();
 
 	// Reconnect status WS when base URL changes
 	$effect(() => {
@@ -352,6 +370,21 @@
 
 	<!-- Environment Switcher -->
 	<EnvironmentSwitcher />
+
+	<!-- Maintenance Dialog (non-closable) -->
+	<Dialog.Root bind:open={showMaintenanceDialog} closeOnEscape={false} closeOnOutsideClick={false}>
+		<Dialog.Content showCloseButton={false}>
+			<Dialog.Header>
+				<Dialog.Title class="flex items-center gap-2">
+					<Icon icon="mdi:tools" class="size-5 text-destructive" />
+					目前处于维护状态
+				</Dialog.Title>
+				<Dialog.Description>
+					{maintenance?.message || '站点维护中，部分功能可能不可用，请稍后再试。'}
+				</Dialog.Description>
+			</Dialog.Header>
+		</Dialog.Content>
+	</Dialog.Root>
 
 	<!-- Auth warning -->
 	{#if !isLoggedIn}
