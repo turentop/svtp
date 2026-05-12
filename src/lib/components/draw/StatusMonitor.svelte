@@ -69,35 +69,6 @@
 		</Button>
 	</div>
 
-	<!-- 预估电费 -->
-	<Card>
-		<CardHeader class="pb-2">
-			<CardTitle class="text-sm flex items-center gap-1.5">
-				<Icon icon="mdi:currency-cny" class="size-4" />
-				预估电费
-			</CardTitle>
-		</CardHeader>
-		<CardContent>
-			<div class="space-y-2 text-xs">
-				<div class="flex justify-between">
-					<span class="text-muted-foreground">当前总功耗</span>
-					<span>{lastPowerDraw} W</span>
-				</div>
-				<div class="flex justify-between">
-					<span class="text-muted-foreground">累计电量</span>
-					<span>{totalKWh.toFixed(6)} kWh</span>
-				</div>
-				<div class="flex justify-between font-medium text-sm">
-					<span>预估费用</span>
-					<span class="text-primary">¥{totalCost.toFixed(6)}</span>
-				</div>
-				<div class="text-[10px] text-muted-foreground">
-					按合肥市居民用电均价 ¥{ELECTRICITY_RATE}/kWh 估算
-				</div>
-			</div>
-		</CardContent>
-	</Card>
-
 	<!-- Announcement -->
 	{#if announcement?.enabled}
 		<Alert>
@@ -164,6 +135,11 @@
 						</div>
 					</div>
 				{/each}
+				{#if lastPowerDraw > 0}
+					<div class="text-[11px] text-yellow-500 pt-1">
+						已烧掉 ¥{totalCost.toFixed(6)}
+					</div>
+				{/if}
 			{/if}
 		</CardContent>
 	</Card>
