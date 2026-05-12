@@ -145,8 +145,13 @@
 			forkSeed = fork.seed;
 			workflowPath = 'fork';
 			workflowName = '(fork)';
-			styleTags = '';
-			styleName = '';
+			if (fork.style_tags) {
+				styleTags = fork.style_tags;
+				styleName = fork.style_tags;
+			} else {
+				styleTags = '';
+				styleName = '';
+			}
 			activeTab = 'generate';
 		}
 
@@ -229,8 +234,13 @@
 			forkSeed = res.seed;
 			workflowPath = 'fork';
 			workflowName = '(fork)';
-			styleTags = '';
-			styleName = '';
+			if (res.style_tags) {
+				styleTags = res.style_tags;
+				styleName = res.style_tags;
+			} else {
+				styleTags = '';
+				styleName = '';
+			}
 			activeTab = 'generate';
 		} catch (e) {
 			alert(e instanceof Error ? e.message : 'Fork 失败');

@@ -111,7 +111,8 @@
 				builtin_negative_prompt: res.builtin_negative_prompt,
 				default_width: res.default_width,
 				default_height: res.default_height,
-				seed: res.seed
+				seed: res.seed,
+				style_tags: res.style_tags
 			});
 			window.location.href = '/draw';
 		} catch (e) {
