@@ -153,6 +153,7 @@ export async function forkOutputImage(path: string) {
 		builtin_negative_prompt: string;
 		loras: string[];
 		format: string;
+		seed?: number;
 	}>('/api/output/fork', { method: 'POST', json: { path } });
 }
 

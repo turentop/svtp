@@ -110,7 +110,8 @@
 				builtin_prompt: res.builtin_prompt,
 				builtin_negative_prompt: res.builtin_negative_prompt,
 				default_width: res.default_width,
-				default_height: res.default_height
+				default_height: res.default_height,
+				seed: res.seed
 			});
 			window.location.href = '/draw';
 		} catch (e) {

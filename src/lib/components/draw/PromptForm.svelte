@@ -29,6 +29,8 @@
 		otherValue = $bindable(0),
 		otherMax = $bindable(0),
 		otherStage = $bindable(''),
+		sameSeed = $bindable(false),
+		forkSeed = $bindable<number | undefined>(undefined),
 	}: {
 		directPrompt?: string;
 		negativePrompt?: string;
@@ -44,6 +46,8 @@
 		otherValue?: number;
 		otherMax?: number;
 		otherStage?: string;
+		sameSeed?: boolean;
+		forkSeed?: number;
 	} = $props();
 
 	let resolutions = $state<DrawResolution[]>([]);
@@ -150,6 +154,18 @@
 				<Icon icon="mdi:help-circle-outline" class="size-3.5" />
 			</button>
 		</label>
+		{#if forkSeed != null}
+			<label class="flex items-center gap-2 text-xs cursor-pointer">
+				<Checkbox bind:checked={sameSeed} />
+				<span>同种子</span>
+				<button
+					class="text-muted-foreground hover:text-foreground"
+					title="使用与原始图片相同的随机种子，便于控制构图"
+				>
+					<Icon icon="mdi:help-circle-outline" class="size-3.5" />
+				</button>
+			</label>
+		{/if}
 	</div>
 
 	<!-- Safety rating -->

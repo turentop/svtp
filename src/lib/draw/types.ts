@@ -238,6 +238,7 @@ export interface WsRunPayload {
 	height?: number | null;
 	style_tags?: string;
 	negative_prompt?: string;
+	seed?: number;
 }
 
 // --- Admin types ---

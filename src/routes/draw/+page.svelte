@@ -50,6 +50,8 @@
 	let height = $state(0);
 	let inlineWorkflow = $state<object | null>(null);
 	let safetyRating = $state('general');
+	let forkSeed = $state<number | undefined>(undefined);
+	let sameSeed = $state(false);
 
 	// Restore form state from localStorage
 	if (typeof localStorage !== 'undefined') {
@@ -139,10 +141,11 @@
 			if (fork.builtin_negative_prompt) negativePrompt = fork.builtin_negative_prompt;
 			if (fork.default_width) width = fork.default_width;
 			if (fork.default_height) height = fork.default_height;
-			workflowPath = '(fork)';
+			forkSeed = fork.seed;
+			workflowPath = '';
 			workflowName = '(fork)';
-			styleTags = '(fork)';
-			styleName = '(fork)';
+			styleTags = '';
+			styleName = '';
 			activeTab = 'generate';
 		}
 
@@ -200,6 +203,8 @@
 		workflowPath = wf.path;
 		workflowName = wf.path.replace('.json', '');
 		inlineWorkflow = null;
+		forkSeed = undefined;
+		sameSeed = false;
 	}
 
 	function handleStyleSelect(tags: string, name: string) {
@@ -220,10 +225,11 @@
 			if (res.builtin_negative_prompt) negativePrompt = res.builtin_negative_prompt;
 			if (res.default_width) width = res.default_width;
 			if (res.default_height) height = res.default_height;
-			workflowPath = '(fork)';
+			forkSeed = res.seed;
+			workflowPath = '';
 			workflowName = '(fork)';
-			styleTags = '(fork)';
-			styleName = '(fork)';
+			styleTags = '';
+			styleName = '';
 			activeTab = 'generate';
 		} catch (e) {
 			alert(e instanceof Error ? e.message : 'Fork 失败');
@@ -236,7 +242,7 @@
 			alert('请先在论坛登录');
 			return;
 		}
-		if (!workflowPath) {
+		if (!workflowPath && !inlineWorkflow) {
 			alert('请选择工作流');
 			return;
 		}
@@ -261,7 +267,8 @@
 			width: width || undefined,
 			height: height || undefined,
 			style_tags: styleTags || undefined,
-			negative_prompt: negativePrompt || undefined
+			negative_prompt: negativePrompt || undefined,
+			seed: sameSeed ? forkSeed : undefined
 		};
 
 		runWs = connectRunWs(
@@ -452,6 +459,8 @@
 				bind:otherValue
 				bind:otherMax
 				bind:otherStage
+				bind:sameSeed
+				bind:forkSeed
 			/>
 
 			<ProgressPanel
