@@ -21,6 +21,7 @@
 	import PromptForm from '$lib/components/draw/PromptForm.svelte';
 	import ProgressPanel from '$lib/components/draw/ProgressPanel.svelte';
 	import FeaturedTab from '$lib/components/draw/FeaturedTab.svelte';
+	import Img2imgTab from '$lib/components/draw/Img2imgTab.svelte';
 		import ImageLightbox from '$lib/components/draw/ImageLightbox.svelte';
 
 	// State
@@ -111,6 +112,7 @@
 
 	// Tab state
 	let activeTab = $state('generate');
+	let genSubTab = $state('txt2img');
 
 	// Persist form state to localStorage
 	$effect(() => {
@@ -373,7 +375,6 @@
 		<div class="flex items-center gap-2">
 			<Icon icon="mdi:palette" class="size-6 text-primary" />
 			<h1 class="text-xl font-bold">AI 生图</h1>
-				<a href="/draw/img2img" class="text-xs text-muted-foreground hover:text-foreground underline ml-2">图生图</a>
 				<PageViews pathname="/draw/" class="text-sm text-muted-foreground" />
 			{#if onlineCount > 0}
 				<Badge variant="secondary" class="text-xs">
@@ -426,39 +427,58 @@
 		</TabsList>
 
 		<!-- Generate Tab -->
-		<TabsContent value="generate" class="space-y-4 mt-4">
-			<div class="grid grid-cols-2 gap-4">
-				<WorkflowDialog bind:value={workflowPath} onselect={handleWorkflowSelect} onpromptload={handlePromptLoad} />
-				<StyleDialog bind:value={styleTags} bind:name={styleName} onselect={handleStyleSelect} />
-			</div>
+		<TabsContent value="generate" class="mt-4">
+			<Tabs bind:value={genSubTab} class="w-full">
+				<TabsList class="w-full">
+					<TabsTrigger value="txt2img" class="flex-1">
+						<Icon icon="mdi:sparkles" class="size-4 mr-1" />
+						文生图
+					</TabsTrigger>
+					<TabsTrigger value="img2img" class="flex-1">
+						<Icon icon="mdi:image-edit-outline" class="size-4 mr-1" />
+						图生图
+					</TabsTrigger>
+				</TabsList>
 
-			<PromptForm
-				bind:directPrompt
-				bind:negativePrompt
-				bind:nlPrompt
-				bind:rewrite
-				bind:width
-				bind:height
-				bind:safetyRating
-				onsubmit={startGeneration}
-				disabled={isGenerating || globalBusy || !isLoggedIn}
-				busy={globalBusy && !isGenerating}
-				bind:otherNode
-				bind:otherValue
-				bind:otherMax
-				bind:otherStage
-				bind:sameSeed
-				bind:forkSeed
-			/>
+				<TabsContent value="txt2img" class="space-y-4 mt-4">
+					<div class="grid grid-cols-2 gap-4">
+						<WorkflowDialog bind:value={workflowPath} onselect={handleWorkflowSelect} onpromptload={handlePromptLoad} />
+						<StyleDialog bind:value={styleTags} bind:name={styleName} onselect={handleStyleSelect} />
+					</div>
 
-			<ProgressPanel
-				bind:messages={progressMessages}
-				visible={showProgress}
-				busy={isGenerating}
-				bind:resultImages
-				cost={genCost}
-				onFork={handleFork}
-			/>
+					<PromptForm
+						bind:directPrompt
+						bind:negativePrompt
+						bind:nlPrompt
+						bind:rewrite
+						bind:width
+						bind:height
+						bind:safetyRating
+						onsubmit={startGeneration}
+						disabled={isGenerating || globalBusy || !isLoggedIn}
+						busy={globalBusy && !isGenerating}
+						bind:otherNode
+						bind:otherValue
+						bind:otherMax
+						bind:otherStage
+						bind:sameSeed
+						bind:forkSeed
+					/>
+
+					<ProgressPanel
+						bind:messages={progressMessages}
+						visible={showProgress}
+						busy={isGenerating}
+						bind:resultImages
+						cost={genCost}
+						onFork={handleFork}
+					/>
+				</TabsContent>
+
+				<TabsContent value="img2img" class="mt-4">
+					<Img2imgTab />
+				</TabsContent>
+			</Tabs>
 		</TabsContent>
 
 		<!-- My Images Tab -->
@@ -592,7 +612,7 @@
 			{/if}
 		</TabsContent>
 
-	</Tabs>
+		</Tabs>
 
 <ImageLightbox
 	open={myLbOpen}
