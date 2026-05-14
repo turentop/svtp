@@ -139,8 +139,6 @@
 				<span class="font-medium flex items-center gap-1.5">
 					{#if busy}
 						<Icon icon="mdi:loading" class="size-3.5 animate-spin" />
-					{:else}
-						<Icon icon="mdi:check-circle-outline" class="size-3.5 text-green-500" />
 					{/if}
 					{progressText || '连接中...'}
 				</span>
