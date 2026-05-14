@@ -373,6 +373,7 @@
 		<div class="flex items-center gap-2">
 			<Icon icon="mdi:palette" class="size-6 text-primary" />
 			<h1 class="text-xl font-bold">AI 生图</h1>
+				<a href="/draw/img2img" class="text-xs text-muted-foreground hover:text-foreground underline ml-2">图生图</a>
 				<PageViews pathname="/draw/" class="text-sm text-muted-foreground" />
 			{#if onlineCount > 0}
 				<Badge variant="secondary" class="text-xs">
