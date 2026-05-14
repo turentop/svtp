@@ -70,38 +70,6 @@ export interface DrawResolutionsResponse {
 	presets: DrawResolution[];
 }
 
-export interface DrawGpuInfo {
-	index: number;
-	name: string;
-	'utilization.gpu': number;
-	'utilization.memory': number;
-	'memory.used': number;
-	'memory.total': number;
-	'temperature.gpu': number;
-	'power.draw': number;
-	'power.limit': number;
-	'clocks.current.graphics': number;
-	'clocks.current.memory': number;
-	'fan.speed': number;
-}
-
-export interface DrawGpuResponse {
-	available: boolean;
-	gpus: DrawGpuInfo[];
-	poll_interval_ms?: number;
-	error?: string;
-	total_kwh?: number;
-	total_cost?: number;
-}
-
-export interface DrawAnnouncementResponse {
-	announcement: {
-		enabled: boolean;
-		title: string;
-		content: string;
-	};
-}
-
 export interface DrawOutputItem {
 	path: string;
 	mtime: number;
@@ -280,11 +248,6 @@ export interface AdminLimits {
 	gpu_cache_ttl_ms: number;
 	gc_interval_hours: number;
 	category_order: string[];
-}
-
-export interface AdminMaintenance {
-	enabled: boolean;
-	message: string;
 }
 
 export interface AdminAnnouncement {

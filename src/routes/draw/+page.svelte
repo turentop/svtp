@@ -11,9 +11,8 @@
 	import { connectRunWs, connectStatusWs } from '$lib/draw/api/ws';
 	import { fetchMyImages, getImageUrl, getImageProxyUrl, forkOutputImage, recommendImage, deleteMyImage, fetchMyRecommendations } from '$lib/draw/api/client';
 	import { consumeFork } from '$lib/draw/stores/fork';
-	import type { WsRunMessage, WsStatusEvent, WsRunPayload, DrawWorkflow, DrawRecommendation, AdminMaintenance } from '$lib/draw/types';
-	import { getMaintenance } from '$lib/draw/api/admin';
-	import { renderForumMarkdown } from '$lib/forum/utils/markdown';
+	import type { WsRunMessage, WsStatusEvent, WsRunPayload, DrawWorkflow, DrawRecommendation } from '$lib/draw/types';
+
 	import PageViews from '$lib/components/PageViews.svelte';
 
 	import EnvironmentSwitcher from '$lib/components/draw/EnvironmentSwitcher.svelte';
@@ -22,8 +21,7 @@
 	import PromptForm from '$lib/components/draw/PromptForm.svelte';
 	import ProgressPanel from '$lib/components/draw/ProgressPanel.svelte';
 	import FeaturedTab from '$lib/components/draw/FeaturedTab.svelte';
-	import StatusMonitor from '$lib/components/draw/StatusMonitor.svelte';
-	import ImageLightbox from '$lib/components/draw/ImageLightbox.svelte';
+		import ImageLightbox from '$lib/components/draw/ImageLightbox.svelte';
 
 	// State
 	let currentBaseUrl = $state('');
@@ -101,18 +99,6 @@
 	let statusConn: ReturnType<typeof connectStatusWs> | null = null;
 	let runWs: WebSocket | null = null;
 
-	// Maintenance state
-	let maintenance = $state<AdminMaintenance | null>(null);
-	let showMaintenanceDialog = $state(false);
-	let maintenanceHtml = $derived(renderForumMarkdown(maintenance?.message));
-
-	$effect(() => {
-		if (showMaintenanceDialog) {
-			document.body.style.overflow = 'hidden';
-			return () => { document.body.style.overflow = ''; };
-		}
-	});
-
 	// Tab state
 	let activeTab = $state('generate');
 
@@ -167,19 +153,6 @@
 			runWs?.close();
 		};
 	});
-
-	// Load maintenance info and show dialog if enabled
-	async function loadMaintenance() {
-		try {
-			maintenance = await getMaintenance();
-			if (maintenance?.enabled) {
-				showMaintenanceDialog = true;
-			}
-		} catch {
-			// silent fail - maintenance is non-critical
-		}
-	}
-	loadMaintenance();
 
 	// Reconnect status WS when base URL changes
 	$effect(() => {
@@ -406,20 +379,6 @@
 	<!-- Environment Switcher -->
 	<EnvironmentSwitcher />
 
-	<!-- Maintenance fullscreen overlay (non-closable) -->
-	{#if showMaintenanceDialog}
-		<div class="fixed top-14 inset-x-0 bottom-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-			<div class="bg-popover text-popover-foreground rounded-4xl p-6 max-w-md w-full mx-4 ring-1 ring-foreground/5">
-				<div class="flex items-center gap-2 mb-3">
-					<Icon icon="mdi:tools" class="size-5 text-destructive" />
-					<h2 class="text-lg font-semibold">目前处于维护状态</h2>
-				</div>
-				<div class="text-sm text-muted-foreground prose-headings:text-foreground prose-h1:text-xl prose-h1:font-bold prose-h1:mt-4 prose-h1:mb-2 prose-h2:text-lg prose-h2:font-semibold prose-h2:mt-3 prose-h2:mb-1.5 prose-h3:text-base prose-h3:font-semibold prose-h3:mt-2 prose-h3:mb-1 prose-p:text-foreground prose-a:text-primary prose-a:underline prose-a:underline-offset-4 prose-strong:text-foreground">
-					{@html maintenanceHtml || '站点维护中，部分功能可能不可用，请稍后再试。'}
-				</div>
-			</div>
-		</div>
-	{/if}
 
 	<!-- Auth warning -->
 	{#if !isLoggedIn}
@@ -445,10 +404,6 @@
 			<TabsTrigger value="featured" class="flex-1">
 				<Icon icon="mdi:star-outline" class="size-4 mr-1" />
 				精选
-			</TabsTrigger>
-			<TabsTrigger value="more" class="flex-1">
-				<Icon icon="mdi:dots-horizontal" class="size-4 mr-1" />
-				更多
 			</TabsTrigger>
 		</TabsList>
 
@@ -619,10 +574,6 @@
 			{/if}
 		</TabsContent>
 
-		<!-- More Tab -->
-		<TabsContent value="more" class="mt-4">
-			<StatusMonitor />
-		</TabsContent>
 	</Tabs>
 
 <ImageLightbox

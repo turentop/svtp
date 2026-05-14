@@ -126,14 +126,6 @@ export async function fetchMyImages() {
 	);
 }
 
-export async function fetchGpuStatus() {
-	return drawRequest<import('../types').DrawGpuResponse>('/api/gpu');
-}
-
-export async function fetchAnnouncement() {
-	return drawRequest<import('../types').DrawAnnouncementResponse>('/api/announcement');
-}
-
 export async function fetchOutputList(limit = 500, offset = 0) {
 	return drawRequest<import('../types').DrawOutputListResponse>('/api/output/list', {
 		query: { limit, offset }

@@ -19,7 +19,6 @@
 	import type {
 		AdminRecentImage,
 		AdminLimits,
-		AdminMaintenance,
 		AdminAnnouncement,
 		AdminLlmConfig,
 		DrawRecommendation
@@ -27,12 +26,10 @@
 
 	let authToken = $state<string | null>(null);
 	let currentBaseUrl = $state('');
-	let activeTab = $state('maintenance');
+	let activeTab = $state('announcement');
 	let loading = $state(false);
 	let message = $state<{ type: 'success' | 'error'; text: string } | null>(null);
 
-	// Maintenance
-	let maintenance = $state<AdminMaintenance>({ enabled: false, message: '' });
 
 	// Announcement
 	let announcement = $state<AdminAnnouncement>({ enabled: false, title: '', content: '' });
@@ -143,27 +140,6 @@
 	function showMsg(type: 'success' | 'error', text: string) {
 		message = { type, text };
 		setTimeout(() => (message = null), 3000);
-	}
-
-	async function loadMaintenance() {
-		try {
-			maintenance = await admin.getMaintenance();
-		} catch (e) {
-			showMsg('error', e instanceof Error ? e.message : '加载失败');
-		}
-	}
-
-	async function saveMaintenance() {
-		loading = true;
-		try {
-			const res = await admin.updateMaintenance(maintenance);
-			maintenance = res.maintenance;
-			showMsg('success', '维护模式已更新');
-		} catch (e) {
-			showMsg('error', e instanceof Error ? e.message : '保存失败');
-		} finally {
-			loading = false;
-		}
 	}
 
 	async function loadAnnouncement() {
@@ -708,9 +684,6 @@
 		const tab = activeTab;
 		if (!authToken) return;
 		switch (tab) {
-			case 'maintenance':
-				loadMaintenance();
-				break;
 			case 'announcement':
 				loadAnnouncement();
 				break;
@@ -772,9 +745,6 @@
 
 		<Tabs bind:value={activeTab} class="w-full">
 			<TabsList class="w-full flex flex-wrap gap-1 overflow-visible min-h-9 !h-auto">
-				<TabsTrigger value="maintenance" class="text-xs">
-					<Icon icon="mdi:tools" class="size-3.5 mr-1" />维护
-				</TabsTrigger>
 				<TabsTrigger value="announcement" class="text-xs">
 					<Icon icon="mdi:bullhorn-outline" class="size-3.5 mr-1" />公告
 				</TabsTrigger>
@@ -807,41 +777,6 @@
 				</TabsTrigger>
 			</TabsList>
 
-			<!-- Maintenance -->
-			<TabsContent value="maintenance" class="mt-4">
-				<Card>
-					<CardHeader>
-						<CardTitle class="text-base flex items-center gap-2">
-							维护模式
-							{#if maintenance.enabled}
-								<Badge variant="destructive">已开启</Badge>
-							{:else}
-								<Badge variant="secondary">已关闭</Badge>
-							{/if}
-						</CardTitle>
-						<CardDescription>开启后所有非管理员 API 请求将返回 503</CardDescription>
-					</CardHeader>
-					<CardContent class="space-y-4">
-						<div class="flex items-center gap-3">
-							<Switch bind:checked={maintenance.enabled} />
-							<Label>{maintenance.enabled ? '开启' : '关闭'}</Label>
-						</div>
-						<div class="space-y-1.5">
-							<Label class="text-xs">维护提示信息</Label>
-							<textarea
-								bind:value={maintenance.message}
-								rows={4}
-								placeholder="站点维护中，请稍后再试..."
-								class="w-full rounded-md border bg-background px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-ring"
-							></textarea>
-						</div>
-						<Button onclick={saveMaintenance} disabled={loading}>
-							<Icon icon="mdi:content-save" class="size-4 mr-1" />
-							保存
-						</Button>
-					</CardContent>
-				</Card>
-			</TabsContent>
 
 			<!-- Announcement -->
 			<TabsContent value="announcement" class="mt-4">
@@ -1562,3 +1497,4 @@
 		</div>
 	{/if}
 {/snippet}
+

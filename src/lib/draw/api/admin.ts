@@ -3,7 +3,6 @@ import type {
 	AdminRecentImage,
 	AdminReport,
 	AdminLimits,
-	AdminMaintenance,
 	AdminAnnouncement,
 	AdminGcResult,
 	AdminLlmConfig,
@@ -109,19 +108,6 @@ export async function getAnnouncement() {
 export async function updateAnnouncement(partial: Partial<AdminAnnouncement>) {
 	return drawRequest<{ ok: boolean; announcement: AdminAnnouncement }>(
 		'/api/draw/admin/announcement',
-		{ method: 'POST', json: partial }
-	);
-}
-
-// --- Maintenance ---
-
-export async function getMaintenance() {
-	return drawRequest<AdminMaintenance>('/api/draw/admin/maintenance');
-}
-
-export async function updateMaintenance(partial: Partial<AdminMaintenance>) {
-	return drawRequest<{ ok: boolean; maintenance: AdminMaintenance }>(
-		'/api/draw/admin/maintenance',
 		{ method: 'POST', json: partial }
 	);
 }
