@@ -137,7 +137,7 @@
 			if (images.length > 1) form.append('image2', images[1]);
 
 			const baseUrl = get(drawEnv.baseUrl);
-			const resp = await fetch(`${baseUrl}/api/img2img/run`, {
+			const resp = await fetch(`${baseUrl}/api/img2img/run?prompt=${encodeURIComponent(prompt.trim())}`, {
 				method: 'POST',
 				headers: { 'Authorization': `Bearer ${token}` },
 				body: form,
