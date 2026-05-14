@@ -596,7 +596,7 @@
 
 	function startWfRename(wf: string) {
 		wfRenaming = wf;
-		wfRenameValue = wf.replace('.json', '');
+		wfRenameValue = wf.split('/').pop()?.replace('.json', '') || '';
 	}
 
 	async function commitWfRename() {
@@ -659,7 +659,7 @@
 		try {
 			const res = await admin.uploadWfThumbnail(file);
 			// Auto-update meta with new thumbnail filename
-			const base = wf.replace('.json', '');
+			const base = wf.split('/').pop()?.replace('.json', '') || '';
 			const updated = workflowMeta.filter((m) => m.workflow !== wf);
 			const existing = getWfMeta(wf);
 			updated.push({
@@ -1370,7 +1370,7 @@
 						{#if wfMetaEditWf}
 							<Card class="border-primary">
 								<CardHeader class="pb-2">
-									<CardTitle class="text-sm">编辑元数据: {wfMetaEditWf.replace('.json', '')}</CardTitle>
+									<CardTitle class="text-sm">编辑元数据: {wfMetaEditWf.split('/').pop()?.replace('.json', '') || ''}</CardTitle>
 								</CardHeader>
 								<CardContent class="space-y-2">
 									<div class="flex gap-2">
@@ -1444,7 +1444,7 @@
 												ondblclick={() => startWfRename(wf)}
 												oncontextmenu={(e) => { e.preventDefault(); editWfMeta(wf); }}
 											>
-												{wf.replace('.json', '')}
+												{wf.split('/').pop()?.replace('.json', '') || ''}
 											</span>
 										{/if}
 									</div>

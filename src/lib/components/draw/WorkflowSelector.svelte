@@ -168,7 +168,7 @@
 								{#if loadingPath === wf.path}
 									<Icon icon="mdi:loading" class="size-4 shrink-0 animate-spin" />
 								{/if}
-								<span class="truncate">{wf.path.replace('.json', '')}</span>
+								<span class="truncate">{wf.path.split('/').pop()?.replace('.json', '')}</span>
 							</button>
 						{/each}
 					</div>
