@@ -82,6 +82,8 @@
 	let myImagesLoaded = $state(false);
 	let myQueueItems = $state<Array<{ id: number; status: string; created_at: number; started_at?: number; finished_at?: number; error?: string; position?: number | null }>>([]);
 	let myQueueLoading = $state(false);
+	let prevQueueIds = new Set<number>();
+	let notifiedIds = new Set<number>();
 	// Masonry layout
 	let columnCount = $state(4);
 	let imgColumns = $state<string[][]>([[], [], [], []]);
@@ -142,7 +144,8 @@
 		if (activeTab === 'mine' && isLoggedIn) {
 			if (!myImagesLoaded) loadMyImages();
 			loadMyQueue();
-			if (!myRecsLoaded) loadMyRecommendations();
+			if ('Notification' in window && Notification.permission === 'default') { Notification.requestPermission(); }
+				if (!myRecsLoaded) loadMyRecommendations();
 		}
 	});
 
@@ -313,7 +316,20 @@
 		try {
 			const res = await fetchMyQueue();
 			const now = res.items;
-			myQueueItems = now.filter(it => it.status === 'pending' || it.status === 'waiting' || it.status === 'running');
+			const showItems = now.filter(it => it.status === 'pending' || it.status === 'waiting' || it.status === 'running');
+				const prevActive = new Set(showItems.map(it => it.id));
+				const newlyDone = now.filter(it => (it.status === 'done' || it.status === 'failed') && !notifiedIds.has(it.id) && prevQueueIds.has(it.id));
+				for (const item of newlyDone) {
+					notifiedIds.add(item.id);
+					if ('Notification' in window && Notification.permission === 'granted') {
+						new Notification('生图完成' + (item.status === 'failed' ? '（失败）' : ''), {
+							body: item.status === 'done' ? '你的图片已生成完成，前往"我的"页面查看。' : (item.error || '生图失败'),
+							icon: '/favicon.ico'
+						});
+					}
+				}
+				prevQueueIds = prevActive;
+				myQueueItems = showItems;
 		} catch {
 			myQueueItems = [];
 		} finally {
