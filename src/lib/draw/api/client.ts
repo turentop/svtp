@@ -184,6 +184,13 @@ export async function fetchMyQueue() {
 	}>; total: number }>('/api/draw/my-queue', { requiresAuth: true });
 }
 
+export async function clearQueue() {
+	return drawRequest<{ ok: boolean; cleared: number }>('/api/draw/queue', {
+		method: 'DELETE',
+		requiresAuth: true,
+	});
+}
+
 export async function recommendImage(imagePath: string, reason?: string) {
 	return drawRequest<{ ok: boolean; recommendation: DrawRecommendation }>('/api/draw/recommend', {
 		method: 'POST',

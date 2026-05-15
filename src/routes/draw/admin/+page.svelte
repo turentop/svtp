@@ -13,7 +13,7 @@
 	import { forumAuth } from '$lib/forum/stores/auth';
 	import { drawEnv } from '$lib/draw/stores/env';
 	import * as admin from '$lib/draw/api/admin';
-	import { getImageProxyUrl, getImageUrl, getThumbnailUrl, forkOutputImage } from '$lib/draw/api/client';
+	import { getImageProxyUrl, getImageUrl, getThumbnailUrl, forkOutputImage, clearQueue } from '$lib/draw/api/client';
 	import { pendingFork } from '$lib/draw/stores/fork';
 	import { onMount, onDestroy } from 'svelte';
 import ImageLightbox from '$lib/components/draw/ImageLightbox.svelte';
@@ -29,6 +29,7 @@ import ImageLightbox from '$lib/components/draw/ImageLightbox.svelte';
 	let currentBaseUrl = $state('');
 	let activeTab = $state('announcement');
 	let loading = $state(false);
+	let clearing = $state(false);
 	let message = $state<{ type: 'success' | 'error'; text: string } | null>(null);
 
 
@@ -466,6 +467,18 @@ let loadingMore = $state(false);
 			showMsg('error', e instanceof Error ? e.message : '保存失败');
 		} finally {
 			loading = false;
+		}
+	}
+
+	async function handleClearQueue() {
+		clearing = true;
+		try {
+			const res = await clearQueue();
+			showMsg('success', `已清空队列，共清理 ${res.cleared} 个任务`);
+		} catch (e) {
+			showMsg('error', e instanceof Error ? e.message : '清空队列失败');
+		} finally {
+			clearing = false;
 		}
 	}
 
@@ -1197,6 +1210,16 @@ function formatTime(ts: number) {
 								<Icon icon="mdi:content-save" class="size-4 mr-1" />
 								保存配置
 							</Button>
+								<div class="flex items-center gap-2 pt-2">
+									<Button variant="destructive" size="sm" onclick={handleClearQueue} disabled={clearing}>
+										{#if clearing}
+											<Icon icon="mdi:loading" class="size-4 mr-1 animate-spin" />
+										{:else}
+											<Icon icon="mdi:delete-sweep" class="size-4 mr-1" />
+										{/if}
+										清空队列
+									</Button>
+								</div>
 						{/if}
 					</CardContent>
 				</Card>
