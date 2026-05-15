@@ -8,11 +8,11 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { forumAuth } from '$lib/forum/stores/auth';
 	import { drawEnv, apiError, apiStatus, resolveApiRedirect } from '$lib/draw/stores/env';
-	import { connectRunWs, connectStatusWs } from '$lib/draw/api/ws';
+	import { connectStatusWs } from '$lib/draw/api/ws';
 	import { fetchMyImages, getImageUrl, getImageProxyUrl, forkOutputImage, recommendImage, deleteMyImage, fetchMyRecommendations, addToQueue, fetchMyQueue } from '$lib/draw/api/client';
 	import { consumeFork } from '$lib/draw/stores/fork';
 	import { onMount, onDestroy } from 'svelte';
-	import type { WsRunMessage, WsStatusEvent, WsRunPayload, DrawWorkflow, DrawRecommendation } from '$lib/draw/types';
+	import type { WsStatusEvent, WsRunPayload, DrawWorkflow, DrawRecommendation } from '$lib/draw/types';
 
 	import PageViews from '$lib/components/PageViews.svelte';
 
@@ -20,7 +20,7 @@
 	import WorkflowDialog from '$lib/components/draw/WorkflowDialog.svelte';
 	import StyleDialog from '$lib/components/draw/StyleDialog.svelte';
 	import PromptForm from '$lib/components/draw/PromptForm.svelte';
-	import ProgressPanel from '$lib/components/draw/ProgressPanel.svelte';
+	
 	import FeaturedTab from '$lib/components/draw/FeaturedTab.svelte';
 	import Img2imgTab from '$lib/components/draw/Img2imgTab.svelte';
 		import ImageLightbox from '$lib/components/draw/ImageLightbox.svelte';
@@ -29,7 +29,7 @@
 	let currentBaseUrl = $state('');
 	let onlineCount = $state(0);
 	let globalBusy = $state(false);
-	let isGenerating = $state(false);
+	
 	let otherNode = $state('');
 	let otherValue = $state(0);
 	let otherMax = $state(0);
@@ -114,7 +114,7 @@
 
 	// WebSocket refs
 	let statusConn: ReturnType<typeof connectStatusWs> | null = null;
-	let runWs: WebSocket | null = null;
+	
 
 	// API error state
 	let apiErrorMessage = $state("");
@@ -326,6 +326,16 @@
 		try {
 			await addToQueue({
 				direct_prompt: pendingPayload.direct_prompt,
+				nl_prompt: pendingPayload.nl_prompt,
+				rewrite: pendingPayload.rewrite,
+				width: pendingPayload.width,
+				height: pendingPayload.height,
+				style_tags: pendingPayload.style_tags,
+				negative_prompt: pendingPayload.negative_prompt,
+				seed: pendingPayload.seed,
+				workflow_path: pendingPayload.workflow_path,
+				inline_workflow: pendingPayload.inline_workflow ?? undefined,
+				denoise: pendingPayload.denoise,
 			});
 			queueError = '';
 			alert('已加入队列，生成完成后可前往"我的"页面查看');

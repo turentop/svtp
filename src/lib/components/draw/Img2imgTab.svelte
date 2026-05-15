@@ -6,12 +6,9 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { forumAuth } from '$lib/forum/stores/auth';
 	import { drawEnv, apiError } from '$lib/draw/stores/env';
-	import { connectRunWs } from '$lib/draw/api/ws';
-	import { addToQueue } from '$lib/draw/api/client';
+		import { addToQueue } from '$lib/draw/api/client';
 	import { get } from 'svelte/store';
-	import ProgressPanel from './ProgressPanel.svelte';
-	import type { WsRunMessage } from '$lib/draw/types';
-
+		
 	const STORAGE_KEY = 'draw-img2img';
 
 	let {
@@ -42,8 +39,7 @@
 	let error = $state('');
 
 	// Queue dialog state
-	let showQueueDialog = $state(false);
-	let pendingUploadNames: { image1_name: string; image2_name: string } | null = null;
+	
 
 	function uploadFileWithProgress(url: string, headers: Headers, form: FormData, onProgress: (pct: number) => void): Promise<Response> {
 		return new Promise((resolve, reject) => {
@@ -128,12 +124,7 @@
 	}
 
 	// WebSocket progress state
-	let progressMessages = $state<WsRunMessage[]>([]);
-	let showProgress = $state(false);
-	let isGenerating = $state(false);
-	let resultImages = $state<{ url: string; filename: string }[]>([]);
-	let genCost = $state(0);
-	let runWs: WebSocket | null = null;
+
 
 	$effect(() => {
 		const unsub = apiError.subscribe((v) => {
@@ -439,7 +430,7 @@
 	<Button
 		class="w-full gap-2"
 		onclick={startGeneration}
-		disabled={!isLoggedIn || isGenerating || uploading || images.length === 0}
+		disabled={!isLoggedIn || uploading || images.length === 0}
 	>
 		{#if uploading}
 			<Icon icon="mdi:loading" class="size-4 animate-spin" />

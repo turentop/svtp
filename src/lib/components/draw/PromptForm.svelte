@@ -212,11 +212,11 @@
 		{disabled}
 	>
 		{#if busy}
-			<Icon icon="mdi:queue-timeline" class="size-4" />
-			他人生图中，点击加入队列
+			<Icon icon="mdi:loading" class="size-4 animate-spin" />
+			加入队列中...
 		{:else}
-			<Icon icon="mdi:sparkles" class="size-5 mr-1.5" />
-			开始生成
+			<Icon icon="mdi:queue-timeline" class="size-4" />
+			加入队列
 		{/if}
 	</Button>
 </div>
