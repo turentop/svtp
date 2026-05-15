@@ -378,7 +378,7 @@
 		try {
 			const res = await fetchMyQueue();
 			const now = res.items;
-			myQueueItems = now.filter(it => it.status === 'pending' || it.status === 'running' || it.status === 'failed' || it.status === 'done');
+			myQueueItems = now.filter(it => it.status === 'pending' || it.status === 'waiting' || it.status === 'running' || it.status === 'failed' || it.status === 'done');
 		} catch {
 			myQueueItems = [];
 		} finally {
@@ -708,6 +708,9 @@
 										{:else if item.status === 'cancelled'}
 											<Icon icon="mdi:cancel" class="size-4 text-muted-foreground" />
 											<span class="flex-1">已取消</span>
+										{:else if item.status === 'waiting'}
+											<Icon icon="mdi:clock-outline" class="size-4 text-muted-foreground" />
+											<span class="flex-1">等待生图中，前面还有 {item.position ? item.position - 1 : 0} 位</span>
 										{:else}
 											<Icon icon="mdi:clock-outline" class="size-4 text-muted-foreground" />
 											<span class="flex-1">等待生图中，前面还有 {item.position ? item.position - 1 : 0} 位</span>
