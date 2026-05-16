@@ -114,9 +114,9 @@ jobs:
               DNS_VERIFY_INSTRUCTIONS: (isDelete, hostname, expected) => [
                 `检测到你正在${isDelete ? '删除' : '修改'}现有的友链/赞助数据。为了防止误操作，请完成域名所有权验证：`,
                 '',
-                `1. 请在域名 ${hostname} 或 _fuwari-verification.${hostname} 下添加 DNS TXT 记录。`,
-                `2. 记录内容：${expected}`,
-                '3. 添加完成后，请 push 更新（或关闭并重新打开 PR）以触发重新校验。',
+                `方法一（DNS）：在域名 ${hostname} 下添加 TXT 记录，内容：${expected}`,
+                `方法二（文件）：在网站根目录放置 acofork-verification.html，内容：${expected}`,
+                '完成后 push 更新以触发重新校验。',
               ].join('\n'),
             }
 
@@ -265,7 +265,7 @@ jobs:
                     try {
                       browser = await chromium.launch({ headless: true });
                       const context = await browser.newContext({
-                        userAgent: 'fuwari-auto-pr/1.0 (+github actions)'
+                        userAgent: 'acofork-auto-pr/1.0 (+github actions)'
                       });
                       const page = await context.newPage();
 
@@ -371,7 +371,7 @@ jobs:
                   method: 'GET',
                   redirect: 'follow',
                   headers: {
-                    'user-agent': 'fuwari-auto-pr/1.0 (+github actions)',
+                    'user-agent': 'acofork-auto-pr/1.0 (+github actions)',
                     accept: 'text/html,application/json,image/*,*/*;q=0.8',
                   },
                   signal: controller.signal,
@@ -439,8 +439,8 @@ jobs:
 
                   if (hostname) {
                     const dns = require('dns').promises
-                    const expected = `fuwari-verification=${pull_number}`
-                    const domains = [hostname, `_fuwari-verification.${hostname}`]
+                    const expected = `acofork-verification=${pull_number}`
+                    const domains = [hostname, `_acofork-verification.${hostname}`]
                     let verified = false
 
                     for (const d of domains) {
@@ -452,6 +452,14 @@ jobs:
                           break
                         }
                       } catch {}
+                    }
+                    if (!verified) {
+                      for (const proto of ['https', 'http']) {
+                        try {
+                          const r = await fetch(`${proto}://${hostname}/acofork-verification.html`)
+                          if ((await r.text()).trim() === expected) { verified = true; break }
+                        } catch {}
+                      }
                     }
 
                     if (!verified) {
@@ -815,9 +823,10 @@ jobs:
               DNS_VERIFY_INSTRUCTIONS: (isDelete, hostname, expected) => [
                 `检测到你正在${isDelete ? '删除' : '修改'}现有的友链/赞助数据。为了防止误操作，请完成域名所有权验证：`,
                 '',
-                `1. 请在域名 ${hostname} 或 _fuwari-verification.${hostname} 下添加 DNS TXT 记录。`,
-                `2. 记录内容：${expected}`,
-                '3. 添加完成后，请回复"准备完毕"以触发重新校验。',
+                `方法一（DNS）：在域名 ${hostname} 下添加 TXT 记录，内容：${expected}`,
+                `方法二（文件）：在网站根目录放置 acofork-verification.html，内容：${expected}`,
+                '完成后 push 更新以触发重新校验。',
+
               ].join('\n'),
               LINK_UNREACHABLE: '检测到链接不可达，请修复后再次回复"准备完毕"。',
             }
@@ -894,7 +903,7 @@ jobs:
                   method: 'GET',
                   redirect: 'follow',
                   headers: {
-                    'user-agent': 'fuwari-auto-pr/1.0 (+github actions)',
+                    'user-agent': 'acofork-auto-pr/1.0 (+github actions)',
                     accept: 'text/html,application/json,image/*,*/*;q=0.8',
                   },
                   signal: controller.signal,
@@ -1020,8 +1029,8 @@ jobs:
 
                   if (hostname) {
                     const dns = require('dns').promises
-                    const expected = `fuwari-verification=${pull_number}`
-                    const domains = [hostname, `_fuwari-verification.${hostname}`]
+                    const expected = `acofork-verification=${pull_number}`
+                    const domains = [hostname, `_acofork-verification.${hostname}`]
                     let verified = false
 
                     for (const d of domains) {
@@ -1033,6 +1042,14 @@ jobs:
                           break
                         }
                       } catch {}
+                    }
+                    if (!verified) {
+                      for (const proto of ['https', 'http']) {
+                        try {
+                          const r = await fetch(`${proto}://${hostname}/acofork-verification.html`)
+                          if ((await r.text()).trim() === expected) { verified = true; break }
+                        } catch {}
+                      }
                     }
 
                     if (!verified) {
@@ -1143,7 +1160,7 @@ jobs:
                     try {
                       browser = await chromium.launch({ headless: true });
                       const context = await browser.newContext({
-                        userAgent: 'fuwari-auto-pr/1.0 (+github actions)'
+                        userAgent: 'acofork-auto-pr/1.0 (+github actions)'
                       });
                       const page = await context.newPage();
 

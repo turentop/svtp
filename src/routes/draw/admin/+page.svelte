@@ -1462,6 +1462,15 @@ function formatTime(ts: number) {
 								</div>
 							</div>
 
+							<div class="flex gap-2">
+								<Button variant="destructive" size="sm" onclick={handleClearQueue} disabled={clearing}>
+									{#if clearing}
+										<Icon icon="mdi:loading" class="size-4 animate-spin" />
+									{/if}
+									清空队列
+								</Button>
+							</div>
+
 							{#if debugData.queue_users.length > 0}
 								<div>
 									<h4 class="text-sm font-medium mb-2">队列中的用户</h4>
