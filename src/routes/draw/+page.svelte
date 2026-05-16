@@ -324,7 +324,7 @@
 		try {
 			const res = await fetchMyQueue();
 			const now = res.items;
-			const showItems = now.filter(it => it.status === 'pending' || it.status === 'waiting' || it.status === 'running' || (it.status === 'done' && (it.finished_at || it.created_at) * 1000 > Date.now() - 30000) || (it.status === 'failed' && (it.finished_at || it.created_at) * 1000 > Date.now() - 60000));
+			const showItems = now.filter(it => it.status === 'pending' || it.status === 'waiting' || it.status === 'running' || it.status === 'done' || it.status === 'failed');
 				const prevActive = new Set(showItems.map(it => it.id));
 				const newlyDone = now.filter(it => (it.status === 'done' || it.status === 'failed') && !notifiedIds.has(it.id) && prevQueueIds.has(it.id));
 				for (const item of newlyDone) {
