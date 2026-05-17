@@ -307,7 +307,7 @@
 						{i + 1}
 					</div>
 					<button
-						class="absolute -top-2 -right-2 size-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+						class="absolute -top-2 -right-2 size-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center "
 						onclick={() => removeImage(i)}
 						title="移除"
 					>

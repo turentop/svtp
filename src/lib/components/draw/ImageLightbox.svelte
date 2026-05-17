@@ -56,7 +56,7 @@
 		if ((e.target as HTMLElement).dataset.backdrop) onclose?.();
 	}
 
-	/* fork removed */ function _fork_removed() {
+	function handleForkClick() {
 		const img = images[index];
 		if (!img) return;
 		const p = getPath(img.src);
@@ -131,10 +131,10 @@
 					生图者: {creatorName ? `${creatorName} (UID:${images[index].creator_id})` : `UID:${images[index].creator_id}`}
 				</a>
 			{/if}
-			{#if false}
+			{#if onfork}
 				<button
 					class="text-white/90 text-sm bg-white/10 px-3 py-1.5 rounded hover:bg-white/20 transition-colors flex items-center gap-1.5"
-					onclick={_fork_removed}
+					onclick={handleForkClick}
 				>
 					<Icon icon="mdi:source-fork" class="size-4" />
 					Fork

@@ -44,6 +44,7 @@
 	let styleName = $state('');
 	let directPrompt = $state('');
 	let workflowPrompt = $state("");
+	let inlineWorkflowApi = $state<Record<string, any> | null>(null);
 	let workflowNegativePrompt = $state("");
 	let negativePrompt = $state('');
 	let nlPrompt = $state('');
@@ -180,19 +181,21 @@
 		authToken = forumAuth.getToken();
 
 		// 检查是否有待消费的 fork 数据（从其他页面跳转过来）
-		const fork = consumeFork();
-		if (fork) {
-			inlineWorkflow = fork.workflow && Object.keys(fork.workflow || {}).length ? fork.workflow : null;
-			if (fork.builtin_prompt) { directPrompt = fork.builtin_prompt; workflowPrompt = fork.builtin_prompt; }
-			if (fork.builtin_negative_prompt) { negativePrompt = fork.builtin_negative_prompt; workflowNegativePrompt = fork.builtin_negative_prompt; }
-			if (fork.default_width) width = fork.default_width;
-			if (fork.default_height) height = fork.default_height;
-			forkSeed = fork.seed;
-			if (inlineWorkflow) workflowPath = 'fork';
-			workflowName = inlineWorkflow ? '(fork)' : '';
-			if (fork.style_tags) {
-				styleTags = fork.style_tags;
-				styleName = fork.style_tags;
+		const res = consumeFork();
+		if (res) {
+					inlineWorkflow = res.workflow && Object.keys(res.workflow || {}).length ? res.workflow : null;
+				inlineWorkflowApi = res.workflow_api || null;
+			if (res.builtin_prompt) { directPrompt = res.builtin_prompt; workflowPrompt = res.builtin_prompt; }
+			if (res.builtin_negative_prompt) { negativePrompt = res.builtin_negative_prompt; workflowNegativePrompt = res.builtin_negative_prompt; }
+			if (res.default_width) width = res.default_width;
+			if (res.default_height) height = res.default_height;
+			forkSeed = res.seed;
+			if (res.workflow_path && res.workflow_path !== 'fork') workflowPath = res.workflow_path;
+			if (res.workflow_name) workflowName = res.workflow_name;
+				else workflowName = inlineWorkflow ? '(fork)' : '';
+			if (res.style_tags) {
+				styleTags = res.style_tags;
+				styleName = res.style_tags;
 			} else {
 				styleTags = '';
 				styleName = '';
@@ -254,14 +257,16 @@
 	async function handleFork(path: string) {
 		try {
 			const res = await forkOutputImage(path);
-			inlineWorkflow = res.workflow;
+			inlineWorkflow = null;
+				inlineWorkflowApi = res.workflow_api || null;
 			if (res.builtin_prompt) directPrompt = res.builtin_prompt;
 			if (res.builtin_negative_prompt) negativePrompt = res.builtin_negative_prompt;
 			if (res.default_width) width = res.default_width;
 			if (res.default_height) height = res.default_height;
 			forkSeed = res.seed;
-			if (inlineWorkflow) workflowPath = 'fork';
-			workflowName = inlineWorkflow ? '(fork)' : '';
+			if (res.workflow_path && res.workflow_path !== 'fork') workflowPath = res.workflow_path;
+			if (res.workflow_name) workflowName = res.workflow_name;
+				else workflowName = inlineWorkflow ? '(fork)' : '';
 			if (res.style_tags) {
 				styleTags = res.style_tags;
 				styleName = res.style_tags;
@@ -269,9 +274,9 @@
 				styleTags = '';
 				styleName = '';
 			}
-			activeTab = 'generate';
+			apiError.set('Fork 成功');
 		} catch (e) {
-			alert(e instanceof Error ? e.message : 'Fork 失败');
+			apiError.set(e instanceof Error ? e.message : 'Fork 失败');
 		}
 	}
 
@@ -304,6 +309,7 @@
 					seed: sameSeed ? forkSeed : undefined,
 					workflow_path: workflowPath,
 					inline_workflow: inlineWorkflow || undefined,
+					inline_workflow_api: inlineWorkflowApi || undefined,
 				});
 				queueSuccess = '成功加入队列！等待生图中，前往"我的"页面查看详情。';
 				loadMyQueue();

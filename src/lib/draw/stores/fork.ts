@@ -9,6 +9,7 @@ interface ForkData {
 	seed?: number;
 	style_tags?: string;
 	matched_workflow?: string;
+	workflow_api?: Record<string, any> | null;
 }
 
 export const pendingFork = writable<ForkData | null>(null);

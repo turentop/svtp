@@ -15,7 +15,8 @@
 	import * as admin from '$lib/draw/api/admin';
 	import { getImageProxyUrl, getImageUrl, getThumbnailUrl, forkOutputImage, clearQueue, fetchDebugInfo } from '$lib/draw/api/client';
 	import { pendingFork } from '$lib/draw/stores/fork';
-	import { onMount, onDestroy } from 'svelte';
+import { onMount, onDestroy } from 'svelte';
+	import { goto } from '$app/navigation';
 import ImageLightbox from '$lib/components/draw/ImageLightbox.svelte';
 	import type {
 		AdminRecentImage,
@@ -152,11 +153,14 @@ let loadingMore = $state(false);
 				default_height: res.default_height,
 				seed: res.seed,
 				style_tags: res.style_tags,
+				workflow_api: res.workflow_api || null,
+				workflow_path: res.workflow_path || '',
+				workflow_name: res.workflow_name || '',
 				matched_workflow: res.matched_workflow
 			});
-			window.location.href = '/draw';
+			showMsg('success', 'Fork 成功，请切换至生图页面');
 		} catch (e) {
-			alert(e instanceof Error ? e.message : 'Fork 失败');
+			showMsg('error', e instanceof Error ? e.message : 'Fork 失败');
 		}
 	}
 
