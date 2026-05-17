@@ -1642,7 +1642,7 @@ function formatTime(ts: number) {
 									<div class="flex flex-wrap gap-2">
 										{#each debugData.queue_users as [uid, count]}
 											<Badge variant="secondary" class="text-xs">
-												UID {ban.user_id} x {count}
+												UID {uid} x {count}
 											</Badge>
 										{/each}
 									</div>
