@@ -63,7 +63,17 @@
 
 	$effect(() => {
 		loadWorkflows();
-	});
+		});
+
+		let inited = false;
+		$effect(() => {
+			if (workflows.length > 0 && value && !inited) {
+				inited = true;
+				fetchWorkflowDetail(value).then(detail => {
+					onpromptload?.(detail.builtin_prompt, detail.builtin_negative_prompt);
+				}).catch(() => {});
+			}
+		});
 
 	async function loadWorkflows() {
 		loading = true;

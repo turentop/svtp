@@ -79,11 +79,12 @@ let loadingMore = $state(false);
 
 	// LLM Config
 	let llmConfig = $state<AdminLlmConfig | null>(null);
-	let llmDefaults = $state<AdminLlmConfig | null>(null);
-	let llmProviders = $state<string[]>([]);
-	let llmThinkingOptions = $state<string[]>([]);
-	let llmTestResult = $state<{ ok: boolean; provider: string; reply?: string; error?: string } | null>(null);
+		let llmProviders = $state<string[]>([]);
+		let llmTestResult = $state<{ ok: boolean; provider: string; profile_index?: number; reply?: string; error?: string; raw?: string } | null>(null);
 	let llmTesting = $state(false);
+		let llmModels = $state<string[] | null>(null);
+		let llmModelsLoading = $state(false);
+		let llmActiveTab = $state(0);
 
 	const thinkingLabels: Record<string, string> = {
 		off: '关闭',
@@ -503,9 +504,7 @@ let loadingMore = $state(false);
 		try {
 			const res = await admin.getLlmConfig();
 			llmConfig = res.config;
-			llmDefaults = res.defaults;
 			llmProviders = res.providers;
-			llmThinkingOptions = res.google_thinking_options;
 		} catch (e) {
 			showMsg('error', e instanceof Error ? e.message : '加载失败');
 		}
@@ -515,8 +514,8 @@ let loadingMore = $state(false);
 		if (!llmConfig) return;
 		loading = true;
 		try {
-			const res = await admin.updateLlmConfig(llmConfig);
-			llmConfig = res.config;
+			const res = await admin.updateLlmConfig({ profiles: llmConfig.profiles, active: llmConfig.active });
+			if (res.config) llmConfig = res.config;
 			showMsg('success', 'LLM 配置已保存');
 		} catch (e) {
 			showMsg('error', e instanceof Error ? e.message : '保存失败');
@@ -529,11 +528,25 @@ let loadingMore = $state(false);
 		llmTesting = true;
 		llmTestResult = null;
 		try {
-			llmTestResult = await admin.testLlmConfig();
+			llmTestResult = await admin.testLlmConfig(llmActiveTab);
 		} catch (e) {
 			llmTestResult = { ok: false, provider: '', error: e instanceof Error ? e.message : '测试失败' };
 		} finally {
 			llmTesting = false;
+		}
+	}
+
+	async function loadLlmModels() {
+		llmModelsLoading = true;
+		llmModels = null;
+		try {
+			const res = await admin.getLlmModels(llmActiveTab);
+			llmModels = res.models || null;
+		} catch (e) {
+			llmModels = [];
+			showMsg('error', e instanceof Error ? e.message : '探测失败');
+		} finally {
+			llmModelsLoading = false;
 		}
 	}
 
@@ -1108,12 +1121,6 @@ function formatTime(ts: number) {
 									<a href="{currentBaseUrl}/api/uploads/{detailImg.image2}" target="_blank" class="text-primary underline">查看</a>
 								</div>
 							{/if}
-							{#if detailImg.nl_prompt}
-								<div>
-									<span class="text-muted-foreground">自然语言描述：</span>
-									<div class="mt-0.5 p-2 bg-muted rounded text-[11px] break-all">{detailImg.nl_prompt}</div>
-								</div>
-							{/if}
 							{#if detailImg.prompt}
 								<div>
 									<span class="text-muted-foreground">正向 Prompt：</span>
@@ -1352,92 +1359,169 @@ function formatTime(ts: number) {
 							<Icon icon="mdi:refresh" class="size-4 mr-1" />加载
 						</Button>
 						{#if llmConfig}
-							<div class="space-y-1.5">
-								<Label class="text-xs">模型提供商</Label>
-								<div class="flex gap-2">
-									{#each llmProviders as p}
+							<div class="flex flex-wrap items-center gap-1">
+								{#each llmConfig.profiles as profile, i}
+									<div class="flex items-center gap-0">
 										<button
-											class="px-3 py-1.5 text-xs rounded-md border transition-colors {llmConfig.provider === p ? 'border-primary bg-primary/10 text-primary font-medium' : 'border-border hover:bg-accent'}"
-											onclick={() => { if (llmConfig) llmConfig.provider = p as AdminLlmConfig['provider']; }}
-										>{p}</button>
-									{/each}
-								</div>
-							</div>
-
-							{#if llmConfig.provider === 'local'}
-								<div class="space-y-1.5">
-									<Label class="text-xs">本地端点</Label>
-									<Input class="text-xs" bind:value={llmConfig.local_endpoint} placeholder={llmDefaults?.local_endpoint || ''} />
-								</div>
-							{:else if llmConfig.provider === 'google'}
-								<div class="space-y-1.5">
-									<Label class="text-xs">API Key</Label>
-									<Input class="text-xs" type="password" bind:value={llmConfig.google_api_key} placeholder="留空不修改，输入新值覆盖" />
-								</div>
-								<div class="space-y-1.5">
-									<Label class="text-xs">模型名称</Label>
-									<Input class="text-xs" bind:value={llmConfig.google_model} placeholder={llmDefaults?.google_model || ''} />
-								</div>
-								<div class="space-y-1.5">
-									<Label class="text-xs">思维链</Label>
-									{#each thinkingGroups as group}
-										<div class="space-y-1">
-											{#if group.label !== '关闭'}
-												<p class="text-[10px] text-muted-foreground">{group.label}</p>
+											class="px-2.5 py-1.5 text-xs rounded-l-md border transition-colors {llmActiveTab === i ? 'border-primary bg-primary/10 text-primary font-medium' : 'border-border hover:bg-accent'}"
+											onclick={() => llmActiveTab = i}>
+											{profile.name || ('配置' + (i + 1))}
+											{#if llmConfig.active === i}
+												<span class="ml-1 text-green-600">✓</span>
 											{/if}
-											<div class="flex flex-wrap gap-1">
-												{#each group.options as opt}
-													{#if llmThinkingOptions.includes(opt)}
-														<button
-															class="px-2 py-1 text-xs rounded border transition-colors {llmConfig.google_thinking === opt ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-accent'}"
-															onclick={() => { if (llmConfig) llmConfig.google_thinking = opt; }}
-														>{thinkingLabels[opt] || opt}</button>
-													{/if}
-												{/each}
-											</div>
-										</div>
-									{/each}
-								</div>
-							{:else if llmConfig.provider === 'custom'}
-								<div class="space-y-1.5">
-									<Label class="text-xs">API 端点（OpenAI 兼容）</Label>
-									<Input class="text-xs" bind:value={llmConfig.custom_endpoint} placeholder={llmDefaults?.custom_endpoint || ''} />
-								</div>
-								<div class="space-y-1.5">
-									<Label class="text-xs">API Key</Label>
-									<Input class="text-xs" type="password" bind:value={llmConfig.custom_api_key} placeholder="留空不修改，输入新值覆盖" />
-								</div>
-								<div class="space-y-1.5">
-									<Label class="text-xs">模型名称</Label>
-									<Input class="text-xs" bind:value={llmConfig.custom_model} placeholder={llmDefaults?.custom_model || ''} />
-								</div>
-							{/if}
-
-							<div class="flex items-center gap-2">
-								<Switch bind:checked={llmConfig.llm_stream} />
-								<Label class="text-xs">流式输出（SSE）</Label>
-							</div>
-
-							<div class="flex gap-2">
-								<Button onclick={saveLlmConfig} disabled={loading}>
-									<Icon icon="mdi:content-save" class="size-4 mr-1" />
-									保存配置
-								</Button>
-								<Button variant="outline" onclick={testLlmConfig} disabled={llmTesting || loading}>
-									<Icon icon={llmTesting ? 'mdi:loading' : 'mdi:flask-outline'} class="size-4 mr-1 {llmTesting ? 'animate-spin' : ''}" />
-									测试
-								</Button>
-							</div>
-							{#if llmTestResult}
-								<Alert variant={llmTestResult.ok ? 'default' : 'destructive'}>
-									<AlertDescription class="text-xs">
-										{#if llmTestResult.ok}
-											<span class="font-medium text-green-600">✓ {llmTestResult.provider}</span> — {llmTestResult.reply}
-										{:else}
-											<span class="font-medium">✗ 失败</span> — {llmTestResult.error}
+										</button>
+										{#if llmConfig.profiles.length > 1}
+											<button
+												class="px-1.5 py-1.5 text-xs rounded-r-md border border-l-0 text-muted-foreground hover:text-destructive transition-colors"
+												onclick={() => {
+													llmConfig.profiles.splice(i, 1);
+													if (llmActiveTab >= llmConfig.profiles.length) llmActiveTab = llmConfig.profiles.length - 1;
+													if (llmConfig.active === i) llmConfig.active = 0;
+													else if (llmConfig.active > i) llmConfig.active--;
+												}}>✕</button>
 										{/if}
-									</AlertDescription>
-								</Alert>
+									</div>
+								{/each}
+								<Button variant="ghost" size="sm" class="text-xs" onclick={() => {
+									llmConfig.profiles.push({
+										name: 'Custom',
+										provider: 'custom',
+										custom_endpoint: '',
+										custom_api_key: '',
+										custom_model: '',
+										llm_stream: true
+									});
+									llmActiveTab = llmConfig.profiles.length - 1;
+								}}>
+									<Icon icon="mdi:plus" class="size-3.5 mr-0.5" />新增配置
+								</Button>
+							</div>
+
+							{@const p = llmConfig.profiles[llmActiveTab]}
+							{#if p}
+								<div class="space-y-1.5">
+									<Label class="text-xs">名称</Label>
+									<Input class="text-xs" bind:value={p.name} placeholder="配置{(llmActiveTab + 1)}" />
+								</div>
+								<div class="space-y-1.5">
+									<Label class="text-xs">类型</Label>
+									<div class="flex gap-2">
+										{#each ['google', 'custom'] as prov}
+											<button
+												class="px-3 py-1.5 text-xs rounded-md border transition-colors {p.provider === prov ? 'border-primary bg-primary/10 text-primary font-medium' : 'border-border hover:bg-accent'}"
+												onclick={() => {
+													p.provider = prov;
+													if (prov === 'google') { p.google_api_key = p.google_api_key || ''; p.google_model = p.google_model || ''; p.google_thinking = p.google_thinking || 'off'; }
+													else { p.custom_endpoint = p.custom_endpoint || ''; p.custom_api_key = p.custom_api_key || ''; p.custom_model = p.custom_model || ''; }
+												}}
+											>{prov === 'google' ? 'Google Gemini' : 'Custom'}</button>
+										{/each}
+									</div>
+								</div>
+
+								{#if p.provider === 'google'}
+									<div class="space-y-1.5">
+										<Label class="text-xs">API Key</Label>
+										<Input class="text-xs" type="password" bind:value={p.google_api_key} placeholder="AIza..." />
+									</div>
+									<div class="space-y-1.5">
+										<Label class="text-xs">模型名称</Label>
+										<div class="flex gap-1">
+											<Input class="text-xs flex-1" bind:value={p.google_model} placeholder="gemma-4-31b-it" />
+											<Button variant="outline" size="sm" onclick={loadLlmModels} disabled={llmModelsLoading}>
+												<Icon icon={llmModelsLoading ? 'mdi:loading' : 'mdi:magnify'} class="size-3.5 mr-0.5 {llmModelsLoading ? 'animate-spin' : ''}" />
+												探测模型
+											</Button>
+										</div>
+									</div>
+									<div class="space-y-1.5">
+										<Label class="text-xs">思维链</Label>
+										<div class="flex flex-wrap gap-1">
+											{#each ['off', 'level_minimal', 'level_low', 'level_medium', 'level_high'] as opt}
+												<button
+													class="px-2 py-1 text-xs rounded border transition-colors {p.google_thinking === opt ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-accent'}"
+													onclick={() => { p.google_thinking = opt; }}
+												>{thinkingLabels[opt] || opt}</button>
+											{/each}
+										</div>
+									</div>
+								{:else}
+									<div class="space-y-1.5">
+										<Label class="text-xs">API 端点 <span class="text-[9px] text-muted-foreground">（完整路径，含 /v1）</span></Label>
+										<Input class="text-xs" bind:value={p.custom_endpoint} placeholder="https://api.openai.com/v1" />
+									</div>
+									<div class="space-y-1.5">
+										<Label class="text-xs">API Key</Label>
+										<Input class="text-xs" type="password" bind:value={p.custom_api_key} placeholder="sk-..." />
+									</div>
+									<div class="space-y-1.5">
+										<Label class="text-xs">模型名称</Label>
+										<div class="flex gap-1">
+											<Input class="text-xs flex-1" bind:value={p.custom_model} placeholder="gpt-4o" />
+											<Button variant="outline" size="sm" onclick={loadLlmModels} disabled={llmModelsLoading}>
+												<Icon icon={llmModelsLoading ? 'mdi:loading' : 'mdi:magnify'} class="size-3.5 mr-0.5 {llmModelsLoading ? 'animate-spin' : ''}" />
+												探测模型
+											</Button>
+										</div>
+									</div>
+								{/if}
+
+								{#if llmModels !== null}
+									<div class="border rounded p-2 max-h-40 overflow-y-auto">
+										<p class="text-[10px] text-muted-foreground mb-1">可用模型（{llmModels.length} 个）：</p>
+										{#if llmModels.length === 0}
+											<p class="text-xs text-muted-foreground">无可用模型或探测失败</p>
+										{:else}
+											{#each llmModels as model}
+												<div class="text-xs py-0.5 hover:bg-accent rounded px-1 cursor-pointer"
+													onclick={() => {
+														/* full id */
+														if (p.provider === 'google') p.google_model = model;
+														else p.custom_model = model;
+													}}>{model}</div>
+											{/each}
+										{/if}
+									</div>
+								{/if}
+
+								<div class="flex items-center gap-2">
+									<Switch checked={p.llm_stream ?? true} onCheckedChange={(e) => { p.llm_stream = e; }} />
+									<Label class="text-xs">流式输出</Label>
+								</div>
+
+								<div class="flex flex-wrap gap-2 pt-2">
+									<Button variant="outline" size="sm" onclick={testLlmConfig} disabled={llmTesting || loading}>
+										<Icon icon={llmTesting ? 'mdi:loading' : 'mdi:flask-outline'} class="size-3.5 mr-1 {llmTesting ? 'animate-spin' : ''}" />
+										测试连通性
+									</Button>
+									<Button size="sm" onclick={saveLlmConfig} disabled={loading}>
+										<Icon icon="mdi:content-save" class="size-3.5 mr-1" />
+										保存
+									</Button>
+									{#if llmConfig.active !== llmActiveTab}
+										<Button variant="secondary" size="sm" onclick={() => { llmConfig.active = llmActiveTab; }}>
+											<Icon icon="mdi:check-circle-outline" class="size-3.5 mr-1" />
+											设为当前配置
+										</Button>
+									{:else}
+										<Badge variant="outline" class="text-xs text-green-600 border-green-300">当前配置</Badge>
+									{/if}
+								</div>
+
+								{#if llmTestResult}
+									<Alert variant={llmTestResult.ok ? 'default' : 'destructive'}>
+										<AlertDescription class="text-xs">
+											{#if llmTestResult.ok}
+												<span class="font-medium text-green-600">✓ {llmTestResult.provider}</span> — {llmTestResult.reply}
+											{:else}
+												<span class="font-medium">✗ 失败</span> — {llmTestResult.error}
+												{#if llmTestResult.raw}
+													<br /><span class="text-[9px] text-muted-foreground">原始回复: {llmTestResult.raw}</span>
+												{/if}
+											{/if}
+										</AlertDescription>
+									</Alert>
+								{/if}
 							{/if}
 						{/if}
 					</CardContent>
@@ -1575,12 +1659,11 @@ function formatTime(ts: number) {
 												<th class="py-1 pr-2">状态</th>
 												<th class="py-1 pr-2">创建</th>
 												<th class="py-1 pr-2">启动</th>
-												<th class="py-1 pr-2">用户输入</th>
-												<th class="py-1 pr-2">LLM输出/错误</th>
+													<th class="py-1 pr-2">错误</th>
 											</tr>
 										</thead>
 										<tbody>
-											{#each debugData.recent_items as item}
+											{#each debugData.recent_items_full as item}
 												<tr class="border-b">
 													<td class="py-1 pr-2 font-mono">{item.id}</td>
 													<td class="py-1 pr-2">{item.user_id}</td>
@@ -1590,8 +1673,7 @@ function formatTime(ts: number) {
 													</td>
 													<td class="py-1 pr-2 text-muted-foreground">{item.created_ago}s前</td>
 													<td class="py-1 pr-2 text-muted-foreground">{item.started_ago != null ? `${item.started_ago}s前` : '-'}</td>
-													<td class="py-1 pr-2 break-all max-w-[120px] text-muted-foreground">{item.nl_prompt || '-'}</td>
-													<td class="py-1 pr-2 break-all max-w-xs text-muted-foreground">{item.llm_output || item.error || '-'}</td>
+														<td class="py-1 pr-2 break-all max-w-xs text-destructive text-[10px]" title={item.error || ''}>{item.error || '-'}</td>
 												</tr>
 											{/each}
 										</tbody>

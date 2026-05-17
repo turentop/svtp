@@ -210,8 +210,6 @@ export interface WsRunPayload {
 	workflow_path: string;
 	inline_workflow?: object | null;
 	direct_prompt: string;
-	nl_prompt?: string;
-	rewrite?: boolean;
 	width?: number | null;
 	height?: number | null;
 	style_tags?: string;
@@ -230,9 +228,7 @@ export interface AdminRecentImage {
 	user_id: string;
 	mtime: number;
 	prompt?: string;
-	nl_prompt?: string;
 	negative_prompt?: string;
-	rewrite?: boolean;
 	image1?: string;
 	image2?: string;
 }
@@ -274,14 +270,20 @@ export interface AdminGcResult {
 	cleaned: Record<string, number>;
 }
 
-export interface AdminLlmConfig {
+export interface AdminLlmProfile {
+	name: string;
 	provider: 'local' | 'google' | 'custom';
-	local_endpoint: string;
-	google_api_key: string;
-	google_model: string;
-	google_thinking: string;
-	custom_endpoint: string;
-	custom_api_key: string;
-	custom_model: string;
-	llm_stream: boolean;
+	local_endpoint?: string;
+	google_api_key?: string;
+	google_model?: string;
+	google_thinking?: string;
+	custom_endpoint?: string;
+	custom_api_key?: string;
+	custom_model?: string;
+	llm_stream?: boolean;
+}
+
+export interface AdminLlmConfig {
+	profiles: AdminLlmProfile[];
+	active: number;
 }

@@ -12,6 +12,14 @@ export const apiError = writable<string | null>(null);
 export type ApiStatus = 'checking' | 'online' | 'offline';
 export const apiStatus = writable<ApiStatus>('checking');
 
+// apiError 和 apiStatus 同步：错误时离线，允许下次重新检测
+apiError.subscribe(v => {
+	if (v) {
+		apiStatus.set('offline');
+		_redirectResolved = false; // 下次尝试重新检测
+	}
+});
+
 export const DRAW_API_BASE_URLS: Record<DrawApiEnv, string> = {
 	prod: 'https://api-ai.2x.nz',
 	dev: 'http://localhost:8080'
@@ -100,8 +108,8 @@ export const drawEnv: DrawEnvStore = createEnvStore();
  */
 let _redirectResolved = false;
 
-export async function resolveApiRedirect(): Promise<void> {
-	if (_redirectResolved) return;
+export async function resolveApiRedirect(force = false): Promise<void> {
+	if (_redirectResolved && !force) return;
 	apiStatus.set('checking');
 	const baseUrl = get(drawEnv.baseUrl);
 	try {
@@ -112,6 +120,7 @@ export async function resolveApiRedirect(): Promise<void> {
 		}
 		_redirectResolved = true;
 		apiStatus.set('online');
+		apiError.set(null);
 	} catch (e) {
 		apiStatus.set('offline');
 	}

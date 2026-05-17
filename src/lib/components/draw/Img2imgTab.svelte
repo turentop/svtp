@@ -5,6 +5,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { forumAuth } from '$lib/forum/stores/auth';
 	import { drawEnv, apiError } from '$lib/draw/stores/env';
+	import { compressPostImage } from '$lib/forum/utils/image-compression';
 	import { addToQueue } from '$lib/draw/api/client';
 	import { get } from 'svelte/store';
 
@@ -193,8 +194,12 @@
 	async function doUpload(): Promise<{ image1_name: string; image2_name: string }> {
 		const token = forumAuth.getToken()!;
 		const form = new FormData();
-		form.append('image1', images[0].file);
-		if (images.length > 1) form.append('image2', images[1].file);
+		const compressed1 = await compressPostImage(images[0].file);
+			form.append('image1', compressed1);
+		if (images.length > 1) {
+			const compressed2 = await compressPostImage(images[1].file);
+			form.append('image2', compressed2);
+		}
 
 		const baseUrl = get(drawEnv.baseUrl);
 		const headers = new Headers();

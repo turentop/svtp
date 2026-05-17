@@ -162,8 +162,6 @@ export async function deleteMyImage(path: string) {
 
 export async function addToQueue(payload: {
 	direct_prompt: string;
-	nl_prompt?: string;
-	rewrite?: boolean;
 	width?: number;
 	height?: number;
 	style_tags?: string;
@@ -208,7 +206,7 @@ export async function fetchDebugInfo() {
 		queue_stats: Record<string, number>;
 		queue_users: [number, number][];
 		stuck: Array<{ id: number; user_id: number; status: string }>;
-		recent_items: Array<{ id: number; user_id: number; status: string; created_ago: number; started_ago?: number | null; error?: string }>;
+		recent_items_full: Array<{ id: number; user_id: number; status: string; created_ago: number; started_ago?: number | null; error?: string; type?: string }>;
 	}>('/api/draw/debug', { requiresAuth: true });
 }
 

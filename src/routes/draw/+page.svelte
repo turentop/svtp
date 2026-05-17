@@ -43,9 +43,10 @@
 	let styleTags = $state('');
 	let styleName = $state('');
 	let directPrompt = $state('');
+	let workflowPrompt = $state("");
+	let workflowNegativePrompt = $state("");
 	let negativePrompt = $state('');
 	let nlPrompt = $state('');
-	let rewrite = $state(true);
 	let width = $state(0);
 	let height = $state(0);
 	let inlineWorkflow = $state<object | null>(null);
@@ -60,13 +61,14 @@
 			if (saved) {
 				const p = JSON.parse(saved);
 				if (p.workflowPath) workflowPath = p.workflowPath;
+					if (localStorage.getItem('wf_prompt')) workflowPrompt = localStorage.getItem('wf_prompt')!;
+					if (localStorage.getItem('wf_neg_prompt')) workflowNegativePrompt = localStorage.getItem('wf_neg_prompt')!;
 				if (p.workflowName) workflowName = p.workflowName;
 				if (p.styleTags) styleTags = p.styleTags;
 				if (p.styleName) styleName = p.styleName;
 				if (p.directPrompt) directPrompt = p.directPrompt;
 				if (p.negativePrompt) negativePrompt = p.negativePrompt;
 				if (p.nlPrompt) nlPrompt = p.nlPrompt;
-				if (p.rewrite !== undefined) rewrite = p.rewrite;
 				if (p.width) width = p.width;
 				if (p.height) height = p.height;
 				if (p.safetyRating) safetyRating = p.safetyRating;
@@ -156,7 +158,7 @@
 	// Persist form state to localStorage
 	$effect(() => {
 		if (typeof localStorage === 'undefined') return;
-		const state = { workflowPath, workflowName, styleTags, styleName, directPrompt, negativePrompt, nlPrompt, rewrite, width, height, safetyRating, forkSeed, sameSeed };
+		const state = { workflowPath, workflowName, styleTags, styleName, directPrompt, negativePrompt, nlPrompt, width, height, safetyRating, forkSeed, sameSeed };
 		localStorage.setItem('draw-form', JSON.stringify(state));
 	});
 
@@ -181,8 +183,8 @@
 		const fork = consumeFork();
 		if (fork) {
 			inlineWorkflow = fork.workflow;
-			if (fork.builtin_prompt) directPrompt = fork.builtin_prompt;
-			if (fork.builtin_negative_prompt) negativePrompt = fork.builtin_negative_prompt;
+			if (fork.builtin_prompt) { directPrompt = fork.builtin_prompt; workflowPrompt = fork.builtin_prompt; }
+			if (fork.builtin_negative_prompt) { negativePrompt = fork.builtin_negative_prompt; workflowNegativePrompt = fork.builtin_negative_prompt; }
 			if (fork.default_width) width = fork.default_width;
 			if (fork.default_height) height = fork.default_height;
 			forkSeed = fork.seed;
@@ -241,9 +243,13 @@
 	}
 
 	function handlePromptLoad(positive: string, negative: string) {
-		directPrompt = positive;
-		negativePrompt = negative;
-	}
+			directPrompt = positive;
+			negativePrompt = negative;
+			workflowPrompt = positive;
+			workflowNegativePrompt = negative;
+			localStorage.setItem('wf_prompt', positive);
+			localStorage.setItem('wf_neg_prompt', negative);
+		}
 
 	async function handleFork(path: string) {
 		try {
@@ -292,8 +298,6 @@
 			try {
 				await addToQueue({
 					direct_prompt: finalDirectPrompt,
-					nl_prompt: nlPrompt || undefined,
-					rewrite,
 					width: width || undefined,
 					height: height || undefined,
 					style_tags: styleTags || undefined,
@@ -598,7 +602,8 @@
 						bind:directPrompt
 						bind:negativePrompt
 						bind:nlPrompt
-						bind:rewrite
+						bind:workflowPrompt
+						bind:workflowNegativePrompt
 						bind:width
 						bind:height
 						bind:safetyRating

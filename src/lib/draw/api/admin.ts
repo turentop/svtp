@@ -198,22 +198,29 @@ export async function uploadWfThumbnail(file: File) {
 export async function getLlmConfig() {
 	return drawRequest<{
 		config: AdminLlmConfig;
-		defaults: AdminLlmConfig;
 		providers: string[];
-		google_thinking_options: string[];
+		google_thinking_options?: string[];
 	}>('/api/draw/admin/llm_config');
 }
 
-export async function updateLlmConfig(partial: Partial<AdminLlmConfig>) {
+export async function updateLlmConfig(data: { profiles: AdminLlmProfile[]; active: number }) {
 	return drawRequest<{ ok: boolean; config: AdminLlmConfig }>('/api/draw/admin/llm_config', {
 		method: 'POST',
-		json: partial
+		json: data
 	});
 }
 
-export async function testLlmConfig() {
-	return drawRequest<{ ok: boolean; provider: string; reply?: string; error?: string }>('/api/draw/admin/llm_config/test', {
-		method: 'POST'
+export async function testLlmConfig(profileIndex?: number) {
+	return drawRequest<{ ok: boolean; provider: string; profile_index?: number; reply?: string; error?: string }>('/api/draw/admin/llm_config/test', {
+		method: 'POST',
+		json: { profile_index: profileIndex }
+	});
+}
+
+export async function getLlmModels(profileIndex?: number) {
+	return drawRequest<{ ok: boolean; models?: string[]; provider?: string; error?: string }>('/api/draw/admin/llm_config/models', {
+		method: 'POST',
+		json: { profile_index: profileIndex }
 	});
 }
 

@@ -2,7 +2,7 @@ import imageCompression, { type Options } from 'browser-image-compression';
 
 export const POST_IMAGE_MAX_BYTES: number = 500 * 1024;
 const POST_IMAGE_MAX_SIZE_MB = POST_IMAGE_MAX_BYTES / 1024 / 1024;
-const POST_IMAGE_MAX_WIDTH_OR_HEIGHT = 1600;
+const POST_IMAGE_MAX_WIDTH_OR_HEIGHT = 1200;
 
 const AVATAR_IMAGE_MAX_BYTES = 200 * 1024;
 const AVATAR_IMAGE_MAX_SIZE_MB = AVATAR_IMAGE_MAX_BYTES / 1024 / 1024;
