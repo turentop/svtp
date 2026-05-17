@@ -35,7 +35,8 @@ async function parseResponse<T>(response: Response): Promise<T> {
 				? body
 				: { message: typeof body === 'string' ? body : undefined }
 		) as DrawApiErrorPayload;
-		throw new DrawApiError(response.status, payload);
+		if (payload.code === 'USER_BANNED') apiError.set(payload.detail || '账号已被封禁');
+			throw new DrawApiError(response.status, payload);
 	}
 	return body as T;
 }
@@ -206,7 +207,7 @@ export async function fetchDebugInfo() {
 		queue_stats: Record<string, number>;
 		queue_users: [number, number][];
 		stuck: Array<{ id: number; user_id: number; status: string }>;
-		recent_items_full: Array<{ id: number; user_id: number; status: string; created_ago: number; started_ago?: number | null; error?: string; type?: string }>;
+		recent_items_full: Array<{ id: number; user_id: number; status: string; created_ago: number; started_ago?: number | null; error?: string; type?: string; workflow_path?: string }>;
 	}>('/api/draw/debug', { requiresAuth: true });
 }
 

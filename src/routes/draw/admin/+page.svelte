@@ -70,8 +70,10 @@ let loadingMore = $state(false);
 	let newFeaturedPath = $state('');
 
 	// Banned
-	let bannedUsers = $state<number[]>([]);
+	let bannedUsers = $state<admin.BanEntry[]>([]);
 	let newBanUserId = $state('');
+	let newBanDays = $state(7);
+	let newBanReason = $state('');
 
 	// Limits
 	let limits = $state<AdminLimits | null>(null);
@@ -192,17 +194,21 @@ let loadingMore = $state(false);
 	}
 
 	async function loadRecent() {
+		if (loadingMore) return;
 		loading = true;
 		try {
+			loadingMore = true;
 			const res = await admin.getRecentImages(recentLimit, 0);
-			recentImages = res.items;
+			const deduped = res.items.filter((v, i, a) => a.findIndex(t => t.path === v.path) === i);
+			recentImages = deduped;
 			recentTotal = res.total;
 			recentOffset = res.items.length;
+			loadingMore = false;
 			selectedPaths = new Set();
 			columnCount = getColumnCount();
 			imgColumns = Array.from({ length: columnCount }, () => []);
 			columnHeights = new Array(columnCount).fill(0);
-			for (const item of res.items) pushToShortest(item.path);
+			for (const item of deduped) pushToShortest(item.path);
 			imgColumns = [...imgColumns];
 			hasMore = recentOffset < recentTotal;
 		} catch (e) {
@@ -217,9 +223,10 @@ let loadingMore = $state(false);
 		loadingMore = true;
 		try {
 			const res = await admin.getRecentImages(recentLimit, recentOffset);
-			recentImages = [...recentImages, ...res.items];
+			const moreDeduped = res.items.filter((v, i, a) => a.findIndex(t => t.path === v.path) === i && !recentImages.some(ex => ex.path === v.path));
+			recentImages = [...recentImages, ...moreDeduped];
 			recentOffset += res.items.length;
-			for (const item of res.items) pushToShortest(item.path);
+			for (const item of moreDeduped) pushToShortest(item.path);
 			imgColumns = [...imgColumns];
 			hasMore = recentOffset < recentTotal;
 		} catch (e) {
@@ -234,7 +241,8 @@ let loadingMore = $state(false);
 		loading = true;
 		try {
 			const res = await admin.getImagesByUser(Number(searchUserId));
-			recentImages = res.items;
+			const deduped = res.items.filter((v, i, a) => a.findIndex(t => t.path === v.path) === i);
+			recentImages = deduped;
 			recentTotal = res.total;
 			selectedPaths = new Set();
 			rebuildColumns();
@@ -429,18 +437,18 @@ let loadingMore = $state(false);
 	async function loadBanned() {
 		try {
 			const res = await admin.getBannedUsers();
-			bannedUsers = res.banned;
+			bannedUsers = Array.isArray(res.banned) ? res.banned.filter((b: any) => typeof b === 'object') : [];
 		} catch (e) {
 			showMsg('error', e instanceof Error ? e.message : '加载失败');
 		}
 	}
 
 	async function handleBan() {
-		if (!newBanUserId.trim()) return;
+		if (!newBanUserId) return;
 		loading = true;
 		try {
-			const res = await admin.banUser(Number(newBanUserId));
-			bannedUsers = res.banned;
+			const res = await admin.banUser(Number(newBanUserId), newBanDays || 7, newBanReason || '违规行为');
+			bannedUsers = Array.isArray(res.banned) ? res.banned.filter((b: any) => typeof b === 'object') : [];
 			newBanUserId = '';
 			showMsg('success', '已封禁');
 		} catch (e) {
@@ -454,7 +462,7 @@ let loadingMore = $state(false);
 		loading = true;
 		try {
 			const res = await admin.unbanUser(userId);
-			bannedUsers = res.banned;
+			bannedUsers = Array.isArray(res.banned) ? res.banned.filter((b: any) => typeof b === 'object') : [];
 			showMsg('success', '已解封');
 		} catch (e) {
 			showMsg('error', e instanceof Error ? e.message : '解封失败');
@@ -1034,7 +1042,7 @@ function formatTime(ts: number) {
 					<div class="flex gap-2 items-start">
 						{#each imgColumns as col, ci (ci)}
 							<div class="flex flex-1 flex-col gap-2 min-w-0">
-								{#each col as path (path)}
+								{#each col as path (ci + '-' + path)}
 									{@const img = recentImages.find(i => i.path === path)}
 									{#if img}
 										<div class="relative group">
@@ -1280,13 +1288,16 @@ function formatTime(ts: number) {
 						<div class="flex gap-2">
 							<Input
 								bind:value={newBanUserId}
-								placeholder="输入用户 ID"
+								placeholder="用户 ID"
 								type="number"
-								class="max-w-48"
-							/>
-							<Button size="sm" variant="destructive" onclick={handleBan} disabled={loading}>
-								<Icon icon="mdi:account-cancel" class="size-4 mr-1" />封禁
-							</Button>
+									class="max-w-20"
+								/>
+								<Input bind:value={newBanDays} type="number" class="max-w-16" min="1" />
+								<span class="text-xs text-muted-foreground">天</span>
+								<Input bind:value={newBanReason} placeholder="原因" class="max-w-36" />
+								<Button size="sm" variant="destructive" onclick={handleBan} disabled={loading}>
+									<Icon icon="mdi:account-cancel" class="size-4 mr-1" />封禁
+								</Button>
 						</div>
 						<Button variant="outline" size="sm" onclick={loadBanned} disabled={loading}>
 							<Icon icon="mdi:refresh" class="size-4 mr-1" />刷新
@@ -1295,9 +1306,9 @@ function formatTime(ts: number) {
 							<div class="text-sm text-muted-foreground py-4 text-center">无封禁用户</div>
 						{:else}
 							<div class="space-y-1.5">
-								{#each bannedUsers as uid}
+								{#each bannedUsers as ban}
 									<div class="flex items-center justify-between border rounded-md px-3 py-2">
-										<span class="text-sm font-mono">{uid}</span>
+										<span class="text-sm font-mono">{ban.user_id}</span>
 										<Button size="sm" variant="ghost" onclick={() => handleUnban(uid)} disabled={loading}>
 											<Icon icon="mdi:account-check" class="size-4 mr-1" />解封
 										</Button>
@@ -1631,7 +1642,7 @@ function formatTime(ts: number) {
 									<div class="flex flex-wrap gap-2">
 										{#each debugData.queue_users as [uid, count]}
 											<Badge variant="secondary" class="text-xs">
-												UID {uid} x {count}
+												UID {ban.user_id} x {count}
 											</Badge>
 										{/each}
 									</div>
@@ -1666,6 +1677,7 @@ function formatTime(ts: number) {
 												<th class="py-1 pr-2">状态</th>
 												<th class="py-1 pr-2">创建</th>
 												<th class="py-1 pr-2">启动</th>
+													<th class="py-1 pr-2">工作流</th>
 													<th class="py-1 pr-2">错误</th>
 											</tr>
 										</thead>
@@ -1680,6 +1692,7 @@ function formatTime(ts: number) {
 													</td>
 													<td class="py-1 pr-2 text-muted-foreground">{item.created_ago}s前</td>
 													<td class="py-1 pr-2 text-muted-foreground">{item.started_ago != null ? `${item.started_ago}s前` : '-'}</td>
+														<td class="py-1 pr-2 break-all max-w-[120px] text-muted-foreground text-[10px]">{item.workflow_path || '-'}</td>
 														<td class="py-1 pr-2 break-all max-w-xs text-destructive text-[10px]" title={item.error || ''}>{item.error || '-'}</td>
 												</tr>
 											{/each}

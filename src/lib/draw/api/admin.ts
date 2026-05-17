@@ -115,21 +115,32 @@ export async function updateAnnouncement(partial: Partial<AdminAnnouncement>) {
 // --- Banned Users ---
 
 export async function getBannedUsers() {
-	return drawRequest<{ banned: number[] }>('/api/draw/admin/draw-banned');
+	return drawRequest<{ banned: BanEntry[] }>('/api/draw/admin/draw-banned');
 }
 
-export async function banUser(userId: number) {
-	return drawRequest<{ ok: boolean; banned: number[] }>('/api/draw/admin/draw-ban', {
+export interface BanEntry {
+	user_id: number;
+	reason: string;
+	banned_until: number;
+	remaining_days: number;
+}
+
+export async function banUser(userId: number, days: number, reason: string) {
+	return drawRequest<{ ok: boolean; banned: BanEntry[] }>('/api/draw/admin/draw-ban', {
 		method: 'POST',
-		json: { user_id: userId }
+		json: { user_id: userId, days, reason }
 	});
 }
 
 export async function unbanUser(userId: number) {
-	return drawRequest<{ ok: boolean; banned: number[] }>('/api/draw/admin/draw-unban', {
+	return drawRequest<{ ok: boolean; banned: BanEntry[] }>('/api/draw/admin/draw-unban', {
 		method: 'POST',
-		json: { user_id: userId }
+		json: { user_id: userId, days, reason }
 	});
+}
+
+export async function fetchBanned() {
+	return drawRequest<{ banned: BanEntry[] }>('/api/draw/admin/draw-banned');
 }
 
 // --- GC ---

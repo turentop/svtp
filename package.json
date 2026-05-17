@@ -51,6 +51,7 @@
 		"dompurify": "^3.4.1",
 		"feed": "^5.2.1",
 		"markdown-it": "^14.1.1",
+		"masonry-layout": "^4.2.2",
 		"photoswipe": "^5.4.4",
 		"qrcode": "^1.5.4"
 	}

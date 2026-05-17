@@ -14,8 +14,7 @@
 		images?: { src: string; creator_id?: string; cached?: string }[];
 		index?: number;
 		onclose?: () => void;
-		onfork?: (path: string) => void;
-		onrecommend?: (path: string) => void;
+				onrecommend?: (path: string) => void;
 	} = $props();
 
 	let creatorName = $state('');
@@ -57,7 +56,7 @@
 		if ((e.target as HTMLElement).dataset.backdrop) onclose?.();
 	}
 
-	function fork() {
+	/* fork removed */ function _fork_removed() {
 		const img = images[index];
 		if (!img) return;
 		const p = getPath(img.src);
@@ -132,10 +131,10 @@
 					生图者: {creatorName ? `${creatorName} (UID:${images[index].creator_id})` : `UID:${images[index].creator_id}`}
 				</a>
 			{/if}
-			{#if onfork}
+			{#if false}
 				<button
 					class="text-white/90 text-sm bg-white/10 px-3 py-1.5 rounded hover:bg-white/20 transition-colors flex items-center gap-1.5"
-					onclick={fork}
+					onclick={_fork_removed}
 				>
 					<Icon icon="mdi:source-fork" class="size-4" />
 					Fork

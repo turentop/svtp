@@ -182,14 +182,14 @@
 		// 检查是否有待消费的 fork 数据（从其他页面跳转过来）
 		const fork = consumeFork();
 		if (fork) {
-			inlineWorkflow = fork.workflow;
+			inlineWorkflow = fork.workflow && Object.keys(fork.workflow || {}).length ? fork.workflow : null;
 			if (fork.builtin_prompt) { directPrompt = fork.builtin_prompt; workflowPrompt = fork.builtin_prompt; }
 			if (fork.builtin_negative_prompt) { negativePrompt = fork.builtin_negative_prompt; workflowNegativePrompt = fork.builtin_negative_prompt; }
 			if (fork.default_width) width = fork.default_width;
 			if (fork.default_height) height = fork.default_height;
 			forkSeed = fork.seed;
-			workflowPath = 'fork';
-			workflowName = '(fork)';
+			if (inlineWorkflow) workflowPath = 'fork';
+			workflowName = inlineWorkflow ? '(fork)' : '';
 			if (fork.style_tags) {
 				styleTags = fork.style_tags;
 				styleName = fork.style_tags;
@@ -260,8 +260,8 @@
 			if (res.default_width) width = res.default_width;
 			if (res.default_height) height = res.default_height;
 			forkSeed = res.seed;
-			workflowPath = 'fork';
-			workflowName = '(fork)';
+			if (inlineWorkflow) workflowPath = 'fork';
+			workflowName = inlineWorkflow ? '(fork)' : '';
 			if (res.style_tags) {
 				styleTags = res.style_tags;
 				styleName = res.style_tags;
@@ -325,7 +325,8 @@
 		myImagesLoading = true;
 		try {
 			const res = await fetchMyImages();
-			myImages = res.items;
+			const deduped = res.items.filter((v, i, a) => a.findIndex(t => t.path === v.path) === i);
+			myImages = deduped;
 			myImagesTotal = res.total;
 			myImagesLoaded = true;
 			rebuildMyColumns();
@@ -563,7 +564,17 @@
 		</Alert>
 	{/if}
 
-	{#if apiErrorMessage}
+	{#if apiErrorMessage && (apiErrorMessage.includes('封禁') || apiErrorMessage.includes('BANNED'))}
+		<div class="fixed inset-0 z-50 bg-red-600 flex items-center justify-center p-8">
+			<div class="bg-white rounded-xl max-w-lg w-full p-8 text-center space-y-4 shadow-2xl">
+				<Icon icon="mdi:account-cancel" class="size-16 mx-auto text-red-500" />
+				<h1 class="text-2xl font-bold text-red-600">账号已被封禁</h1>
+				<p class="text-base text-gray-700">{apiErrorMessage}</p>
+			</div>
+		</div>
+	{/if}
+
+	{#if apiErrorMessage && !apiErrorMessage.includes('封禁') && !apiErrorMessage.includes('BANNED')}
 		<Alert>
 			<Icon icon="mdi:cloud-alert" class="size-4 shrink-0" />
 			<AlertDescription class="text-xs">{apiErrorMessage}</AlertDescription>
@@ -571,6 +582,17 @@
 	{/if}
 
 	<!-- Tabs -->
+	{#if apiStatusValue === 'checking'}
+		<Alert>
+			<Icon icon="mdi:cloud-question" class="size-4" />
+			<AlertDescription class="text-xs">正在检测后端 API 状态，请稍候...</AlertDescription>
+		</Alert>
+	{:else if apiStatusValue === 'offline'}
+		<Alert variant="destructive">
+			<Icon icon="mdi:cloud-alert" class="size-4" />
+			<AlertDescription class="text-xs">后端不可用，二叉树树目前可能需要使用电脑，未启用生图功能</AlertDescription>
+		</Alert>
+	{:else}
 	<Tabs bind:value={activeTab} class="w-full">
 		<TabsList class="w-full">
 			<TabsTrigger value="generate" class="flex-1">
@@ -779,7 +801,7 @@
 							<div class="flex gap-2 items-start">
 								{#each imgColumns as col, ci (ci)}
 									<div class="flex flex-1 flex-col gap-2 min-w-0">
-										{#each col as path (path)}
+										{#each col as path (ci + '-' + path)}
 											{@const item = myImages.find(i => i.path === path)}
 											{#if item}
 												<div role="button" tabindex="0"
@@ -837,7 +859,7 @@
 		</TabsContent>
 
 		</Tabs>
-
+	{/if}
 <ImageLightbox
 	open={myLbOpen}
 	images={myLbImages}
