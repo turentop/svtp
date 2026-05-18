@@ -67,7 +67,9 @@ function createEnvStore(): DrawEnvStore {
 		readLocalStorage<DrawApiEnv | string>(DRAW_API_ENV_STORAGE_KEY, 'prod')
 	);
 	const envStore = writable<DrawApiEnv>(initialEnv);
-	const customBaseUrlStore = writable<string>(DRAW_API_BASE_URLS[initialEnv]);
+	const customBaseUrlStore = writable<string>(
+		readLocalStorage<string>(DRAW_API_CUSTOM_BASE_URL_STORAGE_KEY, '') || DRAW_API_BASE_URLS[initialEnv]
+	);
 
 	const baseUrl = derived([envStore, customBaseUrlStore], ([$env, $custom]) =>
 		sanitizeBaseUrl($custom, $env)
@@ -78,8 +80,15 @@ function createEnvStore(): DrawEnvStore {
 		baseUrl,
 		customBaseUrl: {
 			subscribe: customBaseUrlStore.subscribe,
-			set: (v) => customBaseUrlStore.set(sanitizeBaseUrl(v, get(envStore))),
-			reset: (env) => customBaseUrlStore.set(DRAW_API_BASE_URLS[env])
+			set: (v) => {
+			const url = sanitizeBaseUrl(v, get(envStore));
+			writeLocalStorage(DRAW_API_CUSTOM_BASE_URL_STORAGE_KEY, url);
+			customBaseUrlStore.set(url);
+		},
+			reset: (env) => {
+			writeLocalStorage(DRAW_API_CUSTOM_BASE_URL_STORAGE_KEY, '');
+			customBaseUrlStore.set(DRAW_API_BASE_URLS[env]);
+		}
 		},
 		set: (v) => {
 			const next = normalizeEnv(v);
