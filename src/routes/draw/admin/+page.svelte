@@ -1155,7 +1155,6 @@ function formatTime(ts: number) {
 						<div class="p-3 space-y-3 text-xs">
 							<div class="flex flex-wrap gap-2">
 								<div>
-									<p class="text-[10px] text-muted-foreground mb-1">原图 1</p>
 									{#if detailImg.image1}
 										<img src="{currentBaseUrl}/api/uploads/{detailImg.image1}" alt="原图" class="rounded border max-h-48 w-auto h-auto" loading="lazy" />
 																			{/if}
