@@ -387,7 +387,7 @@ let loadingMore = $state(false);
 		}
 	}
 
-	async function changeRec(recId: string, action: 'approve' | 'reject') {
+	async function async function changeRec(recId: string, action: 'approve' | 'reject') {
 		loading = true;
 		try {
 			const reason = recRejectReasons[recId] || undefined;
