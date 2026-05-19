@@ -199,7 +199,7 @@
 		<Alert>
 			<Icon icon="mdi:account-alert-outline" class="size-4" />
 			<AlertDescription class="text-xs">
-				请先<a href="/forum/auth/login?redirect=/draw/collaborator/" class="underline font-medium">登录论坛</a>后使用。
+				请先<a href="/forum/auth/login?redirect=/draw/admin/collaborator/" class="underline font-medium">登录论坛</a>后使用。
 			</AlertDescription>
 		</Alert>
 	{:else}
