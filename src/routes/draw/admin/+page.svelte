@@ -1106,7 +1106,7 @@ function formatTime(ts: number) {
 													onclick={(e) => e.stopPropagation()}
 													class="size-4 accent-primary opacity-60 group-hover:opacity-100 transition-opacity"
 												/>
-t											{#if img.deleted}
+												{#if img.deleted}
 													<span class="bg-red-600 text-white text-[9px] px-1 rounded font-bold">已删</span>
 												{/if}
 											</div>
