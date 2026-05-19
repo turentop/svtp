@@ -18,10 +18,14 @@
 
 	// Images tab
 	let allImages = $state<{ path: string; mtime: number; user_id: string }[]>([]);
-	let imagesLoaded = $state(false);
+	let imagesTotal = $state(0);
+	let imagesOffset = $state(0);
+	let imagesLimit = $state(50);
 	let imagesLoading = $state(false);
-	let displayLimit = $state(50);
+	let loadingMore = $state(false);
 	let hasMore = $state(false);
+	let sentinelEl: HTMLDivElement | undefined = $state();
+	let io: IntersectionObserver | null = null;
 	let selectedPaths = $state<Set<string>>(new Set());
 	let selectMode = $state(false);
 
@@ -64,22 +68,21 @@
 		return 2;
 	}
 
+	function pushToShortest(path: string) {
+		let minIdx = 0;
+		for (let i = 1; i < columnHeights.length; i++) {
+			if (columnHeights[i] < columnHeights[minIdx]) minIdx = i;
+		}
+		imgColumns[minIdx] = [...imgColumns[minIdx], path];
+		columnHeights[minIdx] += 1;
+	}
+
 	function rebuildColumns() {
 		columnCount = getColumnCount();
-		const cols: string[][] = Array.from({ length: columnCount }, () => []);
-		const heights: number[] = new Array(columnCount).fill(0);
-		const display = allImages.slice(0, displayLimit);
-		for (const item of display) {
-			let minIdx = 0;
-			for (let i = 1; i < heights.length; i++) {
-				if (heights[i] < heights[minIdx]) minIdx = i;
-			}
-			cols[minIdx] = [...cols[minIdx], item.path];
-			heights[minIdx] += 1;
-		}
-		imgColumns = cols;
-		columnHeights = heights;
-		hasMore = displayLimit < allImages.length;
+		imgColumns = Array.from({ length: columnCount }, () => []);
+		columnHeights = new Array(columnCount).fill(0);
+		for (const item of allImages) pushToShortest(item.path);
+		imgColumns = [...imgColumns];
 	}
 
 	function handleResize() {
@@ -103,18 +106,38 @@
 	}
 
 	async function loadImages() {
-		if (imagesLoaded) return;
+		if (imagesLoading) return;
 		imagesLoading = true;
 		try {
-			const res = await collab.getAllImages();
+			const res = await collab.getAllImages(imagesLimit, 0);
 			allImages = res.items;
-			imagesLoaded = true;
-			hasMore = res.total > displayLimit;
+			imagesTotal = res.total;
+			imagesOffset = res.items.length;
+			imagesLoading = false;
+			hasMore = imagesOffset < imagesTotal;
 			rebuildColumns();
 		} catch (e) {
 			showMsg('error', e instanceof Error ? e.message : '加载失败');
 		} finally {
 			imagesLoading = false;
+		}
+	}
+
+	async function loadMoreImages() {
+		if (loadingMore || !hasMore) return;
+		loadingMore = true;
+		try {
+			const res = await collab.getAllImages(imagesLimit, imagesOffset);
+			const newItems = res.items.filter((v: any) => !allImages.some((ex: any) => ex.path === v.path));
+			allImages = [...allImages, ...newItems];
+			imagesOffset += res.items.length;
+			for (const item of newItems) pushToShortest(item.path);
+			imgColumns = [...imgColumns];
+			hasMore = imagesOffset < imagesTotal;
+		} catch (e) {
+			showMsg('error', e instanceof Error ? e.message : '加载失败');
+		} finally {
+			loadingMore = false;
 		}
 	}
 
@@ -181,7 +204,22 @@
 	onMount(() => {
 		columnCount = getColumnCount();
 		imgColumns = Array.from({ length: columnCount }, () => []);
+		columnHeights = new Array(columnCount).fill(0);
+		if (sentinelEl) {
+			io = new IntersectionObserver(
+				(entries) => {
+					if (entries.some((e) => e.isIntersecting && !loadingMore && hasMore)) loadMoreImages();
+				},
+				{ rootMargin: '400px 0px' }
+			);
+			io.observe(sentinelEl);
+		}
 		window.addEventListener('resize', handleResize, { passive: true });
+	});
+
+	onDestroy(() => {
+		io?.disconnect();
+		window.removeEventListener('resize', handleResize);
 	});
 
 	onDestroy(() => {
@@ -279,13 +317,10 @@
 							</div>
 						{/each}
 					</div>
-					{#if hasMore}
-						<div class="flex justify-center pt-2">
-							<Button variant="outline" size="sm" onclick={() => { displayLimit += 50; rebuildColumns(); }}>
-								加载更多
-							</Button>
-						</div>
+					{#if !hasMore && allImages.length > 0}
+						<div class="text-center text-xs text-muted-foreground py-2">已加载全部</div>
 					{/if}
+					<div bind:this={sentinelEl} class="h-4"></div>
 				{/if}
 			</TabsContent>
 

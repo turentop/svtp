@@ -1,8 +1,8 @@
 import { drawRequest } from './client';
 import type { Nomination } from '../types';
 
-export async function getAllImages() {
-	return drawRequest<{ items: { path: string; mtime: number; user_id: string }[]; total: number }>('/api/draw/collaborator/images');
+export async function getAllImages(limit = 200, offset = 0) {
+	return drawRequest<{ items: { path: string; mtime: number; user_id: string }[]; total: number }>('/api/draw/collaborator/images', { query: { limit, offset } });
 }
 
 export async function getPendingRecommendations() {
