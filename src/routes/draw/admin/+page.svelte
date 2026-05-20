@@ -1332,7 +1332,7 @@ function formatTime(ts: number) {
 				{#if recommendations.length === 0}
 					<div class="text-sm text-muted-foreground py-8 text-center">无待审核自荐</div>
 					{:else}
-						<div bind:this={recMasonryEl} class="relative w-full">
+						<div bind:this={recMasonryEl} class="relative w-full overflow-hidden">
 						<div class="rec-sizer w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5"></div>
 						{#each recommendations as rec, i (rec.id || i)}
 							<div class="rec-item w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 p-1">
@@ -1350,22 +1350,22 @@ function formatTime(ts: number) {
 				<!-- Approve/reject dialog -->
 				{#if recDialogItem}
 					<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/90" onclick={closeRecDialog} role="dialog">
-						<div class="relative flex flex-col items-center max-w-[90vw] max-h-[90vh]" onclick={(e) => e.stopPropagation()}>
+						<div class="relative flex flex-col items-center w-[95vw] sm:max-w-[90vw] max-h-[90vh]" onclick={(e) => e.stopPropagation()}>
 							<button class="absolute top-2 right-2 z-10 text-white/80 hover:text-white" onclick={closeRecDialog}>
 								<Icon icon="mdi:close" class="size-8" />
 							</button>
-							<img src={getImageUrl(recDialogItem.image_path)} alt="" class="max-w-full max-h-[75vh] object-contain rounded-lg" />
-							<div class="flex items-center gap-3 mt-4 bg-background/80 backdrop-blur rounded-lg px-4 py-3">
-								<div class="text-xs text-muted-foreground mr-2">
-									UID: {recDialogItem.user_id ?? '?'} &nbsp; {recDialogItem.image_path}
+							<img src={getImageUrl(recDialogItem.image_path)} alt="" class="max-w-full max-h-[60vh] sm:max-h-[75vh] object-contain rounded-lg" />
+							<div class="flex flex-wrap items-center gap-2 mt-3 bg-background/80 backdrop-blur rounded-lg px-3 py-2 w-full sm:w-auto">
+								<div class="text-xs text-muted-foreground truncate max-w-[120px] sm:max-w-[200px] shrink-0">
+									UID: {recDialogItem.user_id ?? '?'}
 								</div>
-								<Button size="sm" variant="default" onclick={() => { resolveRec(recDialogItem.id, 'approve', recDialogItem.image_path); closeRecDialog(); }} disabled={loading}>
+								<Button size="sm" variant="default" onclick={() => { resolveRec(recDialogItem.id, 'approve', recDialogItem.image_path); closeRecDialog(); }} disabled={loading} class="shrink-0">
 									通过
 								</Button>
 								<Input bind:value={recRejectReasons[recDialogId]}
-									placeholder="拒绝理由" class="h-8 text-xs w-40"
+									placeholder="拒绝理由" class="h-8 text-xs min-w-0 w-full sm:w-40"
 								/>
-								<Button size="sm" variant="destructive" onclick={() => { resolveRec(recDialogItem.id, 'reject', recDialogItem.image_path); closeRecDialog(); }} disabled={loading}>
+								<Button size="sm" variant="destructive" onclick={() => { resolveRec(recDialogItem.id, 'reject', recDialogItem.image_path); closeRecDialog(); }} disabled={loading} class="shrink-0">
 									拒绝
 								</Button>
 							</div>
