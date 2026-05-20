@@ -134,8 +134,9 @@ export async function resolveApiRedirect(force = false): Promise<void> {
 	apiStatus.set('checking');
 	const baseUrl = get(drawEnv.baseUrl);
 	try {
-		const resp = await fetch(baseUrl, { method: 'HEAD' });
-		const finalUrl = resp.url.replace(/\/+$/, '');
+		const resp = await fetch(`${baseUrl}/health`, { method: 'GET' });
+		if (!resp.ok) throw new Error('health check failed');
+		const finalUrl = resp.url.replace(/\/+$/, '').replace(/\/health$/, '');
 		if (finalUrl !== baseUrl) {
 			drawEnv.customBaseUrl.set(finalUrl);
 		}
