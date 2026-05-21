@@ -111,16 +111,6 @@
 			await renderMermaidIn(proseEl);
 			highlightCodeBlocksIn(proseEl);
 
-			// 处理 hash 锚点跳转（内容可能延迟渲染，浏览器内置滚动在此时已失效）
-			const hash = $page.url.hash;
-			if (hash) {
-				const id = hash.slice(1);
-				const target = document.getElementById(id) || proseEl.querySelector(`[id="${id}"]`);
-				if (target) {
-					setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-				}
-			}
-
 			// 处理搜索高亮
 			const highlight = $page.url.searchParams.get('highlight');
 			if (highlight) {
@@ -128,6 +118,20 @@
 				setTimeout(scrollToFirstMatch, 100);
 			}
 		})();
+	});
+
+	onMount(() => {
+		const hash = window.location.hash;
+		if (!hash) return;
+		const id = decodeURIComponent(hash.slice(1));
+		const poll = setInterval(() => {
+			const el = document.getElementById(id);
+			if (el) {
+				el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				clearInterval(poll);
+			}
+		}, 100);
+		setTimeout(() => clearInterval(poll), 5000);
 	});
 
 	// 主题切换时重新渲染 mermaid 和代码高亮
