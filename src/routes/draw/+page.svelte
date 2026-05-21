@@ -573,8 +573,8 @@ async function startGeneration() {
 		<div class="flex items-center gap-2">
 			<Icon icon="mdi:palette" class="size-6 text-primary" />
 			<h1 class="text-xl font-bold">AI 生图</h1>
-			<a href="https://2x.nz/posts/ai-wife/#%E6%96%B0%E7%89%88-2xnzdraw-%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7" target="_blank" rel="noopener noreferrer" class="help-glow ml-1.5" title="使用技巧">
-				<span class="help-dot"></span>
+			<a href="https://2x.nz/posts/ai-wife/#%E6%96%B0%E7%89%88-2xnzdraw-%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7" target="_blank" rel="noopener noreferrer" class="no-underline">
+				<Button variant="outline" size="sm" class="rainbow-btn text-xs h-7 px-2.5">使用技巧？</Button>
 			</a>
 				<PageViews pathname="/draw/" class="text-sm text-muted-foreground" />
 			{#if onlineCount > 0}
@@ -926,43 +926,26 @@ async function startGeneration() {
 </div>
 
 <style>
-	.help-glow {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		border: 1px solid var(--border);
-		background: var(--muted);
-		cursor: pointer;
+	.no-underline {
 		text-decoration: none;
-		transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
-		box-shadow: 0 0 6px rgba(168, 85, 247, 0.15);
-		animation: glow-pulse 3s ease-in-out infinite;
 	}
-	.help-glow:hover {
-		border-color: rgb(168 85 247);
-		background: color-mix(in srgb, var(--muted) 60%, rgb(168 85 247));
-		box-shadow: 0 0 14px rgba(168, 85, 247, 0.4);
-		animation: none;
+	.rainbow-btn {
+		background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff, #9b59b6, #ff6b6b);
+		background-size: 300% 100%;
+		animation: rainbow-shift 4s linear infinite;
+		border: none;
+		color: white;
+		font-weight: 600;
+		transition: opacity 0.2s, box-shadow 0.2s;
 	}
-	.help-dot {
-		display: block;
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: rgb(168 85 247);
-		transition: background 0.2s, transform 0.2s;
-	}
-	.help-glow:hover .help-dot {
-		background: white;
-		transform: scale(1.3);
+	.rainbow-btn:hover {
+		opacity: 0.9;
+		box-shadow: 0 0 16px rgba(255, 107, 107, 0.4);
 	}
 
-	@keyframes glow-pulse {
-		0%, 100% { box-shadow: 0 0 6px rgba(168, 85, 247, 0.12); }
-		50% { box-shadow: 0 0 14px rgba(168, 85, 247, 0.3); }
+	@keyframes rainbow-shift {
+		0% { background-position: 0% 50%; }
+		100% { background-position: 300% 50%; }
 	}
 </style>
 
