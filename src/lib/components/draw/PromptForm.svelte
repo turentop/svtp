@@ -128,7 +128,7 @@
 					if (ev === 'chunk') {
 						accumulated += data.text;
 						// 实时解析 POSITIVE:/NEGATIVE: 并去掉前缀
-						const posM = accumulated.match(/POSITIVE:\s*(.+?)(?:\nNEGATIVE|$)/s);
+						const posM = accumulated.match(/POSITIVE:\s*(.+?)(?=\s*NEGATIVE:|\n|$)/s);
 						const negM = accumulated.match(/NEGATIVE:\s*(.+)$/s);
 						if (posM) directPrompt = posM[1].trim();
 						if (negM) negativePrompt = negM[1].trim();
