@@ -5,6 +5,8 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 
+const yesMode = process.argv.includes('--yes');
+
 const postsDir = path.join(root, 'src', 'content', 'posts');
 const backupDir = path.join(root, 'tmp', 'cleanup-backup');
 
@@ -76,16 +78,7 @@ function main() {
 		console.log(`    ${slug}/img/${file}`);
 	}
 
-	console.log(`\n  ⚠️   操作前会自动备份到 tmp/cleanup-backup/`);
-	console.log('  是否删除这些文件？(y/N): ');
-
-	process.stdin.once('data', async (buf) => {
-		const answer = buf.toString().trim().toLowerCase();
-		if (answer !== 'y' && answer !== 'yes') {
-			console.log('\n  已取消。\n');
-			process.exit(0);
-		}
-
+	const deleteFiles = () => {
 		const timestamp = Date.now();
 		const backupRoot = path.join(backupDir, String(timestamp));
 
@@ -102,7 +95,22 @@ function main() {
 
 		console.log(`\n  ✅ 已删除 ${orphans.length} 个文件，备份在 tmp/cleanup-backup/${timestamp}/\n`);
 		process.exit(0);
-	});
+	};
+
+	if (yesMode) {
+		deleteFiles();
+	} else {
+		console.log(`\n  ⚠️   操作前会自动备份到 tmp/cleanup-backup/`);
+		console.log('  是否删除这些文件？(y/N): ');
+		process.stdin.once('data', (buf) => {
+			const answer = buf.toString().trim().toLowerCase();
+			if (answer !== 'y' && answer !== 'yes') {
+				console.log('\n  已取消。\n');
+				process.exit(0);
+			}
+			deleteFiles();
+		});
+	}
 }
 
 main();
