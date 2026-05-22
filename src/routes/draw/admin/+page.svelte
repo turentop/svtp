@@ -1736,7 +1736,8 @@ function formatTime(ts: number) {
 											<Icon icon="mdi:check-circle-outline" class="size-3.5 mr-1" />
 											设为当前配置
 										</Button>
-																			<Badge variant="outline" class="text-xs text-green-600 border-green-300">当前配置</Badge>
+									{:else}
+										<Badge variant="outline" class="text-xs text-green-600 border-green-300">当前配置</Badge>
 									{/if}
 								</div>
 
