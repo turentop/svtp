@@ -156,15 +156,7 @@ let loadingMore = $state(false);
 	let debugLoading = $state(false);
 	let debugError = $state('');
 
-	// Styles
-	let styles = $state<import('$lib/draw/types').DrawStyle[]>([]);
-	let styleEditIndex = $state(-1);
-	let styleEditName = $state('');
-	let styleEditTags = $state('');
-	let styleEditImage = $state('');
-	let styleRenaming = $state(-1);
-	let styleRenameName = $state('');
-	let styleRenameTags = $state('');
+
 
 	// Image Lightbox
 	let lbOpen = $state(false);
@@ -740,34 +732,6 @@ $effect(() => {
 		}
 	}
 
-	// --- Styles ---
-
-	async function loadStyles() {
-		try {
-			const res = await admin.getStyles();
-			styles = res.styles;
-		} catch (e) {
-			showMsg('error', e instanceof Error ? e.message : '加载画风失败');
-		}
-	}
-
-	function editStyle(i: number) {
-		styleEditIndex = i;
-		styleEditName = styles[i].name;
-		styleEditTags = styles[i].tags;
-		styleEditImage = styles[i].image || '';
-	}
-
-	function startStyleRename(i: number) {
-		styleRenaming = i;
-		styleRenameName = styles[i].name;
-		styleRenameTags = styles[i].tags;
-	}
-
-	function cancelStyleEdit() {
-		styleEditIndex = -1;
-	}
-
 	async function loadDebug() {
 		debugLoading = true;
 		debugError = '';
@@ -777,99 +741,6 @@ $effect(() => {
 			debugError = e instanceof Error ? e.message : '加载失败';
 		} finally {
 			debugLoading = false;
-		}
-	}
-
-	async function commitStyleRename() {
-		if (styleRenaming < 0) return;
-		const updated = [...styles];
-		updated[styleRenaming] = {
-			...updated[styleRenaming],
-			name: styleRenameName,
-			tags: styleRenameTags || updated[styleRenaming].tags
-		};
-		loading = true;
-		try {
-			const res = await admin.updateStyles(updated);
-			styles = res.styles;
-			styleRenaming = -1;
-			showMsg('success', '画风已更新');
-		} catch (e) {
-			showMsg('error', e instanceof Error ? e.message : '保存失败');
-		} finally {
-			loading = false;
-		}
-	}
-
-	async function saveStyle() {
-		if (styleEditIndex < 0) return;
-		const updated = [...styles];
-		updated[styleEditIndex] = {
-			name: styleEditName,
-			tags: styleEditTags,
-			image: styleEditImage,
-			thumbnail_url: updated[styleEditIndex].thumbnail_url
-		};
-		loading = true;
-		try {
-			const res = await admin.updateStyles(updated);
-			styles = res.styles;
-			styleEditIndex = -1;
-			showMsg('success', '画风已保存');
-		} catch (e) {
-			showMsg('error', e instanceof Error ? e.message : '保存失败');
-		} finally {
-			loading = false;
-		}
-	}
-
-	async function addStyle() {
-		const updated = [...styles, { name: '', tags: 'new_style', image: '' }];
-		loading = true;
-		try {
-			const res = await admin.updateStyles(updated);
-			styles = res.styles;
-			startStyleRename(styles.length - 1);
-			showMsg('success', '已添加');
-		} catch (e) {
-			showMsg('error', e instanceof Error ? e.message : '添加失败');
-		} finally {
-			loading = false;
-		}
-	}
-
-	async function deleteStyle(i: number) {
-		if (!confirm('确认删除该画风？')) return;
-		const updated = styles.filter((_, idx) => idx !== i);
-		loading = true;
-		try {
-			const res = await admin.updateStyles(updated);
-			styles = res.styles;
-			if (styleEditIndex === i) styleEditIndex = -1;
-			if (styleRenaming === i) styleRenaming = -1;
-			showMsg('success', '已删除');
-		} catch (e) {
-			showMsg('error', e instanceof Error ? e.message : '删除失败');
-		} finally {
-			loading = false;
-		}
-	}
-
-	async function handleStyleThumbnailUpload(e: Event, i: number) {
-		const file = (e.target as HTMLInputElement).files?.[0];
-		if (!file) return;
-		loading = true;
-		try {
-			const res = await admin.uploadStyleThumbnail(file);
-			const updated = [...styles];
-			updated[i] = { ...updated[i], image: res.filename };
-			const metaRes = await admin.updateStyles(updated);
-			styles = metaRes.styles;
-			showMsg('success', '缩略图已上传并关联');
-		} catch (e) {
-			showMsg('error', e instanceof Error ? e.message : '上传失败');
-		} finally {
-			loading = false;
 		}
 	}
 
@@ -901,9 +772,6 @@ $effect(() => {
 				break;
 			case 'limits':
 				loadLimits();
-				break;
-			case 'styles':
-				loadStyles();
 				break;
 		}
 	});
@@ -1023,9 +891,6 @@ function formatTime(ts: number) {
 				</TabsTrigger>
 				<TabsTrigger value="debug" class="text-xs">
 					<Icon icon="mdi:bug-outline" class="size-3.5 mr-1" />调试
-				</TabsTrigger>
-				<TabsTrigger value="styles" class="text-xs">
-					<Icon icon="mdi:palette-outline" class="size-3.5 mr-1" />画风
 				</TabsTrigger>
 
 			</TabsList>
@@ -1885,127 +1750,6 @@ function formatTime(ts: number) {
 					</CardContent>
 				</Card>
 			</TabsContent>
-
-			<!-- Styles -->
-			<TabsContent value="styles" class="mt-4">
-				<Card>
-					<CardHeader>
-						<CardTitle class="text-base flex items-center gap-2">
-							画风管理
-							<Badge variant="secondary">{styles.length}</Badge>
-						</CardTitle>
-						<CardDescription>点击缩略图上传图片，双击名称编辑别名和标签</CardDescription>
-					</CardHeader>
-					<CardContent class="space-y-3">
-						<div class="flex flex-wrap gap-2">
-							<Button variant="outline" size="sm" onclick={() => { styleRenaming = -1; styleEditIndex = -1; loadStyles(); }} disabled={loading}>
-								<Icon icon="mdi:refresh" class="size-4 mr-1" />刷新
-							</Button>
-							<Button size="sm" onclick={addStyle} disabled={loading}>
-								<Icon icon="mdi:plus" class="size-4 mr-1" />添加画风
-							</Button>
-						</div>
-
-						<!-- Edit panel for detailed editing -->
-						{#if styleEditIndex >= 0 && styles[styleEditIndex]}
-							<Card class="border-primary">
-								<CardHeader class="pb-2">
-									<CardTitle class="text-sm">编辑画风详情</CardTitle>
-								</CardHeader>
-								<CardContent class="space-y-2">
-									<div class="flex gap-2">
-										<div class="flex-1 space-y-1">
-											<Label class="text-xs">名称（别名）</Label>
-											<Input bind:value={styleEditName} placeholder="画风名称" />
-										</div>
-										<div class="flex-1 space-y-1">
-											<Label class="text-xs">Tags</Label>
-											<Input bind:value={styleEditTags} placeholder="标签（必填）" />
-										</div>
-									</div>
-									<div class="space-y-1">
-										<Label class="text-xs">缩略图文件名</Label>
-										<Input bind:value={styleEditImage} placeholder="缩略图文件名" />
-									</div>
-									<div class="flex gap-2">
-										<Button size="sm" onclick={saveStyle} disabled={loading}>
-											<Icon icon="mdi:content-save" class="size-4 mr-1" />保存
-										</Button>
-										<Button size="sm" variant="ghost" onclick={cancelStyleEdit}>取消</Button>
-									</div>
-								</CardContent>
-							</Card>
-						{/if}
-
-						<!-- Style grid -->
-						{#if styles.length === 0}
-							<div class="text-sm text-muted-foreground py-4 text-center">无画风</div>
-													<div class="flex flex-wrap gap-2">
-								{#each styles as s, i}
-									<div class="inline-flex flex-col items-center gap-1 p-1.5 rounded-md border border-border hover:bg-accent transition-all group {styleRenaming === i ? 'border-primary ring-1 ring-primary/30' : ''}">
-										<!-- Thumbnail: click to upload -->
-										<button
-											class="relative size-12 rounded overflow-hidden shrink-0 bg-muted flex items-center justify-center cursor-pointer"
-											onclick={() => { document.getElementById(`style-thumb-${i}`)?.click(); }}
-											title="点击上传缩略图"
-										>
-											{#if s.thumbnail_url}
-												<img
-													src="{currentBaseUrl}{s.thumbnail_url}"
-													alt=""
-													class="w-full h-full object-cover"
-													loading="lazy"
-												/>
-																							<Icon icon="mdi:image-plus-outline" class="size-5 text-muted-foreground" />
-											{/if}
-											<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-												<Icon icon="mdi:upload" class="size-4 text-white" />
-											</div>
-										</button>
-										<input
-											type="file"
-											accept="image/*"
-											class="hidden"
-											id="style-thumb-{i}"
-											onchange={(e) => handleStyleThumbnailUpload(e, i)}
-										/>
-
-										<!-- Name: double-click to rename -->
-										{#if styleRenaming === i}
-											<div class="flex flex-col items-center gap-0.5 w-24">
-												<input
-													type="text"
-													class="w-full text-xs text-center border rounded px-1 py-0.5 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-													bind:value={styleRenameName}
-													placeholder="别名"
-													onkeydown={(e) => { if (e.key === 'Enter') commitStyleRename(); if (e.key === 'Escape') styleRenaming = -1; }}
-												/>
-												<input
-													type="text"
-													class="w-full text-[10px] text-center border rounded px-1 py-0.5 bg-background font-mono focus:outline-none focus:ring-1 focus:ring-ring"
-													bind:value={styleRenameTags}
-													placeholder="tags"
-													onkeydown={(e) => { if (e.key === 'Enter') commitStyleRename(); if (e.key === 'Escape') styleRenaming = -1; }}
-													onblur={commitStyleRename}
-												/>
-											</div>
-																					<span
-												class="text-xs text-center truncate max-w-24 cursor-default"
-												title="双击编辑 | 右键详情"
-												ondblclick={() => startStyleRename(i)}
-												oncontextmenu={(e) => { e.preventDefault(); editStyle(i); }}
-											>
-												{s.name || s.tags}
-											</span>
-										{/if}
-									</div>
-								{/each}
-							</div>
-						{/if}
-					</CardContent>
-				</Card>
-			</TabsContent>
-
 
 		</Tabs>
 	{/if}

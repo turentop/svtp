@@ -120,10 +120,6 @@ export async function fetchWorkflowDetail(path: string, signal?: AbortSignal) {
 	});
 }
 
-export async function fetchStyles() {
-	return drawRequest<import('../types').DrawStylesResponse>('/api/styles');
-}
-
 export async function fetchResolutions() {
 	return drawRequest<import('../types').DrawResolutionsResponse>('/api/resolutions');
 }

@@ -50,17 +50,6 @@ export interface DrawWorkflowDetail {
 	lora_link?: string;
 }
 
-export interface DrawStyle {
-	name: string;
-	tags: string;
-	image?: string;
-	thumbnail_url?: string;
-}
-
-export interface DrawStylesResponse {
-	styles: DrawStyle[];
-}
-
 export interface DrawResolution {
 	w: number;
 	h: number;

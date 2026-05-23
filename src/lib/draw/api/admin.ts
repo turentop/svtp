@@ -153,26 +153,6 @@ export async function runGc() {
 
 // --- Styles ---
 
-export async function getStyles() {
-	return drawRequest<{ styles: import('../types').DrawStyle[] }>('/api/draw/admin/styles');
-}
-
-export async function updateStyles(styles: import('../types').DrawStyle[]) {
-	return drawRequest<{ ok: boolean; styles: import('../types').DrawStyle[] }>('/api/draw/admin/styles', {
-		method: 'POST',
-		json: { styles }
-	});
-}
-
-export async function uploadStyleThumbnail(file: File) {
-	const form = new FormData();
-	form.append('file', file);
-	return drawRequest<{ ok: boolean; filename: string }>('/api/draw/admin/style_thumbnail', {
-		method: 'POST',
-		body: form
-	});
-}
-
 // --- Workflows ---
 
 export async function getWorkflowFiles() {
