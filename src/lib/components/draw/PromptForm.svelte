@@ -53,9 +53,7 @@
 		pointsCostTranslate?: number;
 		pointsCostSubmit?: number;
 		llmMode?: string;
-	};
-
-	// llmMode is destructured from the second group already
+	} = $props();
 
 	let resolutions = $state<DrawResolution[]>([]);
 	let selectedRes = $derived(width && height ? `${width}x${height}` : '');
