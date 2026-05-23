@@ -277,6 +277,22 @@ export function getThumbnailUrl(path: string): string {
 	return _appendToken(url);
 }
 
+export async function fetchPresets() {
+	return drawRequest<import('../types').Preset[]>('/api/presets', { requiresAuth: true });
+}
+
+export async function createPreset(data: { name: string; content: string; type: string }) {
+	return drawRequest<import('../types').Preset>('/api/presets', { method: 'POST', requiresAuth: true, json: data });
+}
+
+export async function updatePreset(id: string, data: { name?: string; content?: string; type?: string }) {
+	return drawRequest<import('../types').Preset>('/api/presets/' + id, { method: 'PUT', requiresAuth: true, json: data });
+}
+
+export async function deletePreset(id: string) {
+	return drawRequest<{ ok: boolean }>('/api/presets/' + id, { method: 'DELETE', requiresAuth: true });
+}
+
 export function getImageProxyUrl(filename: string, subfolder = '', type = 'output'): string {
 	const baseUrl = get(drawEnv.baseUrl);
 	const url = new URL('/api/image', baseUrl);

@@ -3,13 +3,15 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Label } from '$lib/components/ui/label';
+	import { Input } from '$lib/components/ui/input';
 	import { Badge } from '$lib/components/ui/badge';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import TurnstileWidget from '$lib/components/TurnstileWidget.svelte';
-	import { fetchResolutions } from '$lib/draw/api/client';
+	import { fetchResolutions, fetchPresets, createPreset, deletePreset } from '$lib/draw/api/client';
 	import { drawEnv } from '$lib/draw/stores/env';
 	import { forumAuth } from '$lib/forum/stores/auth';
 	import { get } from 'svelte/store';
-	import type { DrawResolution } from '$lib/draw/types';
+	import type { DrawResolution, Preset } from '$lib/draw/types';
 
 	let {
 		directPrompt = $bindable(''),
@@ -55,6 +57,8 @@
 		pointsCostSubmit?: number;
 		llmMode?: string;
 		turnstileEnabled?: boolean;
+		turnstileToken?: string;
+		turnstileTick?: number;
 	} = $props();
 
 	let resolutions = $state<DrawResolution[]>([]);
@@ -66,10 +70,63 @@
 		let translateTick = $state(0);
 	let llmPrompt = $state("");
 	let hasTranslated = $state(false);
+	let presets = $state<Preset[]>([]);
+	let presetsLoaded = $state(false);
+	let presetDialogOpen = $state(false);
+	let newPresetName = $state('');
+	let newPresetContent = $state('');
+	let newPresetType = $state<'positive' | 'negative'>('positive');
 
 	$effect(() => {
 		loadResolutions();
 	});
+
+	$effect(() => {
+		if (forumAuth.getToken() && !presetsLoaded) {
+			loadPresets();
+		}
+		if (!forumAuth.getToken()) {
+			presets = [];
+			presetsLoaded = false;
+		}
+	});
+
+	async function loadPresets() {
+		try {
+			presets = await fetchPresets();
+			presetsLoaded = true;
+		} catch {
+			presets = [];
+			presetsLoaded = true;
+		}
+	}
+
+	async function handleCreatePreset() {
+		if (!newPresetName.trim() || !newPresetContent.trim()) return;
+		try {
+			const p = await createPreset({ name: newPresetName.trim(), content: newPresetContent.trim(), type: newPresetType });
+			presets = [...presets, p];
+			newPresetName = '';
+			newPresetContent = '';
+			newPresetType = 'positive';
+			presetDialogOpen = false;
+		} catch {}
+	}
+
+	async function handleDeletePreset(id: string) {
+		try {
+			await deletePreset(id);
+			presets = presets.filter(p => p.id !== id);
+		} catch {}
+	}
+
+	function applyPreset(p: Preset) {
+		const target = p.type === 'positive' ? 'directPrompt' : 'negativePrompt';
+		const cur = target === 'directPrompt' ? directPrompt : negativePrompt;
+		const append = cur ? ', ' + p.content : p.content;
+		if (target === 'directPrompt') directPrompt = append;
+		else negativePrompt = append;
+	}
 
 	// 工作流切换时清除 LLM 结果
 	$effect(() => {
@@ -225,6 +282,38 @@
 					></textarea>
 				</div>
 			</div>
+			{#if presets.length > 0}
+				<div class="space-y-1.5">
+					<div class="flex items-center justify-between">
+						<Label class="text-xs font-medium">预设</Label>
+						<button onclick={() => { newPresetName = ''; newPresetContent = ''; newPresetType = 'positive'; presetDialogOpen = true; }} class="text-xs text-primary hover:underline flex items-center gap-0.5">
+							<Icon icon="mdi:plus" class="size-3.5" />新建
+						</button>
+					</div>
+					{#each presets.filter(p => p.type === 'positive') as p}
+						<div class="flex items-center gap-1 group">
+							<button onclick={() => applyPreset(p)} class="flex-1 text-left text-xs px-2 py-1 rounded border border-border hover:bg-accent hover:border-primary/50 transition-all truncate">
+								{p.name}
+							</button>
+							<button onclick={() => handleDeletePreset(p.id)} class="size-5 flex items-center justify-center rounded text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" title="删除"><Icon icon="mdi:close" class="size-3" /></button>
+						</div>
+					{/each}
+					{#each presets.filter(p => p.type === 'negative') as p}
+						<div class="flex items-center gap-1 group">
+							<button onclick={() => applyPreset(p)} class="flex-1 text-left text-xs px-2 py-1 rounded border border-border hover:bg-accent hover:border-red-300/50 transition-all truncate">
+								{p.name}
+							</button>
+							<button onclick={() => handleDeletePreset(p.id)} class="size-5 flex items-center justify-center rounded text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" title="删除"><Icon icon="mdi:close" class="size-3" /></button>
+						</div>
+					{/each}
+				</div>
+			{:else if forumAuth.getToken()}
+				<div class="flex items-center gap-1.5 pt-1">
+					<button onclick={() => { newPresetName = ''; newPresetContent = ''; newPresetType = 'positive'; presetDialogOpen = true; }} class="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5">
+						<Icon icon="mdi:plus-circle-outline" class="size-3.5" />添加预设
+					</button>
+				</div>
+			{/if}
 		{/if}
 	</div>
 
@@ -240,6 +329,7 @@
 					title="使用与原始图片相同的随机种子，便于控制构图"
 				>
 					<Icon icon="mdi:help-circle-outline" class="size-3.5" />
+				</button>
 			</label>
 		{/if}
 	</div>
@@ -291,3 +381,37 @@
 		{/if}
 	</Button>
 </div>
+
+<Dialog.Root open={presetDialogOpen} onOpenChange={(o) => presetDialogOpen = o}>
+	<Dialog.Content class="max-w-md">
+		<Dialog.Header>
+			<Dialog.Title>新建预设</Dialog.Title>
+			<Dialog.Description class="text-xs text-muted-foreground">预设内容将在点击时追加到对应提示词末尾（最多 2000 字符）</Dialog.Description>
+		</Dialog.Header>
+		<div class="space-y-3 px-6 pb-4">
+			<div class="space-y-1">
+				<Label class="text-xs">名称</Label>
+				<Input bind:value={newPresetName} placeholder="品质三连" />
+			</div>
+			<div class="space-y-1">
+				<Label class="text-xs">类型</Label>
+				<div class="flex gap-2">
+					<button onclick={() => newPresetType = 'positive'} class="flex-1 px-3 py-1.5 rounded text-xs border transition-all {newPresetType === 'positive' ? 'border-primary bg-primary text-primary-foreground' : 'border-border hover:bg-accent'}">正面</button>
+					<button onclick={() => newPresetType = 'negative'} class="flex-1 px-3 py-1.5 rounded text-xs border transition-all {newPresetType === 'negative' ? 'border-red-400 bg-red-500 text-white' : 'border-border hover:bg-accent'}">反面</button>
+				</div>
+			</div>
+			<div class="space-y-1">
+				<Label class="text-xs">内容</Label>
+				<textarea
+					bind:value={newPresetContent}
+					rows={4}
+					maxlength="2000"
+					placeholder="masterpiece, best quality, highly detailed"
+					class="w-full rounded-md border bg-background px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+				></textarea>
+				<div class="text-right text-[10px] text-muted-foreground">{newPresetContent.length}/2000</div>
+			</div>
+			<Button class="w-full" size="sm" onclick={handleCreatePreset} disabled={!newPresetName.trim() || !newPresetContent.trim()}>保存预设</Button>
+		</div>
+	</Dialog.Content>
+</Dialog.Root>

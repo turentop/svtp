@@ -297,6 +297,13 @@ export interface AdminLlmProfile {
 	llm_stream?: boolean;
 }
 
+export interface Preset {
+  id: string;
+  name: string;
+  content: string;
+  type: 'positive' | 'negative';
+}
+
 export interface AdminLlmConfig {
 	profiles: AdminLlmProfile[];
 	active: number;
