@@ -893,9 +893,10 @@ $effect(() => {
 	async function loadWorkflowFiles() {
 		try {
 			const res = await admin.getWorkflowFiles();
-			workflowFiles = res.files;
+			workflowFiles = res.files || [];
 		} catch (e) {
 			showMsg('error', e instanceof Error ? e.message : '加载工作流文件失败');
+			workflowFiles = [];
 		}
 	}
 
