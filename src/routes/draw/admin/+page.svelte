@@ -1571,8 +1571,8 @@ function formatTime(ts: number) {
 								{#each wallets as w}
 									<div class="flex items-center gap-2 text-xs border rounded-lg px-3 py-2">
 										<span class="font-medium w-16">UID {w.user_id}</span>
-										<input type="number" bind:value={w._edit ?? w.balance} class="w-24 h-7 px-2 rounded border bg-transparent text-xs" />
-										<Button size="sm" variant="outline" class="h-7 text-xs" onclick={() => admin.setWalletBalance(w.user_id, Number(w._edit ?? w.balance))}>保存</Button>
+                    <input type="number" bind:value={w._edit} class="w-24 h-7 px-2 rounded border bg-transparent text-xs" />
+                    <Button size="sm" variant="outline" class="h-7 text-xs" onclick={() => admin.setWalletBalance(w.user_id, Number(w._edit))}>保存</Button>
 									</div>
 								{/each}
 							</div>
