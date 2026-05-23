@@ -121,8 +121,8 @@
 	}
 
 	function applyPreset(p: Preset) {
-		if (p.type === 'positive') directPrompt = p.content;
-		else negativePrompt = p.content;
+		if (p.type === 'positive') directPrompt = directPrompt ? directPrompt + ', ' + p.content : p.content;
+		else negativePrompt = negativePrompt ? negativePrompt + ', ' + p.content : p.content;
 	}
 
 	// 工作流切换时清除 LLM 结果
