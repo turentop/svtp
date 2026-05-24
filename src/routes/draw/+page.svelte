@@ -636,9 +636,7 @@ async function startGeneration(mode = 'wai') {
 			if (r.announcement?.enabled && r.announcement.content) {
 				announcementText = r.announcement.content;
 				announcementTitle = r.announcement.title || '公告';
-				if (typeof sessionStorage !== 'undefined' && !sessionStorage.getItem('draw-announcement-dismissed')) {
-					announcementOpen = true;
-				}
+				announcementOpen = true;
 			}
 		}).catch(() => {});
 	});
