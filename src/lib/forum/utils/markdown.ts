@@ -8,8 +8,9 @@ const SANITIZE_OPTS: DOMPurify.Config = {
 	USE_PROFILES: { html: true },
 	ADD_ATTR: ['target', 'rel', 'loading', 'referrerpolicy', 'style', 'tabindex', 'aria-hidden'],
 	ADD_TAGS: ['span'],
-	ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+	ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):(?!.*\.svg\b)|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
 	FORBID_TAGS: ['style', 'script', 'iframe', 'object', 'embed', 'svg', 'math'],
+	FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur'],
 	ALLOW_DATA_ATTR: false
 };
 
