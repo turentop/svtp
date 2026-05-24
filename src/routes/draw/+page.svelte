@@ -766,7 +766,7 @@ async function startGeneration(mode = 'wai') {
 	{#if apiErrorMessage && !apiErrorMessage.includes('封禁') && !apiErrorMessage.includes('BANNED')}
 		<Alert>
 			<Icon icon="mdi:cloud-alert" class="size-4 shrink-0" />
-			<AlertDescription class="text-xs">{apiErrorMessage}</AlertDescription>
+			<AlertDescription class="text-xs">{@html apiErrorMessage}</AlertDescription>
 		</Alert>
 	{/if}
 
@@ -779,7 +779,7 @@ async function startGeneration(mode = 'wai') {
 	{:else if apiStatusValue === 'offline'}
 		<Alert variant="destructive">
 			<Icon icon="mdi:cloud-alert" class="size-4" />
-			<AlertDescription class="text-xs">后端不可用，二叉树树目前可能需要使用电脑，未启用生图功能。您可以尝试加入官方群聊：2x.nz/q ，群内Bot会在生图上线/下线实时提醒。感谢您的支持！</AlertDescription>
+			<AlertDescription class="text-xs">后端不可用，二叉树树目前可能需要使用电脑，未启用生图功能。您可以尝试<a href="https://2x.nz/q" target="_blank" rel="noopener noreferrer" class="underline font-medium">加入官方群聊</a>，群内Bot会在生图上线/下线实时提醒。感谢您的支持！</AlertDescription>
 		</Alert>
 	{:else}
 		{#if forkMessage}
