@@ -42,12 +42,15 @@
 			</Button>
 		{/snippet}
 	</Dialog.Trigger>
-	<Dialog.Content class="sm:max-w-full max-w-full w-dvw h-dvh max-h-dvh m-0 rounded-none p-4 flex flex-col">
-		<Dialog.Header class="shrink-0 min-h-10">
+	<Dialog.Content class="sm:max-w-full max-w-full w-dvw h-dvh max-h-dvh m-0 rounded-none p-4 flex flex-col" showCloseButton={false}>
+		<Dialog.Header class="shrink-0 flex-row items-center justify-between gap-2">
 			<Dialog.Title class="flex items-center gap-2">
 				<Icon icon="mdi:cog-outline" class="size-5" />
 				选择工作流
 			</Dialog.Title>
+			<Dialog.Close>
+				<Button variant="ghost" size="icon-sm"><Icon icon="mdi:close" class="size-4" /></Button>
+			</Dialog.Close>
 		</Dialog.Header>
 		<div class="overflow-y-auto min-h-0 flex-1">
 			<WorkflowSelector {subdir} bind:value onselect={handleSelect} onpromptload={handlePromptLoad} showTitle={false} constrainHeight={false} />
