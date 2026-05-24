@@ -55,22 +55,7 @@
 		loadWorkflows();
 		});
 
-		let inited = false;
-		$effect(() => {
-			if (workflows.length > 0 && value && !inited) {
-				inited = true;
-				const wf = workflows.find(w => w.path === value);
-				if (wf) { expandedCategories.add(wf.category); expandedCategories = new Set(expandedCategories); }
-				abortCtrl?.abort();
-				const ctrl = new AbortController();
-				abortCtrl = ctrl;
-				fetchWorkflowDetail(value, ctrl.signal, subdir).then((detail: any) => {
-					if (!ctrl.signal.aborted) {
-						onpromptload?.(detail.builtin_prompt, detail.builtin_negative_prompt);
-					}
-				}).catch(() => {});
-			}
-		});
+
 
 	async function loadWorkflows() {
 		loading = true;

@@ -321,11 +321,6 @@
 		inlineWorkflow = null;
 		forkSeed = undefined;
 		sameSeed = false;
-		// 清除旧 prompt，等 API 回填
-		directPrompt = '';
-		negativePrompt = '';
-		workflowPrompt = '';
-		workflowNegativePrompt = '';
 	}
 
 	function handleStyleSelect(tags: string, name: string) {
