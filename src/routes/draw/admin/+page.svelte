@@ -124,6 +124,16 @@ let loadingMore = $state(false);
 	// Credits / Wallet
 	let wallets = $state<Array<{ user_id: number; balance: number; total_purchased: number; _edit?: number }>>([]);
 	let adminPlans = $state<Array<{ id: string; name: string; points: number; url: string }>>([]);
+	let searchUid = $state('');
+	let searchedWallet = $state<{ user_id: number; balance: number; total_purchased: number; _edit?: number } | null>(null);
+
+	function searchUidByWallet() {
+		const uid = Number(searchUid);
+		if (!uid) { searchedWallet = null; return; }
+		const found = wallets.find(w => w.user_id === uid);
+		if (found) searchedWallet = { ...found, _edit: found.balance };
+		else searchedWallet = null;
+	}
 	let pointsCfg = $state<{ text_to_image: number; image_to_image: number; llm_translate: number; signup_bonus: number; text_to_image_anima: number }>({ text_to_image: 10, image_to_image: 100, llm_translate: 1, signup_bonus: 0, text_to_image_anima: 20 });
 	let givePointsValue = $state(0);
 	let givePointsTarget = $state('');
@@ -1386,18 +1396,19 @@ function formatTime(ts: number) {
 							{/if}
 							<Button size="sm" variant="outline" class="h-7 text-xs" onclick={handleGivePoints} disabled={!givePointsValue || givePointsValue <= 0}>赠送</Button>
 						</div>
-						{#if wallets.length > 0}
-							<div class="space-y-2">
-								{#each wallets as w}
-									<div class="flex items-center gap-2 text-xs border rounded-lg px-3 py-2">
-										<span class="font-medium w-16">UID {w.user_id}</span>
-                    <input type="number" bind:value={w._edit} class="w-24 h-7 px-2 rounded border bg-transparent text-xs" />
-                    <Button size="sm" variant="outline" class="h-7 text-xs" onclick={() => admin.setWalletBalance(w.user_id, Number(w._edit))}>保存</Button>
-									</div>
-								{/each}
+						<div class="flex items-center gap-2 text-xs border-t pt-3">
+							<span class="font-medium">搜索 UID</span>
+							<input type="number" bind:value={searchUid} class="w-24 h-7 px-2 rounded border bg-transparent text-xs" placeholder="输入 UID" onkeydown={(e) => { if (e.key === 'Enter') searchUidByWallet(); }} />
+							<Button size="sm" variant="outline" class="h-7 text-xs" onclick={searchUidByWallet}>搜索</Button>
+						</div>
+						{#if searchedWallet !== null}
+							<div class="flex items-center gap-2 text-xs border rounded-lg px-3 py-2">
+								<span class="font-medium w-16">UID {searchedWallet.user_id}</span>
+								<input type="number" bind:value={searchedWallet._edit} class="w-24 h-7 px-2 rounded border bg-transparent text-xs" />
+								<Button size="sm" variant="outline" class="h-7 text-xs" onclick={() => admin.setWalletBalance(searchedWallet.user_id, Number(searchedWallet._edit)).then(() => searchUidByWallet())}>保存</Button>
 							</div>
-						{:else}
-							<p class="text-xs text-muted-foreground py-4 text-center">暂无数据</p>
+						{:else if searchUid}
+							<p class="text-xs text-muted-foreground py-2 text-center">未找到该 UID</p>
 						{/if}
 						<div class="border-t pt-3">
 							<p class="text-xs font-medium mb-2">充值计划</p>
