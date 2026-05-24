@@ -1040,6 +1040,32 @@ async function startGeneration(mode = 'wai') {
 	</Dialog.Content>
 </Dialog.Root>
 
+<Dialog.Root open={rechargeOpen} onOpenChange={(o) => rechargeOpen = o}>
+	<Dialog.Content class="max-w-sm">
+		<Dialog.Header>
+			<Dialog.Title class="flex items-center gap-2">
+				<Icon icon="mdi:wallet-plus-outline" class="size-5" />
+				充值
+			</Dialog.Title>
+		</Dialog.Header>
+		<div class="space-y-2 px-6 pb-4">
+			{#if plans.length === 0}
+				<div class="text-xs text-muted-foreground py-4 text-center">暂无充值方案</div>
+			{:else}
+				{#each plans as plan}
+					<a href={plan.url} target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-3 py-2 rounded-lg border border-border hover:bg-accent transition-colors text-sm">
+						<div>
+							<div class="font-medium">{plan.name}</div>
+							<div class="text-xs text-muted-foreground">{plan.points} 点数</div>
+						</div>
+						<Icon icon="mdi:open-in-new" class="size-4 text-muted-foreground" />
+					</a>
+				{/each}
+			{/if}
+		</div>
+	</Dialog.Content>
+</Dialog.Root>
+
 <Dialog.Root open={myRecsOpen} onOpenChange={(o) => myRecsOpen = o}>
 	<Dialog.Content class="sm:max-w-lg">
 		<Dialog.Header>
