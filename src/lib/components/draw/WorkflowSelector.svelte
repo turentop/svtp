@@ -164,7 +164,7 @@
 										<img
 											src={getThumbnailUrl(wf.path)}
 											alt=""
-											class="size-8 rounded object-cover shrink-0"
+											class="h-8 rounded object-contain shrink-0"
 											loading="lazy"
 										/>
 									{:else}

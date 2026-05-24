@@ -94,7 +94,7 @@
 								<img
 									src="{baseUrl}{s.thumbnail_url}"
 									alt=""
-									class="size-20 rounded object-cover shrink-0"
+									class="h-20 rounded object-contain shrink-0"
 									loading="lazy"
 								/>
 							{:else}
