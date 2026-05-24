@@ -164,6 +164,7 @@
 	// Recommendations
 	let myRecommendations = $state<DrawRecommendation[]>([]);
 	let myRecsLoaded = $state(false);
+	let myRecsOpen = $state(false);
 	let selectMode = $state(false);
 	let selectedPaths = $state(new Set<string>());
 
@@ -935,6 +936,9 @@ async function startGeneration(mode = 'wai') {
 								<Button variant={selectMode ? 'default' : 'outline'} size="sm" onclick={() => { selectMode = !selectMode; if (!selectMode) selectedPaths = new Set(); }}>
 									<Icon icon="mdi:checkbox-multiple-marked-outline" class="size-3.5 mr-1" />{selectMode ? '取消' : '选择'}
 								</Button>
+								<Button variant="outline" size="sm" onclick={() => { if (!myRecsLoaded) loadMyRecommendations(); myRecsOpen = true; }}>
+									<Icon icon="mdi:star-plus-outline" class="size-3.5 mr-1" />自荐
+								</Button>
 								{#if selectedPaths.size > 0}
 									<Button variant="outline" size="sm" onclick={handleBatchRecommend} disabled={queuing}>
 										<Icon icon="mdi:star-plus-outline" class="size-3.5 mr-1" />自荐 ({selectedPaths.size})
@@ -1024,28 +1028,42 @@ async function startGeneration(mode = 'wai') {
 	</Dialog.Content>
 </Dialog.Root>
 
-<Dialog.Root open={rechargeOpen} onOpenChange={(o) => rechargeOpen = o}>
-	<Dialog.Content class="max-w-sm">
+<Dialog.Root open={myRecsOpen} onOpenChange={(o) => myRecsOpen = o}>
+	<Dialog.Content class="sm:max-w-lg">
 		<Dialog.Header>
-			<Dialog.Title>⚡ 充值生图点数</Dialog.Title>
-			<Dialog.Description class="space-y-3">
-				{#if plans.length === 0}
-					<p class="text-xs text-muted-foreground py-4 text-center">暂无充值计划</p>
-				{:else}
-					{#each plans as plan}
-						<Button class="w-full" variant="outline" onclick={() => handleRecharge(plan)} disabled={recharging}>
-							<div class="flex items-center justify-between w-full">
-								<span>{plan.name}</span>
-								<span class="text-amber-500 font-bold">{plan.points.toLocaleString()} 点</span>
-							</div>
-						</Button>
-					{/each}
-				{/if}
-				<p class="text-xs text-muted-foreground">支付后点数自动到账，若未到账请稍候刷新页面。</p>
-			</Dialog.Description>
+			<Dialog.Title class="flex items-center gap-2">
+				<Icon icon="mdi:star-plus-outline" class="size-5" />
+				我的自荐
+			</Dialog.Title>
 		</Dialog.Header>
+		<div class="max-h-96 overflow-y-auto space-y-2 px-6 pb-4">
+			{#if !myRecsLoaded}
+				<div class="text-xs text-muted-foreground py-4 text-center">加载中...</div>
+			{:else if myRecommendations.length === 0}
+				<div class="text-xs text-muted-foreground py-4 text-center">暂无自荐记录</div>
+			{:else}
+				{#each myRecommendations as rec}
+					<div class="border rounded-lg p-3 space-y-1">
+						<div class="flex items-center gap-2 text-xs">
+							<img src={getImageProxyUrl(rec.image_path)} alt="" class="size-10 rounded object-cover border shrink-0" />
+							<span class="truncate flex-1">{rec.image_path}</span>
+							<Badge variant={rec.status === "approved" ? "default" : rec.status === "rejected" ? "destructive" : "secondary"} class="text-[10px] shrink-0">
+								{recStatusBadge(rec.status)}
+							</Badge>
+						</div>
+						{#if rec.user_reason}
+							<div class="text-[10px] text-muted-foreground">理由: {rec.user_reason}</div>
+						{/if}
+						{#if rec.admin_reason}
+							<div class="text-[10px] text-muted-foreground">管理员: {rec.admin_reason}</div>
+						{/if}
+					</div>
+				{/each}
+			{/if}
+		</div>
 	</Dialog.Content>
 </Dialog.Root>
+
 
 <Dialog.Root open={waiHelpOpen} onOpenChange={(o) => waiHelpOpen = o}>
 	<Dialog.Content class="max-w-md">
