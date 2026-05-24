@@ -418,7 +418,8 @@ async function startGeneration(mode = 'wai') {
 				loadMyQueue();
 				if (!queueTimer) queueTimer = setInterval(loadMyQueue, 1000);
 			} catch (e) {
-				queueError = e instanceof Error ? e.message : '加入队列失败';
+				const msg = e instanceof Error ? e.message : '加入队列失败';
+				queueError = msg.includes('404') || msg.includes('not found') || msg.includes('workflow') ? '指定的工作流不存在，请重新选择工作流' : msg;
 			} finally {
 				queuing = false;
 			}
