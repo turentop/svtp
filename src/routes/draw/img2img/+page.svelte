@@ -18,6 +18,7 @@
 	let imagePreviews = $state<string[]>([]);
 	let prompt = $state('');
 	let generating = $state(false);
+	let translating = $state(false);
 	let error = $state('');
 	let resultImages = $state<{ url: string; filename: string; subfolder: string; image_type: string }[]>([]);
 
@@ -52,6 +53,27 @@
 		URL.revokeObjectURL(imagePreviews[idx]);
 		images.splice(idx, 1);
 		imagePreviews.splice(idx, 1);
+	}
+
+	async function handleTranslate() {
+		if (!prompt.trim() || translating) return;
+		translating = true;
+		try {
+			const token = forumAuth.getToken();
+			const baseUrl = get(drawEnv.baseUrl);
+			const resp = await fetch(`${baseUrl}/api/translate`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+				body: JSON.stringify({ prompt, mode: 'anima' }),
+			});
+			const data = await resp.json();
+			if (data.ok) prompt = data.positive;
+			else error = data.error || '翻译失败';
+		} catch (e) {
+			error = '翻译失败: ' + (e instanceof Error ? e.message : '未知错误');
+		} finally {
+			translating = false;
+		}
 	}
 
 	async function startGeneration() {
@@ -198,6 +220,13 @@
 			class="w-full min-h-[80px] rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y"
 			disabled={generating}
 		></textarea>
+		<div class="flex items-center gap-2">
+			<Button size="sm" variant="outline" onclick={handleTranslate} disabled={translating || !prompt.trim()}>
+				<Icon icon={translating ? "mdi:loading" : "mdi:auto-fix"} class="size-4 mr-1 {translating ? 'animate-spin' : ''}" />
+				{translating ? "转换中..." : "翻译为英文"}
+			</Button>
+			<span class="text-[11px] text-muted-foreground">支持中文，但英文遵从度更好</span>
+		</div>
 	</div>
 
 	<!-- Run Button -->
