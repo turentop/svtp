@@ -30,7 +30,7 @@
 		const start = performance.now();
 		function tick() {
 			const elapsed = performance.now() - start;
-			const pct = 1 - Math.exp(-elapsed / 400);
+			const pct = 1 - Math.pow(1 - Math.min(elapsed / 2000, 1), 3);
 			barWidth = Math.min(pct * 100, 99);
 			if (navigating) rafId = requestAnimationFrame(tick);
 		}
@@ -42,7 +42,8 @@
 		const fromWidth = barWidth;
 		function tick() {
 			const elapsed = performance.now() - start;
-			const t = Math.min(elapsed / 300, 1);
+			const p = Math.min(elapsed / 300, 1);
+			const t = 1 - Math.pow(1 - p, 3);
 			barWidth = fromWidth + (100 - fromWidth) * t;
 			if (t < 1) rafId = requestAnimationFrame(tick);
 			else setTimeout(() => { navigating = false; barWidth = 0; }, 150);
