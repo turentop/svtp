@@ -340,13 +340,86 @@
 						</section>
 					</div>
 				{:else}
-					<p><strong>必要服务（始终加载）：</strong>Umami Analytics（自托管）收集匿名访问数据；Cloudflare Web Analytics 无 Cookie 无指纹追踪。</p>
-					<p><strong>广告：</strong>Google Adsense 展示广告，使用 Cookie 提供个性化广告。</p>
-					<p><strong>功能（需同意）：</strong>Giscus 基于 GitHub Discussions 的评论系统。</p>
-					<p><strong>分析（需同意）：</strong>百度统计、Google Analytics、Microsoft Clarity 收集站点访问与用户行为数据。</p>
-					<p><strong>本地存储：</strong>cookie-consent-preferences（同意偏好）、theme（主题）、论坛登录凭证。</p>
-					<p><strong>其他：</strong>Cloudflare Turnstile 人机验证；按需加载 CDN 资源。</p>
-					<p>数据控制：可通过本页面底部的「隐私与协议设置」按钮随时修改。清除 localStorage 可删除本地存储的所有数据。</p>
+					<div class="space-y-4">
+						<section>
+							<h3 class="font-bold text-base mb-2">信息收集与使用</h3>
+							<p>你使用本站服务时，我们可能收集以下类型的信息：</p>
+							<ol class="list-decimal list-inside space-y-1">
+								<li><strong>账号信息：</strong>注册论坛时你提供的用户名、邮箱地址及头像。</li>
+								<li><strong>使用数据：</strong>访问记录、页面浏览量、操作日志、生成的图片记录及提示词历史。</li>
+								<li><strong>设备信息：</strong>浏览器类型、操作系统、IP 地址及设备标识符（通过第三方分析服务收集）。</li>
+							</ol>
+						</section>
+
+						<section>
+							<h3 class="font-bold text-base mb-2">Cookie 及本地存储的使用</h3>
+							<p>本站使用以下 Cookie 及浏览器存储技术：</p>
+							<p><strong>必要（始终加载）：</strong></p>
+							<ul class="list-disc list-inside space-y-0.5 text-muted-foreground">
+								<li>Umami Analytics（自托管）— 收集匿名访问数据，用于统计页面浏览量</li>
+								<li>Cloudflare Web Analytics — 匿名访问统计，无 Cookie、无指纹追踪</li>
+								<li>Cloudflare Turnstile — 人机验证，用于登录、注册、发帖等操作</li>
+							</ul>
+							<p><strong>功能（需同意）：</strong></p>
+							<ul class="list-disc list-inside space-y-0.5 text-muted-foreground">
+								<li>Giscus — 基于 GitHub Discussions 的评论系统</li>
+							</ul>
+							<p><strong>分析（需同意）：</strong></p>
+							<ul class="list-disc list-inside space-y-0.5 text-muted-foreground">
+								<li>百度统计 — 站点访问情况分析</li>
+								<li>Google Analytics (GA4) — 用户行为分析</li>
+								<li>Microsoft Clarity — 用户体验分析</li>
+							</ul>
+							<p><strong>浏览器本地存储：</strong></p>
+							<ul class="list-disc list-inside space-y-0.5 text-muted-foreground">
+								<li><code>cookie-consent-preferences</code> — Cookie 同意偏好设置</li>
+								<li><code>theme</code> — 用户主题偏好（亮色/暗色/跟随系统）</li>
+								<li>论坛相关键名 — 登录凭证及环境配置</li>
+							</ul>
+						</section>
+
+						<section>
+							<h3 class="font-bold text-base mb-2">第三方服务</h3>
+							<p>本站集成以下第三方服务，它们可能独立收集你的数据：</p>
+							<ul class="list-disc list-inside space-y-0.5">
+								<li>Umami（自托管）— 服务器位于本站运营者控制的服务器上</li>
+								<li>Cloudflare — CDN 及安全服务，受 <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" class="text-primary underline">Cloudflare 隐私政策</a>约束</li>
+								<li>GitHub（Giscus）— 评论系统，受 <a href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement" target="_blank" class="text-primary underline">GitHub 隐私政策</a>约束</li>
+								<li>百度统计、Google Analytics、Microsoft Clarity — 分析服务（需用户同意后激活）</li>
+							</ul>
+							<p>此外，页面可能按需加载来自 jsdelivr、cdnjs 及 api.iconify.design 等 CDN 的资源，这些请求可能暴露你的 IP 地址给第三方 CDN 服务商。</p>
+						</section>
+
+						<section>
+							<h3 class="font-bold text-base mb-2">数据存储与安全</h3>
+							<p>你生成的内容（包括图片及提示词）存储在本站运营者控制的服务器上。我们采取合理的技术措施保护你的数据安全，但互联网传输无法保证绝对安全。论坛账号密码经过加密存储，但我们建议你不要在多个站点使用相同的密码。</p>
+						</section>
+
+						<section>
+							<h3 class="font-bold text-base mb-2">数据保留与删除</h3>
+							<p>你的账号信息及生成内容在你注销账号前将持续保留。即使你在账号界面中删除相关记录，本站仍可能在后端保留副本用于审核、统计及合法合规目的。Cookie 同意偏好存储在浏览器本地，你可随时清除。统计分析数据的保留期限由各第三方服务商的政策决定。</p>
+						</section>
+
+						<section>
+							<h3 class="font-bold text-base mb-2">你的权利</h3>
+							<p>你享有以下权利：</p>
+							<ul class="list-disc list-inside space-y-0.5">
+								<li><strong>知情权：</strong>本隐私政策向您说明了我们收集哪些信息及如何使用。</li>
+								<li><strong>选择权：</strong>您可以通过本页面的设置选择是否允许功能 Cookie 及分析 Cookie。</li>
+								<li><strong>删除权：</strong>您可以通过论坛设置删除您的账号（功能开发中），或通过清除浏览器 localStorage 删除本地存储的数据。</li>
+								<li><strong>撤回同意：</strong>您随时可以通过页面底部的「隐私与协议设置」按钮撤回 Cookie 同意（撤回不影响撤回前基于同意的处理的合法性）。</li>
+							</ul>
+						</section>
+
+						<section>
+							<h3 class="font-bold text-base mb-2">协议更新</h3>
+							<p>我们可能会不时更新本隐私政策。更新后的政策将在本站发布，并注明最后更新日期。重大变更我们会通过站内公告等方式通知你。</p>
+						</section>
+
+						<section>
+							<p class="text-xs text-muted-foreground">最后更新：2026-05-27</p>
+						</section>
+					</div>
 				{/if}
 			</div>
 			<div class="mt-6 flex justify-center">
