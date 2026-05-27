@@ -287,8 +287,14 @@
 				{#if overlayContent === 'agreement'}
 					<div class="space-y-4">
 						<section>
+							<h3 class="font-bold text-base mb-2">运营者信息</h3>
+							<p>本网站（以下简称"本站"）由个人运营。联系邮箱：<a href="mailto:i@2x.nz" class="text-primary underline">i@2x.nz</a></p>
+							<p>本站服务器位于美国，无中国 ICP 备案。本站无意针对中国大陆用户提供服务，但由于互联网的开放性，中国大陆用户可能通过合法渠道访问本站。你理解并同意，本站运营者未主动向中国大陆市场提供服务，也不以中国大陆为目标市场。</p>
+						</section>
+
+						<section>
 							<h3 class="font-bold text-base mb-2">免责声明</h3>
-							<p>本网站（以下简称"本站"）是一个个人项目，按「现状」及「可用」基础提供。在法律允许的最大范围内，本站明确声明不承担任何明示或暗示的担保责任，包括但不限于适销性、特定用途适用性及不侵权的担保。本站不保证服务的连续性、及时性、安全性及准确性，你使用本站服务所产生的全部风险由你自行承担。</p>
+							<p>本站是一个个人项目，按「现状」及「可用」基础提供。在法律允许的最大范围内，本站明确声明不承担任何明示或暗示的担保责任，包括但不限于适销性、特定用途适用性及不侵权的担保。本站不保证服务的连续性、及时性、安全性及准确性，你使用本站服务所产生的全部风险由你自行承担。</p>
 							<p>你明确理解并同意，本站运营者不对因使用或无法使用本站服务所导致的任何直接、间接、偶然、特殊及后续的损害承担责任，包括但不限于利润损失、数据丢失、业务中断、声誉损害及其他商业损失。</p>
 							<p>本站所有生成内容由人工智能自动生成，不代表本站运营者的观点、立场或意见。生成内容的准确性、完整性、合法性及实用性本站不作任何保证。你应对你生成、发布及传播的内容承担全部责任。</p>
 						</section>
@@ -332,6 +338,11 @@
 								<li>因违规被封禁的账号，剩余生图点不予退还。</li>
 								<li>若你无法认可本协议的任何条款，请立即停止使用本服务。</li>
 							</ol>
+						</section>
+
+						<section>
+							<h3 class="font-bold text-base mb-2">未成年人条款</h3>
+							<p>本站不向未成年人（未满 18 周岁）提供服务。若你未满 18 周岁，请立即停止使用本站。若你隐瞒真实年龄、伪造身份信息或以其他方式欺骗使用本站，你将被视为完全民事行为能力人，自愿承担因使用本站所产生的全部法律责任及后果，本站运营者不承担任何责任。</p>
 						</section>
 
 						<section>
@@ -388,9 +399,10 @@
 							<p>本站集成以下第三方服务，它们可能独立收集你的数据：</p>
 							<ul class="list-disc list-inside space-y-0.5">
 								<li>Umami（自托管）— 服务器位于本站运营者控制的服务器上</li>
-								<li>Cloudflare — CDN 及安全服务，受 <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" class="text-primary underline">Cloudflare 隐私政策</a>约束</li>
-								<li>GitHub（Giscus）— 评论系统，受 <a href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement" target="_blank" class="text-primary underline">GitHub 隐私政策</a>约束</li>
-								<li>百度统计、Google Analytics、Microsoft Clarity — 分析服务（需用户同意后激活）</li>
+							<li>Cloudflare — CDN 及安全服务（美国），受 <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" class="text-primary underline">Cloudflare 隐私政策</a>约束</li>
+							<li>GitHub（Giscus）— 评论系统（美国），受 <a href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement" target="_blank" class="text-primary underline">GitHub 隐私政策</a>约束</li>
+							<li>Google Analytics（美国）— 用户行为分析（需用户同意后激活）</li>
+							<li>Microsoft Clarity（美国）— 用户体验分析（需用户同意后激活）</li>
 							</ul>
 							<p>此外，页面可能按需加载来自 jsdelivr、cdnjs 及 api.iconify.design 等 CDN 的资源，这些请求可能暴露你的 IP 地址给第三方 CDN 服务商。</p>
 						</section>
