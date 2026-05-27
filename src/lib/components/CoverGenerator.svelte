@@ -415,7 +415,7 @@
 						'<svg$1 width="100%" height="100%" preserveAspectRatio="xMidYMid meet">'
 					);
 					if (!useOriginalIconColor) {
-						processedSvg = processedSvg.replace(/fill="[^"]*"/g, 'fill="currentColor"');
+						processedSvg = processedSvg.replace(/fill="[^"]*"/g, `fill="${iconColor}"`);
 					}
 					iconSvg = processedSvg;
 				})
