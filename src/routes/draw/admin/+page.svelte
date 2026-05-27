@@ -66,10 +66,8 @@ let loadingMore = $state(false);
 
 	// Recommendations
 	let recommendations = $state<DrawRecommendation[]>([]);
-	let recRejectReasons = $state<Record<string, string>>({});
 	let recSelectMode = $state(false);
 	let recSelected = $state(new Set<string>());
-	let batchRejectReason = $state('');
 
 	function toggleRecSelect(id: string) {
 		const s = new Set(recSelected);
@@ -79,15 +77,13 @@ let loadingMore = $state(false);
 
 	async function batchResolveRecs(action: 'approve' | 'reject') {
 		if (recSelected.size === 0) return;
-		if (action === 'reject' && !batchRejectReason.trim() && !confirm('拒绝理由为空，确定继续？')) return;
 		loading = true;
 		try {
-			await admin.resolveRecommendations([...recSelected], action, action === 'reject' ? batchRejectReason.trim() : undefined);
+			const ids = [...recSelected];
+			await admin.resolveRecommendations(ids, action);
 			recommendations = recommendations.filter(r => !recSelected.has(r.id));
 			recSelected = new Set();
-			batchRejectReason = '';
-			if (!recSelected.size) recSelectMode = false;
-			showMsg('success', `已${action === 'approve' ? '通过' : '拒绝'} ${recSelected.size} 个`);
+			showMsg('success', `已${action === 'approve' ? '通过' : '拒绝'} ${ids.length} 个`);
 		} catch (e) {
 			showMsg('error', e instanceof Error ? e.message : '操作失败');
 		} finally {
@@ -522,11 +518,9 @@ $effect(() => {
 	async function resolveRec(recId: string, action: 'approve' | 'reject', imagePath?: string) {
 		loading = true;
 		try {
-			const reason = recRejectReasons[recId] || undefined;
-			await admin.resolveRecommendation(recId, action, action === 'reject' ? reason : undefined, imagePath);
+			await admin.resolveRecommendation(recId, action, undefined, imagePath);
 			showMsg('success', action === 'approve' ? '已通过' : '已拒绝');
 			recommendations = recommendations.filter((r) => r.id !== recId);
-			delete recRejectReasons[recId];
 		} catch (e) {
 			showMsg('error', e instanceof Error ? e.message : '处理失败');
 		} finally {
