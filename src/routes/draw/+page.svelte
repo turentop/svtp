@@ -975,9 +975,9 @@ async function startGeneration(mode = 'wai') {
 								<Button variant={selectMode ? 'default' : 'outline'} size="sm" onclick={() => { selectMode = !selectMode; if (!selectMode) selectedPaths = new Set(); }}>
 									<Icon icon="mdi:checkbox-multiple-marked-outline" class="size-3.5 mr-1" />{selectMode ? '取消' : '选择'}
 								</Button>
-								<Button variant="outline" size="sm" onclick={() => { if (!myRecsLoaded) loadMyRecommendations(); myRecsOpen = true; }}>
-									<Icon icon="mdi:star-plus-outline" class="size-3.5 mr-1" />自荐
-								</Button>
+							<Button variant="outline" size="sm" onclick={() => { if (!myRecsLoaded) loadMyRecommendations(); myRecsOpen = true; }}>
+								<Icon icon="mdi:history" class="size-3.5 mr-1" />自荐记录
+							</Button>
 								{#if selectedPaths.size > 0}
 									<Button variant="outline" size="sm" onclick={handleBatchRecommend} disabled={queuing}>
 										<Icon icon="mdi:star-plus-outline" class="size-3.5 mr-1" />自荐 ({selectedPaths.size})

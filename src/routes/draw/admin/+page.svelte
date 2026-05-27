@@ -1056,7 +1056,7 @@ function formatTime(ts: number) {
 											</div>
 											<div class="absolute bottom-0 inset-x-0 flex">
 												<div class="flex-1 bg-black/60 text-white text-[10px] px-1 py-0.5 truncate pointer-events-none">
-													UID {img.user_id || '?'}{#if img.deleted} - <span class="text-red-400 font-bold">已删</span>{/if}
+													UID {img.user_id || '?'} | {formatTime(img.mtime)}{#if img.deleted} - <span class="text-red-400 font-bold">已删</span>{/if}
 												</div>
 												<button
 													class="bg-black/70 text-white text-[10px] px-1.5 py-0.5 hover:bg-black/90"
@@ -1103,7 +1103,7 @@ function formatTime(ts: number) {
 								</div>
 								<div>
 									<p class="text-[10px] text-muted-foreground mb-1">结果图</p>
-									<img src={getImageUrl(detailImg.path)} alt="结果" class="rounded border max-h-48 w-auto h-auto" loading="lazy" />
+									<img src={getImageProxyUrl(detailImg.path)} alt="结果" class="rounded border max-h-48 w-auto h-auto" loading="lazy" />
 								</div>
 							</div>
 							<div class="flex flex-wrap gap-2">
@@ -1184,7 +1184,7 @@ function formatTime(ts: number) {
 							<button class="absolute top-2 right-2 z-10 text-white/80 hover:text-white" onclick={closeRecDialog}>
 								<Icon icon="mdi:close" class="size-8" />
 							</button>
-							<img src={getImageUrl(recDialogItem.image_path)} alt="" class="max-w-full max-h-[60vh] sm:max-h-[75vh] object-contain rounded-lg" />
+							<img src={getImageProxyUrl(recDialogItem.image_path)} alt="" class="max-w-full max-h-[60vh] sm:max-h-[75vh] object-contain rounded-lg" />
 							<div class="flex flex-wrap items-center gap-2 mt-3 bg-background/80 backdrop-blur rounded-lg px-3 py-2 w-full sm:w-auto">
 								<div class="text-xs text-muted-foreground truncate max-w-[120px] sm:max-w-[200px] shrink-0">
 									UID: {recDialogItem.user_id ?? '?'}
@@ -1192,9 +1192,6 @@ function formatTime(ts: number) {
 								<Button size="sm" variant="default" onclick={() => { resolveRec(recDialogItem.id, 'approve', recDialogItem.image_path); closeRecDialog(); }} disabled={loading} class="shrink-0">
 									通过
 								</Button>
-								<Input bind:value={recRejectReasons[recDialogId]}
-									placeholder="拒绝理由" class="h-8 text-xs min-w-0 w-full sm:w-40"
-								/>
 								<Button size="sm" variant="destructive" onclick={() => { resolveRec(recDialogItem.id, 'reject', recDialogItem.image_path); closeRecDialog(); }} disabled={loading} class="shrink-0">
 									拒绝
 								</Button>
@@ -1455,11 +1452,7 @@ function formatTime(ts: number) {
 								{@render limitField('每用户队列上限', 'max_queue_per_user', 'number')}
 							{@render limitField('速率窗口（秒）', 'image_rate_window_sec', 'number')}
 							{@render limitField('速率上限', 'image_rate_max', 'number')}
-							{@render limitField('举报窗口（秒）', 'report_window_sec', 'number')}
-							{@render limitField('举报窗口上限', 'report_window_max', 'number')}
-							{@render limitField('待处理举报上限', 'report_pending_max', 'number')}
-							{@render limitField('GPU 轮询间隔（ms）', 'gpu_poll_interval_ms', 'number')}
-							{@render limitField('GPU 缓存 TTL（ms）', 'gpu_cache_ttl_ms', 'number')}
+							{@render limitField('LLM 冷却（秒）', 'llm_cooldown_sec', 'number')}
 							{@render limitField('GC 间隔（小时）', 'gc_interval_hours', 'number')}
 							{@render limitField('Turnstile 验证', 'turnstile_enabled', 'boolean')}
 							<Button onclick={saveLimits} disabled={loading}>
@@ -1672,7 +1665,7 @@ function formatTime(ts: number) {
 				<Card>
 					<CardHeader>
 						<CardTitle class="text-base">垃圾回收</CardTitle>
-						<CardDescription>清理已解决的举报、过期的速率限制条目和孤立的创作者映射</CardDescription>
+						<CardDescription>清理孤立文件、裁剪队列、删除过期上传</CardDescription>
 					</CardHeader>
 					<CardContent class="space-y-3">
 						<Button onclick={handleGc} disabled={loading}>
