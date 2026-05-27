@@ -22,7 +22,7 @@
 	let navigating = $state(false);
 
 	beforeNavigate(() => { navigating = true; });
-	afterNavigate(() => { setTimeout(() => { navigating = false; }, 300); });
+	afterNavigate(() => { setTimeout(() => { navigating = false; }, 500); });
 </script>
 
 <svelte:head>
@@ -52,10 +52,10 @@
 <NavBar />
 
 <div
-	class="fixed top-0 left-0 z-50 h-0.5 bg-primary transition-all duration-75"
+	class="fixed top-0 left-0 z-50 h-0.5 bg-primary transition-all duration-300 ease-out"
 	class:opacity-0={!navigating}
 	class:opacity-100={navigating}
-	style="width: {navigating ? '60%' : '0%'};"
+	style="width: {navigating ? '95%' : '0%'};"
 />
 
 <style>
