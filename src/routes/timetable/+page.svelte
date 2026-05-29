@@ -41,12 +41,6 @@
 					<p>共 {data.viewModel.maxWeek} 周</p>
 				</div>
 			</div>
-			<a href="/">
-				<Button variant="outline">
-					<Icon icon="mdi:home" class="mr-2 h-4 w-4" />
-					返回首页
-				</Button>
-			</a>
 		</div>
 
 		<div class="flex flex-wrap items-center gap-3">

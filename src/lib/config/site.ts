@@ -19,6 +19,12 @@ export const siteConfig = {
 		bio: 'Protect What You Love.',
 		links: [
 			{
+				name: '爱发电',
+				icon: 'simple-icons:afdian',
+				url: 'https://www.ifdian.net/a/acofork',
+				color: '#946ce6'
+			},
+			{
 				name: 'B站主页',
 				icon: 'simple-icons:bilibili',
 				url: 'https://space.bilibili.com/325903362',
@@ -96,6 +102,7 @@ export const siteConfig = {
 		{ label: '画廊', icon: 'mdi:image-multiple', href: '/gallery' },
 		{ label: '隐藏图', icon: 'mdi:layers-triple', href: '/ptg' },
 		{ label: '水印', icon: 'mdi:water', href: '/watermark' },
+		{ label: '图片转换', icon: 'mdi:swap-horizontal-bold', href: '/convert' },
 		{ label: '文件', icon: 'mdi:folder-open', href: '/files' },
 		{ label: '零宽短链', icon: 'mynaui:zero-circle-solid', href: '/short' },
 		{ label: '长链', icon: 'mdi:link-variant-plus', href: '/long' },

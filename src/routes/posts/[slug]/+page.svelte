@@ -172,13 +172,6 @@
 </svelte:head>
 
 <article class="container mx-auto max-w-3xl px-4 py-12">
-	<!-- 返回按钮 -->
-	<div class="mb-8">
-		<a href="/posts">
-			<Button variant="ghost">← 返回博客文章</Button>
-		</a>
-	</div>
-
 	<!-- 文章头部 -->
 	<header class="mb-8 mo-fade-in-up" use:fadeInUp>
 		<div class="mb-4 flex items-center gap-2">
@@ -248,11 +241,6 @@
 
 	<!-- 文章底部 -->
 	<footer class="mt-12 border-t pt-8">
-		<div class="flex justify-center">
-			<a href="/posts">
-				<Button>← 返回博客文章</Button>
-			</a>
-		</div>
 	</footer>
 </article>
 
