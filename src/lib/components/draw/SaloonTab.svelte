@@ -49,7 +49,6 @@ let sending = $state(false);
 let settingsOpen = $state(true);
 let errorText = $state('');
 let genEnabled = $state(true);
-let helpOpen = $state(false);
 
 let totalLlmCost = $state(0);
 let totalLlmTokens = $state(0);
@@ -392,7 +391,6 @@ $effect(() => {
 				<Icon icon="mdi:image-outline" class="size-4" />
 				<span class="hidden sm:inline">{genEnabled ? '生图' : '纯聊'}</span>
 			</button>
-			<button class="flex items-center justify-center w-7 text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors border-l" onclick={() => helpOpen = true} title="使用帮助">?</button>
 		</div>
 		<input type="text" class="flex-1 h-9 text-sm border rounded px-3 bg-background" placeholder={genEnabled ? '输入消息，AI 会边聊边生图...' : '输入消息...'} bind:value={inputText} onkeydown={handleKeydown} disabled={sending} />
 		<Button variant="default" size="sm" class="h-9 px-4" onclick={sendMessage} disabled={sending || !inputText.trim()}>
@@ -416,23 +414,3 @@ $effect(() => {
 		</div>
 	{/if}
 </div>
-
-{#if helpOpen}
-	<div class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onclick={() => helpOpen = false}>
-		<div class="bg-card rounded-lg shadow-xl max-w-md w-full p-5 space-y-3" onclick={(e) => e.stopPropagation()}>
-			<h3 class="text-lg font-bold">酒馆使用说明</h3>
-			<div class="text-sm text-muted-foreground space-y-2">
-				<p><strong>酒馆</strong>是一个角色扮演聊天功能，AI 会扮演你设定的角色与你对话。</p>
-				<p><strong>生图开关</strong>：开启后，AI 会在对话中自动生图（消耗生图点数）。关闭后为纯文字聊天。</p>
-				<p><strong>使用步骤</strong>：</p>
-				<ol class="list-decimal pl-4 space-y-1">
-					<li>在上方「角色设定」中填写角色名和 System Prompt</li>
-					<li>在「文生图」页选择好工作流、画风、分辨率</li>
-					<li>开始聊天，AI 会以角色身份回复并自动生图</li>
-				</ol>
-				<p><strong>计费</strong>：聊天按 LLM token 消耗点数，生图按次扣费。</p>
-			</div>
-			<button class="w-full py-2 bg-primary text-primary-foreground rounded text-sm" onclick={() => helpOpen = false}>知道了</button>
-		</div>
-	</div>
-{/if}

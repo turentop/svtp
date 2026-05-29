@@ -41,6 +41,8 @@
 	let waiHelpOpen = $state(false);
 	let animaHelpOpen = $state(false);
 	let saloonHelpOpen = $state(false);
+	let txt2imgHelpOpen = $state(false);
+	let img2imgHelpOpen = $state(false);
 	let dsOutage = $state(false);
 	let queuing = $state(false);
 	let queueSuccess = $state("");
@@ -841,10 +843,12 @@ async function startGeneration(mode = 'wai') {
 					<TabsTrigger value="txt2img" class="flex-1">
 						<Icon icon="mdi:sparkles" class="size-4 mr-1" />
 						文生图
+						<button onclick={(e) => { e.stopPropagation(); txt2imgHelpOpen = true; }} class="inline-flex items-center justify-center size-4 rounded-full border border-muted-foreground/40 text-muted-foreground text-[10px] font-bold ml-1 hover:border-primary hover:text-primary transition-colors" title="文生图帮助">?</button>
 					</TabsTrigger>
 					<TabsTrigger value="img2img" class="flex-1">
 						<Icon icon="mdi:image-edit-outline" class="size-4 mr-1" />
 						图生图
+						<button onclick={(e) => { e.stopPropagation(); img2imgHelpOpen = true; }} class="inline-flex items-center justify-center size-4 rounded-full border border-muted-foreground/40 text-muted-foreground text-[10px] font-bold ml-1 hover:border-primary hover:text-primary transition-colors" title="图生图帮助">?</button>
 					</TabsTrigger>
 					<TabsTrigger value="saloon" class="flex-1">
 						<Icon icon="mdi:chat-outline" class="size-4 mr-1" />
@@ -1157,10 +1161,19 @@ async function startGeneration(mode = 'wai') {
 <Dialog.Root open={saloonHelpOpen} onOpenChange={(o) => saloonHelpOpen = o}>
 	<Dialog.Content class="max-w-md">
 		<Dialog.Header>
-			<Dialog.Title>ℹ️ 关于酒馆（Beta）</Dialog.Title>
+			<Dialog.Title>🍺 酒馆（Beta）</Dialog.Title>
 			<Dialog.Description class="text-sm leading-relaxed">
 				<div class="space-y-2">
-					<div>测试功能，不代表最终质量。如遇 Bug 请 <a href="https://2x.nz/q" target="_blank" rel="noopener noreferrer" class="text-primary underline">加群</a> 讨论。</div>
+					<div><strong>酒馆</strong>是一个角色扮演聊天功能，AI 会扮演你设定的角色与你对话。</div>
+					<div><strong>生图开关</strong>：开启后，AI 会在对话中自动生图（消耗生图点数）。关闭后为纯文字聊天。</div>
+					<div><strong>使用步骤：</strong></div>
+					<ol class="list-decimal pl-4 space-y-1">
+						<li>在「角色设定」中填写角色名和 System Prompt</li>
+						<li>在「文生图」页选择好工作流、画风、分辨率</li>
+						<li>开始聊天，AI 会以角色身份回复并自动生图</li>
+					</ol>
+					<div><strong>计费</strong>：聊天按 LLM token 消耗点数，生图按次扣费。</div>
+					<div class="text-muted-foreground text-xs">⚠️ 测试功能，不代表最终质量。如遇 Bug 请 <a href="https://2x.nz/q" target="_blank" rel="noopener noreferrer" class="text-primary underline">加群</a> 讨论。</div>
 				</div>
 			</Dialog.Description>
 		</Dialog.Header>
