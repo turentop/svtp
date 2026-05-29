@@ -5,6 +5,7 @@
 
 	let spinRaf = $state(0);
 	let spinStart = $state(0);
+	let spinOffset = $state(0);
 	let spinDeg = $state(0);
 
 	function startSpin() {
@@ -12,7 +13,7 @@
 		spinStart = performance.now();
 		function tick(now: number) {
 			const elapsed = now - spinStart;
-			spinDeg = (Math.pow(2, elapsed / 3000) - 1) * 360;
+			spinDeg = spinOffset + (Math.pow(2, elapsed / 3000) - 1) * 360;
 			spinRaf = requestAnimationFrame(tick);
 		}
 		spinRaf = requestAnimationFrame(tick);
@@ -20,6 +21,7 @@
 
 	function stopSpin() {
 		cancelAnimationFrame(spinRaf);
+		spinOffset = spinDeg;
 	}
 
 	let crumbs = $derived.by(() => {
