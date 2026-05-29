@@ -840,16 +840,20 @@ async function startGeneration(mode = 'wai') {
 		<TabsContent value="generate" class="mt-4">
 			<Tabs bind:value={genSubTab} class="w-full">
 				<TabsList class="w-full">
-					<TabsTrigger value="txt2img" class="flex-1">
-						<Icon icon="mdi:sparkles" class="size-4 mr-1" />
-						文生图
-						<button onclick={(e) => { e.stopPropagation(); txt2imgHelpOpen = true; }} class="inline-flex items-center justify-center size-4 rounded-full border border-muted-foreground/40 text-muted-foreground text-[10px] font-bold ml-1 hover:border-primary hover:text-primary transition-colors" title="文生图帮助">?</button>
-					</TabsTrigger>
-					<TabsTrigger value="img2img" class="flex-1">
-						<Icon icon="mdi:image-edit-outline" class="size-4 mr-1" />
-						图生图
-						<button onclick={(e) => { e.stopPropagation(); img2imgHelpOpen = true; }} class="inline-flex items-center justify-center size-4 rounded-full border border-muted-foreground/40 text-muted-foreground text-[10px] font-bold ml-1 hover:border-primary hover:text-primary transition-colors" title="图生图帮助">?</button>
-					</TabsTrigger>
+					<div class="flex items-center flex-1">
+						<TabsTrigger value="txt2img" class="flex-1">
+							<Icon icon="mdi:sparkles" class="size-4 mr-1" />
+							文生图
+						</TabsTrigger>
+						<button onclick={() => txt2imgHelpOpen = true} class="inline-flex items-center justify-center size-4 rounded-full border border-muted-foreground/40 text-muted-foreground text-[10px] font-bold mr-2 hover:border-primary hover:text-primary transition-colors shrink-0" title="文生图帮助">?</button>
+					</div>
+					<div class="flex items-center flex-1">
+						<TabsTrigger value="img2img" class="flex-1">
+							<Icon icon="mdi:image-edit-outline" class="size-4 mr-1" />
+							图生图
+						</TabsTrigger>
+						<button onclick={() => img2imgHelpOpen = true} class="inline-flex items-center justify-center size-4 rounded-full border border-muted-foreground/40 text-muted-foreground text-[10px] font-bold mr-2 hover:border-primary hover:text-primary transition-colors shrink-0" title="图生图帮助">?</button>
+					</div>
 					<TabsTrigger value="saloon" class="flex-1">
 						<Icon icon="mdi:chat-outline" class="size-4 mr-1" />
 						酒馆（Beta）
