@@ -385,22 +385,24 @@ $effect(() => {
 
 	<!-- 输入区 -->
 	<div class="flex gap-2 pt-2 border-t items-center">
-		<!-- 生图开关 -->
-		<button
-			class="flex items-center gap-1 h-9 px-2 text-xs border rounded transition-colors {genEnabled ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-muted text-muted-foreground'}"
-			onclick={() => genEnabled = !genEnabled}
-			title={genEnabled ? '生图已开启，点击关闭' : '生图已关闭，点击开启'}
-		>
-			<Icon icon="mdi:image-outline" class="size-4" />
-			<span class="hidden sm:inline">{genEnabled ? '生图' : '纯聊'}</span>
-		</button>
-		<button
-			class="flex items-center justify-center size-9 text-xs border rounded text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
-			onclick={() => helpOpen = true}
-			title="使用帮助"
-		>
-			?
-		</button>
+		<!-- 生图开关 + 帮助 -->
+		<div class="flex h-9 border rounded overflow-hidden">
+			<button
+				class="flex items-center gap-1 px-2 text-xs transition-colors {genEnabled ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}"
+				onclick={() => genEnabled = !genEnabled}
+				title={genEnabled ? '生图已开启，点击关闭' : '生图已关闭，点击开启'}
+			>
+				<Icon icon="mdi:image-outline" class="size-4" />
+				<span class="hidden sm:inline">{genEnabled ? '生图' : '纯聊'}</span>
+			</button>
+			<button
+				class="flex items-center justify-center w-7 text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors border-l"
+				onclick={() => helpOpen = true}
+				title="使用帮助"
+			>
+				?
+			</button>
+		</div>
 		<input type="text" class="flex-1 h-9 text-sm border rounded px-3 bg-background" placeholder={genEnabled ? '输入消息，AI 会边聊边生图...' : '输入消息...'} bind:value={inputText} onkeydown={handleKeydown} disabled={sending} />
 		<Button variant="default" size="sm" class="h-9 px-4" onclick={sendMessage} disabled={sending || !inputText.trim()}>
 			{#if sending}
