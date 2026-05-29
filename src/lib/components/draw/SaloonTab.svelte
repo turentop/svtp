@@ -48,6 +48,7 @@ let settingsOpen = $state(true);
 let errorText = $state('');
 let genEnabled = $state(true);
 let helpOpen = $state(false);
+let conversationStarted = $state(false);
 
 // 消耗统计
 let totalLlmCost = $state(0);
@@ -73,6 +74,7 @@ onMount(async () => {
 		const res = await fetchChatHistory();
 		chatHistory = res.items || [];
 		chatMessages = chatHistory.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+		if (chatMessages.length > 0) conversationStarted = true;
 	} catch {}
 });
 
@@ -125,6 +127,7 @@ function clearChat() {
 	totalLlmTokens = 0;
 	totalGenCount = 0;
 	totalGenCost = 0;
+	conversationStarted = false;
 	// 清空后端记录
 	clearChatHistory().catch(() => {});
 }
@@ -163,6 +166,7 @@ async function sendMessage() {
 	if (!workflowPath) { errorText = '请先在文生图页选择工作流'; return; }
 	errorText = '';
 	sending = true;
+	conversationStarted = true;
 
 	chatMessages = [...chatMessages, { role: 'user', content: msg }];
 	inputText = '';
@@ -314,7 +318,7 @@ $effect(() => {
 
 <div class="flex flex-col h-[calc(100vh-260px)] min-h-[400px]">
 	<!-- 设定区 -->
-	<div class="border rounded-lg bg-card mb-3">
+	<div class="border rounded-lg bg-card mb-3 {conversationStarted ? 'opacity-60' : ''}">
 		<button
 			class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium"
 			onclick={() => settingsOpen = !settingsOpen}
@@ -324,6 +328,9 @@ $effect(() => {
 				角色扮演设定
 				{#if presetName}
 					<Badge variant="secondary" class="text-[10px]">{presetName}</Badge>
+				{/if}
+				{#if conversationStarted}
+					<Badge variant="outline" class="text-[10px] text-muted-foreground">对话中锁定</Badge>
 				{/if}
 			</span>
 			<Icon icon={settingsOpen ? "mdi:chevron-up" : "mdi:chevron-down"} class="size-4 text-muted-foreground" />
@@ -336,27 +343,30 @@ $effect(() => {
 						class="flex-1 h-8 text-xs border rounded px-2 bg-background"
 						value={selectedPresetIdx}
 						onchange={(e) => selectPreset(Number(e.currentTarget.value))}
+						disabled={conversationStarted}
 					>
 						<option value={-1}>-- 选择或新建 --</option>
 						{#each presets as p, i}
 							<option value={i}>{p.name}</option>
 						{/each}
 					</select>
-					{#if selectedPresetIdx >= 0}
+					{#if selectedPresetIdx >= 0 && !conversationStarted}
 						<Button variant="outline" size="sm" class="h-8 px-2 text-xs text-destructive" onclick={deletePreset}>
 							<Icon icon="mdi:delete-outline" class="size-3.5" />
 						</Button>
 					{/if}
 				</div>
-				<input type="text" class="w-full h-8 text-xs border rounded px-2 bg-background" placeholder="给这个角色设定起个名字" bind:value={presetName} />
-				<textarea class="w-full text-xs border rounded px-2 py-1.5 bg-background resize-none" rows="3" placeholder="你正在扮演遐蝶。你是一个..." bind:value={systemPrompt}></textarea>
+				<input type="text" class="w-full h-8 text-xs border rounded px-2 bg-background" placeholder="给这个角色设定起个名字" bind:value={presetName} disabled={conversationStarted} />
+				<textarea class="w-full text-xs border rounded px-2 py-1.5 bg-background resize-none" rows="3" placeholder="你正在扮演遐蝶。你是一个..." bind:value={systemPrompt} disabled={conversationStarted}></textarea>
 				<div class="flex gap-2">
-					<Button variant="default" size="sm" class="h-7 text-xs" onclick={savePreset}>
-						<Icon icon="mdi:content-save-outline" class="size-3.5 mr-1" />保存预设
-					</Button>
-					<Button variant="outline" size="sm" class="h-7 text-xs" onclick={newPreset}>新建</Button>
-					<Button variant="outline" size="sm" class="h-7 text-xs ml-auto" onclick={clearChat}>
-						<Icon icon="mdi:chat-remove-outline" class="size-3.5 mr-1" />清空聊天
+					{#if !conversationStarted}
+						<Button variant="default" size="sm" class="h-7 text-xs" onclick={savePreset}>
+							<Icon icon="mdi:content-save-outline" class="size-3.5 mr-1" />保存预设
+						</Button>
+						<Button variant="outline" size="sm" class="h-7 text-xs" onclick={newPreset}>新建</Button>
+					{/if}
+					<Button variant={conversationStarted ? "default" : "outline"} size="sm" class="h-7 text-xs {conversationStarted ? '' : 'ml-auto'}" onclick={clearChat}>
+						<Icon icon="mdi:chat-remove-outline" class="size-3.5 mr-1" />{conversationStarted ? '清空并新建' : '清空聊天'}
 					</Button>
 				</div>
 			</div>
