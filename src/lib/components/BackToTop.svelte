@@ -10,7 +10,7 @@
 
 	let showCommentButton = $derived.by(() => {
 		const id = $page.route?.id || '';
-		return id === '/posts/[slug]' || id === '/forum/post';
+		return id === '/posts/[slug]' || id === '/forum/post/[id]';
 	});
 
 	// xl 断点以下才显示 TOC 浮动按钮（桌面端用侧边 aside，不需要按钮）

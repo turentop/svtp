@@ -89,7 +89,7 @@
 <style>
 </style>
 
-<div class="pt-14">
+<div>
 	{@render children()}
 </div>
 

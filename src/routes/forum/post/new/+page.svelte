@@ -77,7 +77,7 @@
 			const nextId = String(result.id || '').trim();
 			if (!nextId) throw new Error('发帖成功，但未拿到帖子 ID。');
 			emitSuccessToast('发帖', '发布成功，正在跳转...');
-			void goto(`/forum/post/?id=${encodeURIComponent(nextId)}`);
+			void goto(`/forum/post/${nextId}`);
 		} catch (e) {
 			emitErrorToast('发帖', e instanceof Error ? e.message : '发布失败，请稍后再试。');
 		} finally {

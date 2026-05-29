@@ -36,7 +36,7 @@
 
 <button
 	onclick={cycle}
-	class="inline-flex items-center justify-center rounded-md w-9 h-9 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+	class="inline-flex items-center justify-center rounded-md w-8 h-8 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
 	aria-label={label}
 	title={label}
 >

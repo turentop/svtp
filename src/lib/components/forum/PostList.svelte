@@ -19,7 +19,7 @@
 	let safePosts = $derived(Array.isArray(posts) ? posts : []);
 
 	function goToPost(id: string) {
-		goto(`/forum/post?id=${encodeURIComponent(id)}`);
+		goto(`/forum/post/${encodeURIComponent(id)}`);
 	}
 	function goToUser(id: string | undefined, e?: MouseEvent | KeyboardEvent) {
 		e?.stopPropagation();
