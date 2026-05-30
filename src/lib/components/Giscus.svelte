@@ -8,7 +8,7 @@
 	let loaded = $state(false);
 
 	const STORAGE_KEY = 'cookie-consent-preferences';
-	const CONSENT_VERSION = '1.0';
+	const CONSENT_VERSION = '2.0';
 
 	function checkExistingConsent(): boolean {
 		try {
