@@ -4,7 +4,7 @@ import { Button } from '$lib/components/ui/button';
 import { Label } from '$lib/components/ui/label';
 import { Alert, AlertDescription } from '$lib/components/ui/alert';
 import { forumAuth } from '$lib/forum/stores/auth';
-import { generateTts, fetchTtsStatus, getTtsResultUrl, fetchTtsMyQueue } from '$lib/draw/api/client';
+import { generateTts, fetchTtsStatus, getTtsResultUrl, fetchTtsMyQueue, getTtsRecordDownloadUrl } from '$lib/draw/api/client';
 import { Badge } from '$lib/components/ui/badge';
 import { onMount } from 'svelte';
 
@@ -81,7 +81,7 @@ async function pollStatus() {
 		queuePosition = st.position ?? null;
 		if (st.status === 'done') {
 			if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-			resultUrl = getTtsResultUrl(queueItemId);
+			resultUrl = getTtsRecordDownloadUrl(queueItemId);
 			done = true;
 		} else if (st.status === 'failed') {
 			if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
@@ -114,7 +114,7 @@ onMount(async () => {
 			queuePosition = latest.position ?? null;
 			pollTimer = setInterval(pollStatus, 2000);
 			if (latest.status === 'done') {
-				resultUrl = getTtsResultUrl(latest.id);
+				resultUrl = getTtsRecordDownloadUrl(latest.id);
 				done = true;
 			}
 		}
