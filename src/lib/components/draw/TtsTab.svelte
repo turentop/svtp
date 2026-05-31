@@ -43,6 +43,10 @@ function handleFileSelect(e: Event) {
 
 async function handleSubmit() {
 	if (submitting || !audioFile || !targetText) return;
+	if (!xVectorMode && !refText.trim()) {
+		error = '非 X-Vector 模式下参考文本为必填项';
+		return;
+	}
 	error = '';
 	queueStatus = '';
 	queueError = '';
