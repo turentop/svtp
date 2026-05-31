@@ -14,107 +14,107 @@ export const apiStatus = writable<ApiStatus>('checking');
 
 // apiError 和 apiStatus 同步：错误时离线
 apiError.subscribe(v => {
-	if (v) {
-		apiStatus.set('offline');
-	}
+  if (v) {
+    apiStatus.set('offline');
+  }
 });
 
 export const DRAW_API_BASE_URLS: Record<DrawApiEnv, string> = {
-	prod: 'https://api-ai.2x.nz',
-	dev: 'http://localhost:8080'
+  prod: 'https://api-ai.2x.nz',
+  dev: 'http://localhost:8080'
 };
 
 function normalizeBaseUrl(value: string) {
-	return value.trim().replace(/\/+$/, '');
+  return value.trim().replace(/\/+$/, '');
 }
 
 function normalizeEnv(value: DrawApiEnv | string | null | undefined): DrawApiEnv {
-	return value === 'dev' ? 'dev' : 'prod';
+  return value === 'dev' ? 'dev' : 'prod';
 }
 
 function sanitizeBaseUrl(value: string | null | undefined, env: DrawApiEnv) {
-	const v = normalizeBaseUrl(value || '');
-	if (!v) return DRAW_API_BASE_URLS[env];
-	try {
-		const url = new URL(v);
-		if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-			return DRAW_API_BASE_URLS[env];
-		}
-		return normalizeBaseUrl(url.toString());
-	} catch {
-		return DRAW_API_BASE_URLS[env];
-	}
+  const v = normalizeBaseUrl(value || '');
+  if (!v) return DRAW_API_BASE_URLS[env];
+  try {
+    const url = new URL(v);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      return DRAW_API_BASE_URLS[env];
+    }
+    return normalizeBaseUrl(url.toString());
+  } catch {
+    return DRAW_API_BASE_URLS[env];
+  }
 }
 
 interface DrawCustomBaseUrlStore {
-	subscribe: Writable<string>['subscribe'];
-	set(value: string): void;
-	reset(env: DrawApiEnv): void;
+  subscribe: Writable<string>['subscribe'];
+  set(value: string): void;
+  reset(env: DrawApiEnv): void;
 }
 
 interface DrawEnvStore {
-	subscribe: Writable<DrawApiEnv>['subscribe'];
-	baseUrl: Readable<string>;
-	customBaseUrl: DrawCustomBaseUrlStore;
-	set(value: DrawApiEnv): void;
-	toggle(): void;
-	getBaseUrl(env: DrawApiEnv): string;
+  subscribe: Writable<DrawApiEnv>['subscribe'];
+  baseUrl: Readable<string>;
+  customBaseUrl: DrawCustomBaseUrlStore;
+  set(value: DrawApiEnv): void;
+  toggle(): void;
+  getBaseUrl(env: DrawApiEnv): string;
 }
 
 function createEnvStore(): DrawEnvStore {
-	const initialEnv = normalizeEnv(
-		readLocalStorage<DrawApiEnv | string>(DRAW_API_ENV_STORAGE_KEY, 'prod')
-	);
-	const envStore = writable<DrawApiEnv>(initialEnv);
-	const customBaseUrlStore = writable<string>(
-		readLocalStorage<string>(DRAW_API_CUSTOM_BASE_URL_STORAGE_KEY, '') || DRAW_API_BASE_URLS[initialEnv]
-	);
+  const initialEnv = normalizeEnv(
+    readLocalStorage<DrawApiEnv | string>(DRAW_API_ENV_STORAGE_KEY, 'prod')
+  );
+  const envStore = writable<DrawApiEnv>(initialEnv);
+  const customBaseUrlStore = writable<string>(
+    readLocalStorage<string>(DRAW_API_CUSTOM_BASE_URL_STORAGE_KEY, '') || DRAW_API_BASE_URLS[initialEnv]
+  );
 
-	const baseUrl = derived([envStore, customBaseUrlStore], ([$env, $custom]) =>
-		sanitizeBaseUrl($custom, $env)
-	);
+  const baseUrl = derived([envStore, customBaseUrlStore], ([$env, $custom]) =>
+    sanitizeBaseUrl($custom, $env)
+  );
 
-	return {
-		subscribe: envStore.subscribe,
-		baseUrl,
-		customBaseUrl: {
-			subscribe: customBaseUrlStore.subscribe,
-			set: (v) => {
-			const url = sanitizeBaseUrl(v, get(envStore));
-			writeLocalStorage(DRAW_API_CUSTOM_BASE_URL_STORAGE_KEY, url);
-			_redirectResolved = false;
-			_redirectFailAt = 0;
-			apiStatus.set('checking');
-			customBaseUrlStore.set(url);
-		},
-			reset: (env) => {
-			writeLocalStorage(DRAW_API_CUSTOM_BASE_URL_STORAGE_KEY, '');
-			_redirectResolved = false;
-			_redirectFailAt = 0;
-			customBaseUrlStore.set(DRAW_API_BASE_URLS[env]);
-		}
-		},
-		set: (v) => {
-			const next = normalizeEnv(v);
-			writeLocalStorage(DRAW_API_ENV_STORAGE_KEY, next);
-			_redirectResolved = false;
-			_redirectFailAt = 0;
-			envStore.set(next);
-			customBaseUrlStore.set(DRAW_API_BASE_URLS[next]);
-		},
-		toggle: () => {
-			let next: DrawApiEnv = 'prod';
-			envStore.update((cur) => {
-				next = cur === 'prod' ? 'dev' : 'prod';
-				writeLocalStorage(DRAW_API_ENV_STORAGE_KEY, next);
-				return next;
-			});
-			_redirectResolved = false;
-			_redirectFailAt = 0;
-			customBaseUrlStore.set(DRAW_API_BASE_URLS[next]);
-		},
-		getBaseUrl: (env) => DRAW_API_BASE_URLS[env]
-	};
+  return {
+    subscribe: envStore.subscribe,
+    baseUrl,
+    customBaseUrl: {
+      subscribe: customBaseUrlStore.subscribe,
+      set: (v) => {
+      const url = sanitizeBaseUrl(v, get(envStore));
+      writeLocalStorage(DRAW_API_CUSTOM_BASE_URL_STORAGE_KEY, url);
+      _redirectResolved = false;
+      _redirectFailAt = 0;
+      apiStatus.set('checking');
+      customBaseUrlStore.set(url);
+    },
+      reset: (env) => {
+      writeLocalStorage(DRAW_API_CUSTOM_BASE_URL_STORAGE_KEY, '');
+      _redirectResolved = false;
+      _redirectFailAt = 0;
+      customBaseUrlStore.set(DRAW_API_BASE_URLS[env]);
+    }
+    },
+    set: (v) => {
+      const next = normalizeEnv(v);
+      writeLocalStorage(DRAW_API_ENV_STORAGE_KEY, next);
+      _redirectResolved = false;
+      _redirectFailAt = 0;
+      envStore.set(next);
+      customBaseUrlStore.set(DRAW_API_BASE_URLS[next]);
+    },
+    toggle: () => {
+      let next: DrawApiEnv = 'prod';
+      envStore.update((cur) => {
+        next = cur === 'prod' ? 'dev' : 'prod';
+        writeLocalStorage(DRAW_API_ENV_STORAGE_KEY, next);
+        return next;
+      });
+      _redirectResolved = false;
+      _redirectFailAt = 0;
+      customBaseUrlStore.set(DRAW_API_BASE_URLS[next]);
+    },
+    getBaseUrl: (env) => DRAW_API_BASE_URLS[env]
+  };
 }
 
 export const drawEnv: DrawEnvStore = createEnvStore();
@@ -128,23 +128,23 @@ let _redirectFailAt = 0;
 const REDIRECT_COOLDOWN = 30000;
 
 export async function resolveApiRedirect(force = false): Promise<void> {
-	if (_redirectResolved && !force) return;
-	const now = Date.now();
-	if (!force && now - _redirectFailAt < REDIRECT_COOLDOWN) return;
-	apiStatus.set('checking');
-	const baseUrl = get(drawEnv.baseUrl);
-	try {
-		const resp = await fetch(`${baseUrl}/health`, { method: 'GET' });
-		if (!resp.ok) throw new Error('health check failed');
-		const finalUrl = resp.url.replace(/\/+$/, '').replace(/\/health$/, '');
-		if (finalUrl !== baseUrl && finalUrl.startsWith('http')) {
-			drawEnv.customBaseUrl.set(finalUrl);
-		}
-		_redirectResolved = true;
-		apiStatus.set('online');
-		apiError.set(null);
-	} catch {
-		_redirectFailAt = Date.now();
-		apiStatus.set('offline');
-	}
+  if (_redirectResolved && !force) return;
+  const now = Date.now();
+  if (!force && now - _redirectFailAt < REDIRECT_COOLDOWN) return;
+  apiStatus.set('checking');
+  const baseUrl = get(drawEnv.baseUrl);
+  try {
+    const resp = await fetch(`${baseUrl}/health`, { method: 'GET' });
+    if (!resp.ok) throw new Error('health check failed');
+    const finalUrl = resp.url.replace(/\/+$/, '').replace(/\/health$/, '');
+    if (finalUrl !== baseUrl && finalUrl.startsWith('http')) {
+      drawEnv.customBaseUrl.set(finalUrl);
+    }
+    _redirectResolved = true;
+    apiStatus.set('online');
+    apiError.set(null);
+  } catch {
+    _redirectFailAt = Date.now();
+    apiStatus.set('offline');
+  }
 }
