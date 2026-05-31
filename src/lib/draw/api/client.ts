@@ -473,3 +473,15 @@ export async function deleteTtsMyRecord(id: number) {
 		requiresAuth: true,
 	});
 }
+
+export async function fetchTtsSpeakers() {
+	return drawRequest<{ speakers: Array<{ id: string; description: string }> }>('/api/draw/tts/speakers');
+}
+
+export async function generateTtsCustomVoice(data: { text: string; speaker: string; language?: string; instruct?: string }) {
+	return drawRequest<{ ok: boolean; item_id: number; output_path: string }>('/api/draw/tts/custom-voice', {
+		method: 'POST',
+		json: data,
+		requiresAuth: true,
+	});
+}
