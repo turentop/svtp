@@ -1102,8 +1102,8 @@ async function startGeneration(mode = 'wai') {
 											{/if}
 											<div class="flex items-center gap-2 text-muted-foreground">
 												<span>{new Date(rec.finished_at * 1000).toLocaleString()}</span>
-												<a href={getTtsRecordDownloadUrl(rec.id)} download class="underline text-primary ml-auto">下载</a>
-												<button onclick={async () => { if (confirm('确定删除这条 TTS 记录？')) { await deleteTtsMyRecord(rec.id); ttsMyRecords = ttsMyRecords.filter(r => r.id !== rec.id); } }} class="underline text-red-500">删除</button>
+												<audio src={getTtsRecordDownloadUrl(rec.id)} controls class="h-8 ml-auto" preload="none"></audio>
+												<button onclick={async () => { if (confirm('确定删除这条 TTS 记录？')) { await deleteTtsMyRecord(rec.id); ttsMyRecords = ttsMyRecords.filter(r => r.id !== rec.id); } }} class="underline text-red-500 shrink-0">删除</button>
 											</div>
 										</div>
 									{/each}

@@ -1466,11 +1466,11 @@ function formatTime(ts: number) {
 									{#if rec.refText}
 										<div class="truncate text-muted-foreground">参考: {rec.refText}</div>
 									{/if}
-								<div class="flex items-center gap-2 text-muted-foreground">
-									<span>{new Date(rec.finished_at * 1000).toLocaleString()}</span>
-									<a href={'/api/draw/admin/tts-download/' + rec.id} download class="underline text-primary">下载</a>
-									<button onclick={async () => { if (confirm('确定删除这条记录？')) { await admin.deleteTtsRecord(rec.id); await loadTtsRecords(); } }} class="underline text-red-500">删除</button>
-								</div>
+									<div class="flex items-center gap-2 text-muted-foreground">
+										<span>{new Date(rec.finished_at * 1000).toLocaleString()}</span>
+										<audio src={'/api/draw/admin/tts-download/' + rec.id} controls class="h-8" preload="none"></audio>
+										<button onclick={async () => { if (confirm('确定删除这条记录？')) { await admin.deleteTtsRecord(rec.id); await loadTtsRecords(); } }} class="underline text-red-500 shrink-0">删除</button>
+									</div>
 								</div>
 							{/each}
 							{#if !ttsRecordsLoading && ttsRecords.length === 0}
