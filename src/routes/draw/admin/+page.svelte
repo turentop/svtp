@@ -19,6 +19,7 @@
 import { onMount, onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
 import ImageLightbox from '$lib/components/draw/ImageLightbox.svelte';
+import StatsTab from '$lib/components/draw/StatsTab.svelte';
   import type {
     AdminRecentImage,
     AdminLimits,
@@ -198,8 +199,6 @@ let loadingMore = $state(false);
   let debugData = $state<any>(null);
   let debugLoading = $state(false);
   let debugError = $state('');
-  let statsData = $state<any>(null);
-  let statsLoading = $state(false);
 
 
 
@@ -1763,6 +1762,10 @@ function formatTime(ts: number) {
         </Card>
       </TabsContent>
 
+      <TabsContent value="stats" class="mt-4">
+        <StatsTab />
+      </TabsContent>
+
       <!-- GC -->
       <TabsContent value="gc" class="mt-4">
         <Card>
@@ -1787,38 +1790,137 @@ function formatTime(ts: number) {
             {/if}
           </CardContent>
         </Card>
-      
-      <TabsContent value="stats" class="mt-4">
+      </TabsContent>
+
+      <TabsContent value="debug" class="mt-4">
         <Card>
           <CardHeader>
-            <CardTitle class="text-base">使用统计</CardTitle>
+            <CardTitle class="text-base flex items-center gap-2">
+              <Icon icon="mdi:bug-outline" class="size-5" />
+              生图调试总览
+            </CardTitle>
+            <CardDescription>活跃状态、队列统计、卡住任务</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button size="sm" onclick={loadStats} disabled={statsLoading}>刷新</Button>
-            {#if statsData}
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-                {#each Object.entries(statsData.stats) as [period, data]}
-                  <div class="border rounded-lg p-3 space-y-1 text-xs">
-                    <div class="font-medium text-sm">{period === 'today' ? '今日' : period === '7d' ? '近7天' : '近1个月'}</div>
-                    <div class="text-muted-foreground">调用: {data.calls} | 消耗: ⚡{data.cost}</div>
-                    <div class="text-muted-foreground">失败: {data.failed}</div>
-                    <div class="text-muted-foreground">收入: ¥{statsData.income[period] || 0}</div>
-                    <div class="flex flex-wrap gap-1 pt-1">
-                      {#each Object.entries(data.byModel) as [model, count]}
-                        <span class="px-1.5 py-0.5 rounded bg-muted">{model}: {count}</span>
-                      {/each}
-                    </div>
-                  </div>
-                {/each}
+          <CardContent class="space-y-4">
+            <Button variant="outline" size="sm" onclick={loadDebug} disabled={debugLoading}>
+              <Icon icon="mdi:refresh" class="size-4 mr-1" />
+              {debugLoading ? '加载中...' : '刷新'}
+            </Button>
+
+            {#if debugError}
+              <Alert variant="destructive">
+                <Icon icon="mdi:alert-circle" class="size-4" />
+                <AlertDescription class="text-xs">{debugError}</AlertDescription>
+              </Alert>
+            {/if}
+
+            {#if debugData}
+
+              <div>
+                <h4 class="text-sm font-medium mb-2">队列状态分布</h4>
+                <div class="flex flex-wrap gap-2">
+                  {#each Object.entries(debugData.queue_stats) as [status, count]}
+                    {#if count > 0}
+                      <Badge variant={status === 'failed' ? 'destructive' : status === 'done' ? 'default' : 'secondary'} class="text-xs">
+                        {status}: {count}
+                      </Badge>
+                    {/if}
+                  {/each}
+                </div>
               </div>
-            {:else if statsLoading}
-              <div class="text-xs text-muted-foreground py-4 text-center">加载中...</div>
-            {:else}
-              <div class="text-xs text-muted-foreground py-4 text-center">点击刷新加载数据</div>
+
+              <div class="flex gap-2">
+                <Button variant="destructive" size="sm" onclick={handleClearQueue} disabled={clearing}>
+                  {#if clearing}
+                    <Icon icon="mdi:loading" class="size-4 animate-spin" />
+                  {/if}
+                  清空队列
+                </Button>
+              </div>
+
+              {#if debugData.meta_stats}
+                <div>
+                  <h4 class="text-sm font-medium mb-2">元数据写入</h4>
+                  <div class="flex flex-wrap gap-2">
+                    <Badge variant="outline" class="text-xs">图片数: {debugData.meta_stats.output_total}</Badge>
+                  </div>
+              </div>
+              {/if}
+
+              {#if debugData.queue_users.length > 0}
+                <div>
+                  <h4 class="text-sm font-medium mb-2">队列中的用户</h4>
+                  <div class="flex flex-wrap gap-2">
+                    {#each debugData.queue_users as [uid, count]}
+                      <Badge variant="secondary" class="text-xs">
+                        UID {uid} x {count}
+                      </Badge>
+                    {/each}
+                  </div>
+              </div>
+              {/if}
+
+              {#if debugData.stuck.length > 0}
+                <div>
+                  <h4 class="text-sm font-medium mb-2 text-red-500">卡住任务 ({debugData.stuck.length})</h4>
+                  <div class="space-y-1">
+                    {#each debugData.stuck as item}
+                      <div class="flex items-center gap-2 text-xs border rounded px-3 py-2">
+                        <Icon icon="mdi:alert" class="size-4 text-red-500" />
+                        <span>UID {item.user_id}</span>
+                        <Badge variant="destructive" class="text-[10px]">{item.status}</Badge>
+                        <span class="text-muted-foreground">ID:{item.id}</span>
+                      </div>
+                    {/each}
+                  </div>
+                </div>
+              {/if}
+
+              <div>
+                <h4 class="text-sm font-medium mb-2">最近 20 条队列项</h4>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-xs">
+                    <thead>
+                      <tr class="border-b text-left text-muted-foreground">
+                        <th class="py-1 pr-2">ID</th>
+                        <th class="py-1 pr-2">UID</th>
+                        <th class="py-1 pr-2">类型</th>
+                        <th class="py-1 pr-2">状态</th>
+                        <th class="py-1 pr-2">创建</th>
+                        <th class="py-1 pr-2">启动</th>
+                          <th class="py-1 pr-2">工作流</th>
+                          <th class="py-1 pr-2">错误</th>
+                            <th class="py-1 pr-2">元数据</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {#each debugData.recent_items_full as item}
+                        <tr class="border-b">
+                          <td class="py-1 pr-2 font-mono">{item.id}</td>
+                          <td class="py-1 pr-2">{item.user_id}</td>
+                          <td class="py-1 pr-2 text-xs">{item.type === 'img2img' ? '🖼️' : '📝'}</td>
+                          <td class="py-1 pr-2">
+                            <Badge variant={item.status === 'failed' ? 'destructive' : item.status === 'done' ? 'default' : item.status === 'running' ? 'default' : 'secondary'} class="text-[10px]">{item.status}</Badge>
+                          </td>
+                          <td class="py-1 pr-2 text-muted-foreground">{item.created_ago}s前</td>
+                          <td class="py-1 pr-2 text-muted-foreground">{item.started_ago != null ? `${item.started_ago}s前` : '-'}</td>
+                            <td class="py-1 pr-2 break-all max-w-[120px] text-muted-foreground text-[10px]">{item.workflow_path || '-'}</td>
+                            <td class="py-1 pr-2 break-all max-w-xs text-destructive text-[10px]" title={item.error || ''}>{item.error || '-'}</td>
+                            <td class="py-1 pr-2 break-all max-w-[120px] text-muted-foreground text-[10px]">{item.meta_write ? `正向:${item.meta_write.prompt} 反向:${item.meta_write.negative} 原图1:${item.meta_write.image1} 原图2:${item.meta_write.image2}` : '-'}</td>
+                        </tr>
+                      {/each}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             {/if}
           </CardContent>
         </Card>
       </TabsContent>
+
+    </Tabs>
+  {/if}
+</div>
 
 <ImageLightbox
   open={lbOpen}
