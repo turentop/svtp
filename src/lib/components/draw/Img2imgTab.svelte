@@ -11,8 +11,6 @@ import { Badge } from '$lib/components/ui/badge';
   import { addToQueue } from '$lib/draw/api/client';
   import { get } from 'svelte/store';
 
-  const STORAGE_KEY = 'draw-img2img-' + (workflowPath || 'flux');
-
   let {
     turnstileToken = $bindable(''),
       turnstileTick = $bindable(0),
@@ -32,6 +30,7 @@ import { Badge } from '$lib/components/ui/badge';
     workflowPath?: string;
     showConsistency?: boolean;
   } = $props();
+  let storageKey = $derived('draw-img2img-' + (workflowPath || 'flux'));
 
   let currentBaseUrl = $state('');
   let authToken = $state<string | null>(null);
@@ -149,7 +148,7 @@ import { Badge } from '$lib/components/ui/badge';
   $effect(() => {
     if (typeof localStorage === 'undefined') return;
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(storageKey);
       if (!saved) return;
       const parsed = JSON.parse(saved);
       if (parsed.cnPrompt) cnPrompt = parsed.cnPrompt;
@@ -175,7 +174,7 @@ import { Badge } from '$lib/components/ui/badge';
       const data: any = { cnPrompt, enPrompt };
       const savedDataUrls = images.map(i => i.dataUrl).filter(u => u.startsWith('data:'));
       if (savedDataUrls.length) data.images = savedDataUrls;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      localStorage.setItem(storageKey, JSON.stringify(data));
     } catch {}
   }
 
