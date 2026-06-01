@@ -1016,7 +1016,7 @@ function formatTime(ts: number) {
             <CardTitle class="text-base">图片管理</CardTitle>
             <CardDescription>共 {recentTotal} 张图片</CardDescription>
           </CardHeader>
-          <CardContent class="space-y-3">
+          <CardContent class="space-y-2 sm:space-y-3 p-3 sm:p-6">
             <div class="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onclick={loadRecent} disabled={loading}>
                 <Icon icon="mdi:refresh" class="size-4 mr-1" />刷新
@@ -1050,7 +1050,7 @@ function formatTime(ts: number) {
               {/if}
             </div>
           {#if recentImages.length > 0}
-          <div class="flex gap-2 items-start">
+          <div class="flex gap-1 sm:gap-2 items-start">
             {#each imgColumns as col, ci (ci)}
               <div class="flex flex-1 flex-col gap-2 min-w-0">
                 {#each col as path, i (ci + '-' + i + '-' + path)}
@@ -1245,7 +1245,7 @@ function formatTime(ts: number) {
           <CardHeader>
             <CardTitle class="text-base">精选管理</CardTitle>
           </CardHeader>
-          <CardContent class="space-y-3">
+          <CardContent class="space-y-2 sm:space-y-3 p-3 sm:p-6">
             <div class="flex gap-2">
               <Input
                 bind:value={newFeaturedPath}
@@ -1274,7 +1274,7 @@ function formatTime(ts: number) {
             {#if featuredPaths.length === 0}
               <div class="text-sm text-muted-foreground py-4 text-center">无精选图片</div>
             {:else}
-              <div class="flex gap-2 items-start">
+              <div class="flex gap-1 sm:gap-2 items-start">
                 {#each featColumns as col, ci (ci)}
                   <div class="flex flex-1 flex-col gap-2 min-w-0">
                     {#each col as path, i (ci + '-' + i + '-' + path)}
@@ -1308,7 +1308,7 @@ function formatTime(ts: number) {
           <CardHeader>
             <CardTitle class="text-base">封禁管理</CardTitle>
           </CardHeader>
-          <CardContent class="space-y-3">
+          <CardContent class="space-y-2 sm:space-y-3 p-3 sm:p-6">
             <div class="flex gap-2">
               <Input
                 bind:value={newBanUserId}
@@ -1350,7 +1350,7 @@ function formatTime(ts: number) {
           <CardHeader>
             <CardTitle class="text-base">协作者管理</CardTitle>
           </CardHeader>
-          <CardContent class="space-y-3">
+          <CardContent class="space-y-2 sm:space-y-3 p-3 sm:p-6">
             <div class="flex gap-2">
               <Input bind:value={newCollaboratorId} placeholder="用户 ID" type="number" class="max-w-20" />
               <Button size="sm" onclick={handleAddCollaborator} disabled={loading}>
@@ -1386,7 +1386,7 @@ function formatTime(ts: number) {
             {#if pendingNominations.length === 0}
               <div class="text-sm text-muted-foreground py-4 text-center">无待审核提名</div>
             {:else}
-              <div class="flex gap-2 items-start">
+              <div class="flex gap-1 sm:gap-2 items-start">
                 {#each nomImgColumns as col, ci (ci)}
                   <div class="flex flex-1 flex-col gap-2 min-w-0">
                     {#each col as path, i (ci + '-' + i + '-' + path)}
@@ -1763,7 +1763,7 @@ function formatTime(ts: number) {
             <CardTitle class="text-base">垃圾回收</CardTitle>
             <CardDescription>清理孤立文件、裁剪队列、删除过期上传</CardDescription>
           </CardHeader>
-          <CardContent class="space-y-3">
+          <CardContent class="space-y-2 sm:space-y-3 p-3 sm:p-6">
             <Button onclick={handleGc} disabled={loading}>
               <Icon icon="mdi:broom" class="size-4 mr-1" />
               执行 GC

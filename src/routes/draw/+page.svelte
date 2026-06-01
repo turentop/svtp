@@ -769,7 +769,7 @@ async function startGeneration(mode = 'wai') {
   <title>AI 生图 - {siteConfig.title}</title>
 </svelte:head>
 
-<div class="w-full max-w-4xl mx-auto px-4 py-6 space-y-4">
+<div class="w-full max-w-4xl mx-auto px-2 sm:px-4 py-3 sm:py-6 space-y-4">
   <!-- Header -->
   <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
     <div class="flex items-center gap-x-2 gap-y-1 flex-wrap">
@@ -1063,7 +1063,7 @@ async function startGeneration(mode = 'wai') {
             {:else if myImages.length === 0}
               <div class="text-xs text-muted-foreground py-8 text-center">你还没有生成过图片</div>
             {:else}
-              <div class="flex gap-2 items-start">
+              <div class="flex gap-1 sm:gap-2 items-start">
                 {#each imgColumns as col, ci (ci)}
                   <div class="flex flex-1 flex-col gap-2 min-w-0">
                     {#each col as path, i (ci + '-' + i + '-' + path)}
@@ -1161,7 +1161,7 @@ async function startGeneration(mode = 'wai') {
 </div>
 
 <Dialog.Root open={rechargeOpen} onOpenChange={(o) => rechargeOpen = o}>
-  <Dialog.Content class="max-w-sm">
+  <Dialog.Content class="max-w-sm w-[calc(100%-2rem)] sm:w-full">
     <Dialog.Header>
       <Dialog.Title class="flex items-center gap-2">
         <Icon icon="mdi:wallet-plus-outline" class="size-5" />
