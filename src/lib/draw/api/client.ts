@@ -243,7 +243,8 @@ export async function createWalletOrder(payUrl: string, points: number) {
 
 async function fetchPublic<T>(path: string): Promise<T> {
   const baseUrl = get(drawEnv.baseUrl);
-  const resp = await fetch(`${baseUrl}${path}`);
+  const sep = path.includes('?') ? '&' : '?';
+  const resp = await fetch(`${baseUrl}${path}${sep}_t=${Date.now()}`);
   if (!resp.ok) throw new Error(`fetchPublic ${path} failed: ${resp.status}`);
   return resp.json();
 }
