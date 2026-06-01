@@ -42,6 +42,7 @@ import { clearMyImages } from '$lib/draw/api/client';
   let pointsConfig = $state<{ text_to_image: number; image_to_image: number; llm_translate: number; llm_token_per_point: number; signup_bonus: number; text_to_image_anima: number; text_to_image_real: number; tts_generate: number; tts_per_char: number; tts_per_sec: number } | null>(null);
   let walletTimer: ReturnType<typeof setInterval> | null = null;
   let waiHelpOpen = $state(false);
+  let realHelpOpen = $state(false);
   let animaHelpOpen = $state(false);
   let ernieHelpOpen = $state(false);
   let saloonHelpOpen = $state(false);
@@ -910,6 +911,7 @@ async function startGeneration(mode = 'wai') {
                 <button onclick={(e) => { e.stopPropagation(); ernieHelpOpen = true; }} class="inline-flex items-center justify-center size-4 rounded-full border border-muted-foreground/40 text-muted-foreground text-[10px] font-bold ml-1 hover:border-primary hover:text-primary transition-colors" title="关于 Ernie">?</button>
               </TabsTrigger>
               <TabsTrigger value="real" class="text-xs" onclick={() => { genTxtSubTab = 'real'; workflowPath = 'ZImage/RedAIO.json'; directPrompt = ''; workflowPrompt = ''; negativePrompt = ''; workflowNegativePrompt = ''; nlPrompt = ''; }}>RedZI
+                <button onclick={(e) => { e.stopPropagation(); realHelpOpen = true; }} class="inline-flex items-center justify-center size-4 rounded-full border border-muted-foreground/40 text-muted-foreground text-[10px] font-bold ml-1 hover:border-primary hover:text-primary transition-colors" title="关于 RedZI">?</button>
               </TabsTrigger>
             </TabsList>
 
