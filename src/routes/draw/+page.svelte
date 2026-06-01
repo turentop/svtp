@@ -435,7 +435,7 @@ async function startGeneration(mode = 'wai') {
       // Tag preset → fallback to 无Lora base workflow
       let finalWfPath = workflowPath;
       if (finalWfPath.endsWith('.txt')) {
-        const subdir = mode === 'anima' ? 'ANIMA' : 'WAI';
+        const subdir = mode === 'anima' ? 'ANIMA' : mode === 'ernie' ? 'Ernie' : 'WAI';
         finalWfPath = `${subdir}/通用/无Lora.json`;
       }
 
@@ -906,6 +906,9 @@ async function startGeneration(mode = 'wai') {
               <TabsTrigger value="anima" class="text-xs" onclick={() => { genTxtSubTab = 'anima'; workflowPath = ''; }}>Anima
                 <button onclick={(e) => { e.stopPropagation(); animaHelpOpen = true; }} class="inline-flex items-center justify-center size-4 rounded-full border border-muted-foreground/40 text-muted-foreground text-[10px] font-bold ml-1 hover:border-primary hover:text-primary transition-colors" title="关于 Anima">?</button>
               </TabsTrigger>
+              <TabsTrigger value="ernie" class="text-xs" onclick={() => { genTxtSubTab = 'ernie'; workflowPath = ''; }}>Ernie
+                <button onclick={(e) => { e.stopPropagation(); ernieHelpOpen = true; }} class="inline-flex items-center justify-center size-4 rounded-full border border-muted-foreground/40 text-muted-foreground text-[10px] font-bold ml-1 hover:border-primary hover:text-primary transition-colors" title="关于 Ernie">?</button>
+              </TabsTrigger>
               <TabsTrigger value="real" class="text-xs" onclick={() => { genTxtSubTab = 'real'; workflowPath = 'ZImage/RedAIO.json'; directPrompt = ''; workflowPrompt = ''; negativePrompt = ''; workflowNegativePrompt = ''; nlPrompt = ''; }}>RedZI
               </TabsTrigger>
             </TabsList>
@@ -941,6 +944,18 @@ async function startGeneration(mode = 'wai') {
             llmMode="anima"
             turnstileEnabled={pointsConfig?.turnstile_enabled}
           />
+            </TabsContent>
+            <TabsContent value="ernie" class="space-y-4 mt-4">
+              <PromptForm
+                bind:turnstileToken bind:turnstileTick bind:directPrompt bind:negativePrompt bind:nlPrompt
+                bind:workflowPrompt bind:workflowNegativePrompt bind:width bind:height
+                onsubmit={() => startGeneration('ernie')} disabled={queuing || !isLoggedIn} busy={queuing}
+                bind:sameSeed bind:forkSeed
+                llmTokenPerPoint={pointsConfig?.llm_token_per_point}
+                pointsCostSubmit={pointsConfig?.text_to_image_anima}
+                llmMode="anima"
+                turnstileEnabled={pointsConfig?.turnstile_enabled}
+              />
             </TabsContent>
             <TabsContent value="real" class="space-y-4 mt-4">
               <RealTab
