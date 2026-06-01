@@ -1271,9 +1271,11 @@ async function startGeneration(mode = 'wai') {
       <Dialog.Title>ℹ️ 关于 WAI</Dialog.Title>
       <Dialog.Description class="text-sm leading-relaxed">
         <div class="space-y-2">
-          <div>仅支持 <strong>英文 Tag</strong>。</div>
-          <div>角色库：<a href="https://www.downloadmost.com/NoobAI-XL/danbooru-character/" target="_blank" rel="noopener noreferrer" class="text-primary underline">Danbooru Characters</a></div>
-          <div>画风库：<a href="https://www.downloadmost.com/NoobAI-XL/danbooru-artist/" target="_blank" rel="noopener noreferrer" class="text-primary underline">Danbooru Artists</a></div>
+          <div>动漫文生图模型，使用英文 Tag（Danbooru 格式）</div>
+          <div>角色库：<a href="https://www.downloadmost.com/NoobAI-XL/danbooru-character/" target="_blank" rel="noopener noreferrer" class="text-primary underline">www.downloadmost.com/NoobAI-XL/danbooru-character/</a></div>
+          <div>画风库：<a href="https://www.downloadmost.com/NoobAI-XL/danbooru-artist/" target="_blank" rel="noopener noreferrer" class="text-primary underline">www.downloadmost.com/NoobAI-XL/danbooru-artist/</a></div>
+          <div>画风标签以 by 开头，角色标签直接写</div>
+          <div>不支持中文自然语言</div>
         </div>
       </Dialog.Description>
     </Dialog.Header>
@@ -1286,11 +1288,11 @@ async function startGeneration(mode = 'wai') {
       <Dialog.Title>ℹ️ 关于 Anima</Dialog.Title>
       <Dialog.Description class="text-sm leading-relaxed">
         <div class="space-y-2">
-          <div>最新的动漫文生图模型，推荐使用 <strong>自然语言的英文</strong> 描述画面，模型理解能力极强，非常听话！</div>
-          <div>支持 <strong>英文 Tag</strong> 和 <strong>英文自然语言（长句子）</strong> 混搭输入，推荐以英文自然语言为主。</div>
-          <div><strong>不会写英文？</strong>在「自然语言描述」写中文，点「转换」即可。</div>
-          <div>角色库：Danbooru Characters（与 WAI 共用）</div>
-          <div>画风库：Anima Style Explorer（专用）</div>
+          <div>动漫文生图模型</div>
+          <div>支持英文 Tag 和英文自然语言</div>
+          <div>画风标签以 @ 开头</div>
+          <div>角色库/画风库与 WAI 通用。链接见WAI的?</div>
+          <div>内置 Turbo 加速 LoRA，出图更快</div>
         </div>
       </Dialog.Description>
     </Dialog.Header>
@@ -1303,9 +1305,9 @@ async function startGeneration(mode = 'wai') {
       <Dialog.Title>ℹ️ 关于 RedZI</Dialog.Title>
       <Dialog.Description class="text-sm leading-relaxed">
         <div class="space-y-2">
-          <div>基于 <strong>RedAIO</strong> 工作流的RedZI/写实风格文生图。</div>
-          <div>使用 <strong>英文提示词</strong> 可以获得更好的效果。</div>
-          <div><strong>不会写英文？</strong>在「自然语言描述」写中文，点「转换」即可。</div>
+          <div>写实/半写实风格，基于 Flux 架构</div>
+          <div>支持中文自然语言，但英文遵从度可能更好</div>
+          <div>无需选择工作流和画风</div>
         </div>
       </Dialog.Description>
     </Dialog.Header>
@@ -1362,9 +1364,8 @@ async function startGeneration(mode = 'wai') {
       <Dialog.Title>ℹ️ 关于 Ernie</Dialog.Title>
       <Dialog.Description class="text-sm leading-relaxed">
         <div class="space-y-2">
-          <div>Ernie 是生图模型，基于 <strong>ERNIE-Redmix</strong>。</div>
-          <div><strong>支持写字</strong>——可以在图片中生成文字。</div>
-          <div>使用 <strong>英文提示词</strong> 可以获得更好的效果。</div>
+          <div>写实/半写实风格，支持在图中生成文字</div>
+          <div>支持中文自然语言，但英文遵从度可能更好</div>
         </div>
       </Dialog.Description>
     </Dialog.Header>
