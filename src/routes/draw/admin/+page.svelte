@@ -141,7 +141,16 @@ let loadingMore = $state(false);
     if (found) searchedWallet = { ...found, _edit: found.balance };
     else searchedWallet = null;
   }
-  let pointsCfg = $state<{ text_to_image: number; image_to_image: number; llm_translate: number; llm_token_per_point: number; signup_bonus: number; text_to_image_anima: number; text_to_image_real: number; text_to_image_ernie: number; image_to_image_qwen: number; tts_generate: number; tts_per_char: number; tts_per_sec: number }>({ text_to_image: 10, image_to_image: 100, llm_translate: 1, llm_token_per_point: 1000, signup_bonus: 0, text_to_image_anima: 20, text_to_image_real: 15, text_to_image_ernie: 15, image_to_image_qwen: 20, tts_generate: 5, tts_per_char: 0.01, tts_per_sec: 0.033 });
+  let pointsCfg = $state<{ text_to_image: number; image_to_image: number; text_to_video: number; llm_translate: number; llm_token_per_point: number; signup_bonus: number; text_to_image_anima: number; text_to_image_real: number; text_to_image_ernie: number; image_to_image_qwen: number; tts_generate: number; tts_per_char: number; tts_per_sec: number }>({ text_to_image: 10, image_to_image: 100, text_to_video: 600, llm_translate: 1, llm_token_per_point: 1000, signup_bonus: 0, text_to_image_anima: 20, text_to_image_real: 15, text_to_image_ernie: 15, image_to_image_qwen: 20, tts_generate: 5, tts_per_char: 0.01, tts_per_sec: 0.033 });
+  const MODEL_CFG = [
+    { key: 'text_to_image', label: 'WAI' },
+    { key: 'text_to_image_anima', label: 'Anima' },
+    { key: 'text_to_image_ernie', label: 'Ernie' },
+    { key: 'text_to_image_real', label: 'RedZI' },
+    { key: 'image_to_image', label: 'Flux2' },
+    { key: 'image_to_image_qwen', label: 'Qwen' },
+    { key: 'text_to_video', label: '视频' },
+  ];
   let givePointsValue = $state(0);
   let givePointsTarget = $state('');
   let givePointsUid = $state(0);
@@ -1436,12 +1445,9 @@ function formatTime(ts: number) {
             <Button size="sm" onclick={loadCredits} disabled={loading}>刷新</Button>
             <div class="flex flex-wrap items-center gap-2 text-xs">
               <span class="font-medium">消耗配置</span>
-              <label class="flex items-center gap-1">WAI <input type="number" bind:value={pointsCfg.text_to_image} class="w-16 h-7 px-2 rounded border bg-transparent text-xs" /></label>
-              <label class="flex items-center gap-1">Anima <input type="number" bind:value={pointsCfg.text_to_image_anima} class="w-16 h-7 px-2 rounded border bg-transparent text-xs" /></label>
-              <label class="flex items-center gap-1">Ernie <input type="number" bind:value={pointsCfg.text_to_image_ernie} class="w-16 h-7 px-2 rounded border bg-transparent text-xs" /></label>
-              <label class="flex items-center gap-1">RedZI <input type="number" bind:value={pointsCfg.text_to_image_real} class="w-16 h-7 px-2 rounded border bg-transparent text-xs" /></label>
-              <label class="flex items-center gap-1">Flux2 <input type="number" bind:value={pointsCfg.image_to_image} class="w-16 h-7 px-2 rounded border bg-transparent text-xs" /></label>
-              <label class="flex items-center gap-1">Qwen <input type="number" bind:value={pointsCfg.image_to_image_qwen} class="w-16 h-7 px-2 rounded border bg-transparent text-xs" /></label>
+              {#each MODEL_CFG as m}
+                <label class="flex items-center gap-1">{m.label} <input type="number" bind:value={pointsCfg[m.key]} class="w-16 h-7 px-2 rounded border bg-transparent text-xs" /></label>
+              {/each}
               <label class="flex items-center gap-1">LLM token/点 <input type="number" bind:value={pointsCfg.llm_token_per_point} class="w-20 h-7 px-2 rounded border bg-transparent text-xs" title="每N个token扣1点" /></label>
               <label class="flex items-center gap-1">TTS 保底 <input type="number" bind:value={pointsCfg.tts_generate} class="w-16 h-7 px-2 rounded border bg-transparent text-xs" /></label>
               <label class="flex items-center gap-1">TTS 每字 <input type="number" step="0.001" bind:value={pointsCfg.tts_per_char} class="w-20 h-7 px-2 rounded border bg-transparent text-xs" /></label>

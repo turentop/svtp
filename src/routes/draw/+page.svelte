@@ -12,6 +12,8 @@
   import { fetchMyImages, getImageUrl, getImageProxyUrl, forkOutputImage, recommendImage, deleteMyImage, fetchMyRecommendations, addToQueue, fetchMyQueue, fetchWalletBalance, createWalletOrder, fetchPlans, fetchPointsConfig, fetchWorkflowDetail, fetchAnnouncement, fetchStyles, fetchTtsMyRecords, getTtsRecordDownloadUrl, deleteTtsMyRecord } from '$lib/draw/api/client';
 import { clearMyImages } from '$lib/draw/api/client';
   import { consumeFork } from '$lib/draw/stores/fork';
+  import { forumToast } from '$lib/forum/stores/toast';
+  import { get } from 'svelte/store';
   import { onMount, onDestroy } from 'svelte';
   import type { WsStatusEvent, DrawWorkflow, DrawRecommendation } from '$lib/draw/types';
   let announcementText = $state('');
@@ -29,6 +31,7 @@ import { clearMyImages } from '$lib/draw/api/client';
   import SaloonTab from '$lib/components/draw/SaloonTab.svelte';
   import TtsTab from '$lib/components/draw/TtsTab.svelte';
   import RealTab from '$lib/components/draw/RealTab.svelte';
+  import VideoTab from '$lib/components/draw/VideoTab.svelte';
   import ImageLightbox from '$lib/components/draw/ImageLightbox.svelte';
 
   // State
@@ -250,7 +253,7 @@ import { clearMyImages } from '$lib/draw/api/client';
 
   $effect(() => {
     if (activeTab === 'mine' && isLoggedIn) {
-      if (!myImagesLoaded) loadMyImages();
+      loadMyImages();
       if (!ttsMyRecordsLoaded) loadTtsMyRecords();
       myQueueLoading = true;
       loadMyQueue();
@@ -465,13 +468,14 @@ async function startGeneration(mode = 'wai') {
           mode,
         turnstile_token: turnstileToken || undefined,
         });
-        queueSuccess = '成功加入队列！等待生图中，前往"我的"页面查看详情。';
+        forumToast.add('success', '已加入队列', '等待生图中，前往"我的"页面查看详情。');
         turnstileTick++;
         loadMyQueue();
         if (!queueTimer) queueTimer = setInterval(loadMyQueue, 1000);
       } catch (e) {
         const msg = e instanceof Error ? e.message : '加入队列失败';
-        queueError = msg.includes('404') || msg.includes('not found') || msg.includes('workflow') ? '指定的工作流不存在，请重新选择工作流' : msg;
+        const errMsg = msg.includes('404') || msg.includes('not found') || msg.includes('workflow') ? '指定的工作流不存在，请重新选择工作流' : msg;
+        forumToast.add('error', '加入队列失败', errMsg);
       } finally {
         queuing = false;
       }
@@ -483,7 +487,6 @@ async function startGeneration(mode = 'wai') {
 
 
   async function loadMyImages() {
-    if (myImagesLoaded) return;
     myImagesLoading = true;
     try {
       const res = await fetchMyImages();
@@ -887,6 +890,10 @@ async function startGeneration(mode = 'wai') {
             图生
             <button onclick={(e) => { e.stopPropagation(); img2imgHelpOpen = true; }} class="inline-flex items-center justify-center size-4 rounded-full border border-muted-foreground/40 text-muted-foreground text-[10px] font-bold ml-1 hover:border-primary hover:text-primary transition-colors" title="图生图帮助">?</button>
           </TabsTrigger>
+          <TabsTrigger value="video" class="flex-1">
+            <Icon icon="mdi:video-vintage" class="size-4 mr-1" />
+            动态壁纸
+          </TabsTrigger>
           <TabsTrigger value="saloon" class="flex-1">
             <Icon icon="mdi:chat-outline" class="size-4 mr-1" />
             酒馆
@@ -1002,6 +1009,9 @@ async function startGeneration(mode = 'wai') {
         <TabsContent value="tts" class="mt-4">
           <TtsTab ttsPerChar={pointsConfig?.tts_per_char} ttsPerSec={pointsConfig?.tts_per_sec} ttsMin={pointsConfig?.tts_generate} />
         </TabsContent>
+        <TabsContent value="video" class="mt-4">
+          <VideoTab />
+        </TabsContent>
 
       </Tabs>
     </TabsContent>
@@ -1043,6 +1053,7 @@ async function startGeneration(mode = 'wai') {
                       <Icon icon="mdi:cancel" class="size-4 text-muted-foreground" /><span class="flex-1">已取消</span>
                     {:else}
                       <Icon icon="mdi:clock-outline" class="size-4 text-muted-foreground" /><span class="flex-1">等待中，前面还有 {item.position != null ? item.position - 1 : 0} 位</span>
+                      <button class="text-red-500 hover:text-red-400 shrink-0" onclick={async () => { try { const baseUrl = get(drawEnv.baseUrl); await fetch(baseUrl + '/api/draw/my-queue/' + item.id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + forumAuth.getToken() } }); loadMyQueue(); forumToast.add('success', '已取消', ''); } catch { forumToast.add('error', '取消失败', ''); } }}>取消</button>
                     {/if}
                     </div>
                   {/each}
@@ -1097,7 +1108,11 @@ async function startGeneration(mode = 'wai') {
                       {#if item}
                         <div role="button" tabindex="0" class="group relative rounded-md overflow-hidden border hover:ring-2 hover:ring-primary/50 transition-all cursor-pointer {selectedPaths.has(item.path) ? 'ring-2 ring-primary' : ''}"
                           onclick={() => { if (selectMode) toggleSelect(item.path); else { myLbIndex = myImages.indexOf(item); myLbOpen = true; } }}>
-                          <img src={getImageProxyUrl(item.path)} alt={item.path} loading="lazy" decoding="async" style="aspect-ratio: 1;" onload={handleImgLoad} class="block w-full h-auto bg-muted" />
+                          {#if item.path.endsWith('.mp4') || item.path.endsWith('.webm')}
+                            <video src={getImageProxyUrl(item.path)} loop autoplay muted playsinline class="block w-full h-auto bg-muted" style="aspect-ratio: 1;" />
+                          {:else}
+                            <img src={getImageProxyUrl(item.path)} alt={item.path} loading="lazy" decoding="async" style="aspect-ratio: 1;" onload={handleImgLoad} class="block w-full h-auto bg-muted" />
+                          {/if}
                           {#if selectMode}
                             <div class="absolute top-1 left-1 flex items-center justify-center" onclick={(e) => e.stopPropagation()}>
                               <input type="checkbox" checked={selectedPaths.has(item.path)} onchange={() => toggleSelect(item.path)} class="size-4 accent-primary" />

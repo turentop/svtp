@@ -263,7 +263,7 @@ export async function resolveRecommendations(recIds: string[], action: 'approve'
     return drawRequest<{ ok: boolean }>('/api/draw/admin/tts-record/' + id, { method: 'DELETE' });
   }
 
-  export async function savePointsConfig(cfg: { text_to_image: number; image_to_image: number; llm_translate: number; llm_token_per_point?: number; signup_bonus?: number; text_to_image_anima?: number; text_to_image_real?: number; text_to_image_ernie?: number; image_to_image_qwen?: number; tts_generate?: number; tts_per_char?: number; tts_per_sec?: number }) {
+  export async function savePointsConfig(cfg: { text_to_image: number; image_to_image: number; text_to_video?: number; llm_translate: number; llm_token_per_point?: number; signup_bonus?: number; text_to_image_anima?: number; text_to_image_real?: number; text_to_image_ernie?: number; image_to_image_qwen?: number; tts_generate?: number; tts_per_char?: number; tts_per_sec?: number }) {
     return drawRequest<{ ok: boolean; config: any }>('/api/draw/admin/points-config', {
       method: 'POST',
       json: cfg

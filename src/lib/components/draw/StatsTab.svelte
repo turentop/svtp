@@ -4,7 +4,7 @@
   import { drawRequest } from '$lib/draw/api/client';
   import { onMount } from 'svelte';
 
-  let data = $state<{ stats: Record<string, { calls: number; cost: number; failed: number; byModel: Record<string, number> }>; income: Record<string, number> } | null>(null);
+  let data = $state<{ stats: Record<string, { calls: number; cost: number; failed: number; byModel: Record<string, { calls: number; failed: number }> }>; income: Record<string, number> } | null>(null);
   let loading = $state(false);
 
   onMount(() => load());
@@ -27,7 +27,7 @@
     {#if data}
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
         {#each Object.entries(data.stats) as [period, s]}
-          {@const st = s as { calls: number; cost: number; failed: number; byModel: Record<string, number> }}
+          {@const st = s as { calls: number; cost: number; failed: number; byModel: Record<string, { calls: number; failed: number }> }}
           <div class="border rounded-lg p-3 space-y-1 text-xs">
             <div class="font-medium text-sm">
               {period === 'today' ? '今日' : period === '7d' ? '近7天' : '近1个月'}
@@ -35,8 +35,9 @@
             <div class="text-muted-foreground">调用: {st.calls} | 消耗: ⚡{st.cost}</div>
             <div class="text-muted-foreground">失败: {st.failed}</div>
             <div class="flex flex-wrap gap-1 pt-1">
-              {#each Object.entries(st.byModel) as [model, count]}
-                <span class="px-1.5 py-0.5 rounded bg-muted">{model}: {count}</span>
+              {#each Object.entries(st.byModel) as [model, info]}
+                {@const inf = info as { calls: number; failed: number }}
+                <span class="px-1.5 py-0.5 rounded bg-muted">{model}: {inf.calls}{#if inf.failed > 0}<span class="text-red-500">({inf.failed}失败)</span>{/if}</span>
               {/each}
             </div>
           </div>
