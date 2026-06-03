@@ -139,31 +139,39 @@ let _redirectResolved = false;
 let _redirectFailAt = 0;
 const REDIRECT_COOLDOWN = 30000;
 
+let _redirectPending: Promise<void> | null = null;
+
 export async function resolveApiRedirect(force = false): Promise<void> {
   if (_redirectResolved && !force) return;
+  if (_redirectPending) return _redirectPending;
   const now = Date.now();
   if (!force && now - _redirectFailAt < REDIRECT_COOLDOWN) return;
-  apiStatus.set('checking');
-  const baseUrl = get(drawEnv.baseUrl);
-  addRedirectLog(`probing ${baseUrl}/health`);
-  try {
-    const resp = await fetch(`${baseUrl}/health?_t=${Date.now()}`, { method: 'GET' });
-    addRedirectLog(`response status=${resp.status} url=${resp.url}`);
-    if (!resp.ok) { addRedirectLog(`not ok`); throw new Error('health check failed'); }
-    const finalUrl = new URL(resp.url.replace(/\/health[\?&].*$/, '').replace(/\/health$/, '')).origin;
-    addRedirectLog(`baseUrl=${baseUrl} finalUrl=${finalUrl}`);
-    if (finalUrl !== baseUrl && finalUrl.startsWith('http')) {
-      addRedirectLog(`redirect detected, updating to ${finalUrl}`);
-      drawEnv.customBaseUrl.set(finalUrl);
-    } else {
-      addRedirectLog(`no redirect, using ${baseUrl}`);
+  _redirectPending = (async () => {
+    apiStatus.set('checking');
+    const baseUrl = get(drawEnv.baseUrl);
+    addRedirectLog(`probing ${baseUrl}/health`);
+    try {
+      const resp = await fetch(`${baseUrl}/health?_t=${Date.now()}`, { method: 'GET' });
+      addRedirectLog(`response status=${resp.status} url=${resp.url}`);
+      if (!resp.ok) { addRedirectLog(`not ok`); throw new Error('health check failed'); }
+      const finalUrl = new URL(resp.url.replace(/\/health[\?&].*$/, '').replace(/\/health$/, '')).origin;
+      addRedirectLog(`baseUrl=${baseUrl} finalUrl=${finalUrl}`);
+      if (finalUrl !== baseUrl && finalUrl.startsWith('http')) {
+        addRedirectLog(`redirect detected, updating to ${finalUrl}`);
+        drawEnv.customBaseUrl.set(finalUrl);
+      } else {
+        addRedirectLog(`no redirect, using ${baseUrl}`);
+      }
+      _redirectResolved = true;
+      apiStatus.set('online');
+      apiError.set(null);
+    } catch {
+      addRedirectLog(`failed`);
+      _redirectFailAt = Date.now();
+      apiStatus.set('offline');
+    } finally {
+      _redirectPending = null;
     }
-    _redirectResolved = true;
-    apiStatus.set('online');
-    apiError.set(null);
-  } catch {
-    addRedirectLog(`failed`);
-    _redirectFailAt = Date.now();
-    apiStatus.set('offline');
-  }
+  })();
+  return _redirectPending;
 }
