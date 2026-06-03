@@ -188,6 +188,7 @@ export async function addToQueue(payload: {
     instruct?: string;
     language?: string;
     ref_text?: string;
+    ref_audio_name?: string;
 }) {
   return drawRequest<{ queued: boolean; position: number; item_id: number }>('/api/draw/queue', {
     method: 'POST',
@@ -490,6 +491,23 @@ export async function deleteTtsMyRecord(id: number) {
 
 export async function fetchTtsSpeakers() {
   return drawRequest<{ speakers: Array<{ id: string; description: string }> }>('/api/draw/tts/speakers');
+}
+
+export async function uploadTtsRefAudio(file: File): Promise<{ filename: string }> {
+  const token = forumAuth.getToken();
+  const baseUrl = get(drawEnv.baseUrl);
+  const fd = new FormData();
+  fd.append('audio', file);
+  const resp = await fetch(baseUrl + '/api/tts/upload-ref', {
+    method: 'POST',
+    headers: token ? { 'Authorization': 'Bearer ' + token } : {},
+    body: fd,
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: resp.statusText }));
+    throw new Error(err.error || '上传失败');
+  }
+  return resp.json();
 }
 
 export async function generateTtsCustomVoice(data: { text: string; speaker: string; language?: string; instruct?: string }) {
