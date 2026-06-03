@@ -12,6 +12,7 @@
   import { fetchMyImages, getImageUrl, getImageProxyUrl, forkOutputImage, recommendImage, deleteMyImage, fetchMyRecommendations, addToQueue, fetchMyQueue, fetchWalletBalance, createWalletOrder, fetchPlans, fetchPointsConfig, fetchWorkflowDetail, fetchAnnouncement, fetchStyles, fetchTtsMyRecords, getTtsRecordDownloadUrl, deleteTtsMyRecord } from '$lib/draw/api/client';
 import { clearMyImages } from '$lib/draw/api/client';
   import { consumeFork } from '$lib/draw/stores/fork';
+import { fetchOutputMeta } from '$lib/draw/api/client';
   import { forumToast } from '$lib/forum/stores/toast';
   import { get } from 'svelte/store';
   import { onMount, onDestroy } from 'svelte';
@@ -174,6 +175,8 @@ import { clearMyImages } from '$lib/draw/api/client';
   let hasMore = $state(true);
   let loadingMore = $state(false);
   let myImagesDisplayLimit = $state(5);
+let expandedAudioId = $state<string | null>(null);
+let audioMeta = $state<Record<string, { prompt?: string; speaker?: string; language?: string }>>({});
 
   // My images lightbox
   let myLbOpen = $state(false);
@@ -1116,7 +1119,7 @@ async function startGeneration(mode = 'wai') {
             {#if myImagesLoading}
               <div class="text-xs text-muted-foreground py-8 text-center">加载中...</div>
             {:else if myImages.length === 0}
-              <div class="text-xs text-muted-foreground py-8 text-center">你还没有生成过图片</div>
+              <div class="text-xs text-muted-foreground py-8 text-center">你还没有生成过内容</div>
             {:else}
               <div class="flex gap-1 sm:gap-2 items-start">
                 {#each imgColumns as col, ci (ci)}
@@ -1125,9 +1128,31 @@ async function startGeneration(mode = 'wai') {
                       {@const item = myImages.find(i => i.path === path)}
                       {#if item}
                         <div role="button" tabindex="0" class="group relative rounded-md overflow-hidden border hover:ring-2 hover:ring-primary/50 transition-all cursor-pointer {selectedPaths.has(item.path) ? 'ring-2 ring-primary' : ''}"
-                          onclick={() => { if (selectMode) toggleSelect(item.path); else { myLbIndex = myImages.indexOf(item); myLbOpen = true; } }}>
+                          onclick={() => { if (selectMode) toggleSelect(item.path); else if (item.path.endsWith('.wav') || item.path.endsWith('.flac')) {} else { myLbIndex = myImages.indexOf(item); myLbOpen = true; } }}>
                           {#if item.path.endsWith('.mp4') || item.path.endsWith('.webm')}
                             <video src={getImageProxyUrl(item.path)} loop autoplay muted playsinline class="block w-full h-auto bg-muted" style="aspect-ratio: 1;" />
+                          {:else if item.path.endsWith('.wav') || item.path.endsWith('.flac')}
+                            <div class="bg-muted" style="aspect-ratio: 1;">
+                              <div class="flex items-center justify-center h-full p-2" onclick={(e) => { e.stopPropagation(); }}>
+                                <audio src={getImageUrl(item.path)} controls class="w-full max-w-full" preload="none"></audio>
+                              </div>
+                              <button onclick={async (e) => { e.stopPropagation(); if (expandedAudioId === item.path) { expandedAudioId = null; return; } expandedAudioId = item.path; if (!audioMeta[item.path]) { try { const m = await fetchOutputMeta(item.path); audioMeta = { ...audioMeta, [item.path]: m }; } catch {} } }} class="w-full text-[10px] text-muted-foreground hover:text-foreground py-1 text-center border-t border-border/50 transition-colors">
+                                {expandedAudioId === item.path ? '收起原文' : '查看原文'}
+                              </button>
+                              {#if expandedAudioId === item.path}
+                                <div class="text-[10px] text-muted-foreground px-2 pb-2 leading-relaxed border-t border-border/50 pt-1.5" onclick={(e) => e.stopPropagation()}>
+                                  {#if audioMeta[item.path]?.prompt}
+                                    <div class="line-clamp-3">{audioMeta[item.path].prompt}</div>
+                                    <div class="flex gap-2 mt-1">
+                                      {#if audioMeta[item.path]?.speaker}<span class="text-primary/60">音色: {audioMeta[item.path].speaker}</span>{/if}
+                                      {#if audioMeta[item.path]?.language}<span class="text-primary/60">语言: {audioMeta[item.path].language}</span>{/if}
+                                    </div>
+                                  {:else}
+                                    <span class="italic">加载中...</span>
+                                  {/if}
+                                </div>
+                              {/if}
+                            </div>
                           {:else}
                             <img src={getImageProxyUrl(item.path)} alt={item.path} loading="lazy" decoding="async" style="aspect-ratio: 1;" onload={handleImgLoad} class="block w-full h-auto bg-muted" />
                           {/if}
@@ -1152,39 +1177,7 @@ async function startGeneration(mode = 'wai') {
               {/if}
             {/if}
 
-            <!-- TTS History -->
-            <div class="pt-4 border-t mt-4">
-              <div class="flex items-center justify-between mb-2">
-                <h3 class="text-sm font-medium flex items-center gap-1.5"><Icon icon="mdi:voice" class="size-4" />TTS 记录</h3>
-                <button onclick={() => { ttsMyRecordsLoaded = false; loadTtsMyRecords(); }} class="size-7 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors" title="刷新"><Icon icon="mdi:refresh" class="size-3.5" /></button>
-              </div>
-              {#if ttsMyRecordsLoading}
-                <div class="text-xs text-muted-foreground py-4 text-center">加载中...</div>
-              {:else if !isLoggedIn}
-                <div class="text-xs text-muted-foreground py-4 text-center">请先登录</div>
-              {:else if ttsMyRecords.length === 0}
-                <div class="text-xs text-muted-foreground py-4 text-center">你还没有生成过 TTS</div>
-              {:else}
-                <div class="space-y-2">
-                  {#each ttsMyRecords as rec}
-                    <div class="text-xs border rounded-lg px-3 py-2 space-y-1">
-                      <div class="flex items-center gap-2 text-muted-foreground">
-                        <span class="truncate max-w-[200px]">{rec.text}</span>
-                        <span class="ml-auto shrink-0">⚡{rec.cost} | {rec.language} | {rec.audioDuration.toFixed(1)}s</span>
-                      </div>
-                      {#if rec.refText}
-                        <div class="truncate text-muted-foreground">参考: {rec.refText}</div>
-                      {/if}
-                      <div class="flex items-center gap-2 text-muted-foreground">
-                        <span>{new Date(rec.finished_at * 1000).toLocaleString()}</span>
-                        <audio src={getTtsRecordDownloadUrl(rec.id)} controls class="h-8 ml-auto" preload="none"></audio>
-                        <button onclick={async () => { if (confirm('确定删除这条 TTS 记录？')) { await deleteTtsMyRecord(rec.id); ttsMyRecords = ttsMyRecords.filter(r => r.id !== rec.id); } }} class="underline text-red-500 shrink-0">删除</button>
-                      </div>
-                    </div>
-                  {/each}
-                </div>
-              {/if}
-            </div>
+
           </div>
         {/if}
         </div>

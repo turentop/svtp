@@ -184,6 +184,10 @@ export async function addToQueue(payload: {
   image1_name?: string;
   image2_name?: string;
     turnstile_token?: string;
+    speaker?: string;
+    instruct?: string;
+    language?: string;
+    ref_text?: string;
 }) {
   return drawRequest<{ queued: boolean; position: number; item_id: number }>('/api/draw/queue', {
     method: 'POST',
@@ -201,6 +205,7 @@ export async function fetchMyQueue() {
     finished_at?: number;
     error?: string;
     position?: number | null;
+    _output_files?: string[];
   }>; total: number }>('/api/draw/my-queue', { requiresAuth: true });
 }
 
@@ -253,6 +258,12 @@ async function fetchPublic<T>(path: string): Promise<T> {
 
 export async function fetchAnnouncement() {
   return fetchPublic<{ announcement: { enabled: boolean; title: string; content: string } | null }>('/api/announcement');
+}
+
+export async function fetchOutputMeta(path: string) {
+  return drawRequest<{ prompt?: string; workflow_path?: string; speaker?: string; language?: string }>('/api/output/meta', {
+    query: { path }
+  });
 }
 
 export async function fetchPlans() {
