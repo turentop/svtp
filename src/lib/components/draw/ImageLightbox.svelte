@@ -112,7 +112,7 @@
 
     <!-- Image / Video -->
     <div class="relative flex items-center justify-center w-full h-full px-16 py-12">
-      {#if (images[index].cached || images[index].src).match(/\.(mp4|webm)(\?|$)/)}
+      {#if (images[index].cached || images[index].src).match(/\.(mp4|webm)(\?|&|$)/)}
         <video
           src={images[index].cached || images[index].src}
           controls autoplay loop
