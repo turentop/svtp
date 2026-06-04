@@ -1237,6 +1237,7 @@ async function startGeneration(mode = 'wai') {
             </div>
           {/if}
         {/if}
+      {/if}
 <Dialog.Root open={waiHelpOpen} onOpenChange={(o) => waiHelpOpen = o}>
   <Dialog.Content class="max-w-md">
     <Dialog.Header>
