@@ -14,6 +14,7 @@
   import { drawEnv } from '$lib/draw/stores/env';
   import { get } from 'svelte/store';
   import * as admin from '$lib/draw/api/admin';
+  import PieChart from '$lib/components/draw/PieChart.svelte';
   import { getImageProxyUrl, getImageUrl, getThumbnailUrl, forkOutputImage, clearQueue, fetchDebugInfo } from '$lib/draw/api/client';
   import { pendingFork } from '$lib/draw/stores/fork';
 import { onMount, onDestroy } from 'svelte';
@@ -1819,6 +1820,25 @@ function formatTime(ts: number) {
                 <span>总计：{formatSize(storageTotal)}</span>
                 <span class="text-muted-foreground/50">|</span>
                 <span>用户数：{storageItems.length}</span>
+              </div>
+              <div class="flex flex-wrap gap-6 mb-4">
+                <div class="border rounded-lg p-3">
+                  <div class="text-xs font-medium mb-2">按用户</div>
+                  <PieChart
+                    items={storageItems.map(i => ({ label: '#' + i.user_id, size: i.img_size + i.aud_size }))}
+                    size={160} maxSlices={6}
+                  />
+                </div>
+                <div class="border rounded-lg p-3">
+                  <div class="text-xs font-medium mb-2">按类型</div>
+                  {@const imgTotal = storageItems.reduce((s, i) => s + i.img_size, 0)}
+                  {@const audTotal = storageItems.reduce((s, i) => s + i.aud_size, 0)}
+                  <PieChart
+                    items={[{ label: '图片', size: imgTotal }, { label: '音频', size: audTotal }]}
+                    colorScheme={['#3b82f6', '#f59e0b']}
+                    size={160} maxSlices={2}
+                  />
+                </div>
               </div>
               <div class="space-y-1 max-h-[600px] overflow-y-auto">
                 {#each storageItems as item, i}
