@@ -20,14 +20,14 @@
   let total = $derived(items.reduce((s, i) => s + Number(i[valueKey] || 0), 0));
 
   // 取前 N 项，其余合并
-  let sorted = $derived([...items].sort((a, b) => Number(b[valueKey] || 0) - Number(a[valueKey] || 0)));
-  let slices = $derived(() => {
+  let slices = $derived.by(() => {
+    const sorted = [...items].sort((a, b) => Number(b[valueKey] || 0) - Number(a[valueKey] || 0));
     const top = sorted.slice(0, maxSlices);
     const rest = sorted.slice(maxSlices);
     const restVal = rest.reduce((s, i) => s + Number(i[valueKey] || 0), 0);
     if (restVal > 0) top.push({ [labelKey]: othersLabel, [valueKey]: restVal } as any);
     return top;
-  }());
+  });
 
   let cx = size / 2, cy = size / 2, r = size / 2 - 4;
 
