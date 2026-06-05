@@ -29,7 +29,19 @@
     return top;
   });
 
-  let cx = size / 2, cy = size / 2, r = size / 2 - 4;
+  let cx = $derived(size / 2), cy = $derived(size / 2), r = $derived(size / 2 - 4);
+
+  // 预计算每个扇区的偏移角度
+  let slicesWithOffset = $derived.by(() => {
+    let off = 0;
+    return slices.map(s => {
+      const val = Number(s[valueKey] || 0);
+      const angle = total > 0 ? (val / total) * Math.PI * 2 : 0;
+      const entry = { ...s, _offset: off, _angle: angle };
+      off += angle;
+      return entry;
+    });
+  });
 
   function arcPath(value: number, offset: number): string {
     if (total === 0) return '';
@@ -58,29 +70,25 @@
 
 <div class="flex items-center gap-4">
   <svg width={size} height={size} viewBox="0 0 {size} {size}" class="shrink-0">
-    {#let offset = 0}
-      {#each slices as slice}
-        {@const val = Number(slice[valueKey] || 0)}
-        {@const color = colorScheme[slices.indexOf(slice) % colorScheme.length]}
+      {#each slicesWithOffset as s}
+        {@const val = Number(s[valueKey] || 0)}
+        {@const color = colorScheme[slicesWithOffset.indexOf(s) % colorScheme.length]}
         {#if val > 0}
-          <path d={arcPath(val, offset)} fill={color} opacity="0.85" class="hover:opacity-100 transition-opacity cursor-pointer" title={String(slice[labelKey]) + ': ' + formatSize(val)} />
+          <path d={arcPath(val, s._offset)} fill={color} opacity="0.85" class="hover:opacity-100 transition-opacity cursor-pointer" title={String(s[labelKey]) + ': ' + formatSize(val)} />
         {/if}
-        {@const angle = (val / total) * Math.PI * 2}
-        {@const offset = offset + angle}
       {/each}
-    {/let}
     <text x={cx} y={cy - 4} text-anchor="middle" class="fill-foreground text-xs font-bold">{formatSize(total)}</text>
     <text x={cx} y={cy + 10} text-anchor="middle" class="fill-muted-foreground text-[9px]">总计</text>
   </svg>
 
   <div class="space-y-1 text-xs">
-    {#each slices as slice}
-      {@const val = Number(slice[valueKey] || 0)}
+    {#each slicesWithOffset as s}
+      {@const val = Number(s[valueKey] || 0)}
       {@const pct = total > 0 ? (val / total * 100).toFixed(1) : '0'}
-      {@const color = colorScheme[slices.indexOf(slice) % colorScheme.length]}
+      {@const color = colorScheme[slicesWithOffset.indexOf(s) % colorScheme.length]}
       <div class="flex items-center gap-1.5">
         <span class="size-2.5 rounded-sm shrink-0" style="background: {color}"></span>
-        <span class="text-muted-foreground truncate max-w-[80px]">{String(slice[labelKey])}</span>
+        <span class="text-muted-foreground truncate max-w-[80px]">{String(s[labelKey])}</span>
         <span class="font-mono ml-auto">{pct}%</span>
       </div>
     {/each}
