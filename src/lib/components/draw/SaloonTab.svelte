@@ -8,6 +8,7 @@ import { drawEnv } from '$lib/draw/stores/env';
 import { forumAuth } from '$lib/forum/stores/auth';
 import { get } from 'svelte/store';
 import { onMount, onDestroy } from 'svelte';
+import { autoResize } from '$lib/utils/actions';
 
 let {
   workflowPath = '',
@@ -73,6 +74,7 @@ async function speakMessage(text: string, msgIdx?: number) {
         speaker: ttsMode === 'preset' ? ttsSpeaker : undefined,
         instruct: ttsInstruct || undefined,
         tags: ttsTags || undefined,
+        source: 'saloon',
       },
       requiresAuth: true,
     });
@@ -173,6 +175,7 @@ async function submitGenJob(tags: string, msgIdx: number) {
       direct_prompt: finalPrompt, width: width || undefined, height: height || undefined,
       style_tags: styleTags || undefined, negative_prompt: negativePrompt || undefined,
       workflow_path: finalWfPath, turnstile_token: turnstileToken || undefined,
+      source: 'saloon',
     });
     // 添加到消息的 pendingImages
     chatMessages = chatMessages.map((m, i) => {
@@ -458,7 +461,7 @@ $effect(() => {
           {/if}
         </div>
         <input type="text" class="w-full h-8 text-xs border rounded px-2 bg-background" placeholder="给这个角色设定起个名字" bind:value={presetName} />
-        <textarea class="w-full text-xs border rounded px-2 py-1.5 bg-background resize-none" rows="3" placeholder="你正在扮演遐蝶。你是一个..." bind:value={systemPrompt}></textarea>
+        <textarea use:autoResize class="w-full text-xs border rounded px-2 py-1.5 bg-background scrollbar-hide" placeholder="你正在扮演遐蝶。你是一个..." bind:value={systemPrompt}></textarea>
         <div class="flex gap-2">
           <Button variant="default" size="sm" class="h-7 text-xs" onclick={savePreset}><Icon icon="mdi:content-save-outline" class="size-3.5 mr-1" />保存预设</Button>
           <Button variant="outline" size="sm" class="h-7 text-xs" onclick={newPreset}>新建</Button>
@@ -511,13 +514,14 @@ $effect(() => {
                       {pending.status === 'pending' ? '排队中' : pending.status === 'waiting' ? '等待中' : '生图中'}
                     </span>
                   {/if}
+                </div>
+              {/each}
+            </div>
+          {/if}
 
           {#if msg.ttsUrl}
             <div class="mt-1.5">
-              <audio src={msg.ttsUrl} controls class="w-full h-8 max-w-[200px]" preload="none"></audio>
-            </div>
-          {/if}                </div>
-              {/each}
+              <audio src={msg.ttsUrl} controls class="w-full h-8 max-w-full" preload="none"></audio>
             </div>
           {/if}
 
