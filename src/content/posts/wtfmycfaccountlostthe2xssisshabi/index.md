@@ -167,8 +167,11 @@ draft: false
 
 二叉树树你是人啊
 
-# 未完待续
+# 后记
 
-待我先睡一觉哈哈
+- `b-live.2x.nz` 原依托于Cloudflare Worker，目前迁移到Oracle继续运营
+- `gh.2x.nz` 等域名（即Github镜像站）原依托于Cloudflare Worker，作者太懒，不想迁移了，就让它4那吧
+- QQBot的文章通知原依托于Cloudflare Tunnel连接家宽NAS，但是由于Tunnel是ZeroTrust的子业务，而启用ZeroTrust需要添加付款方式并订阅。二叉树树有阴影了，故将整个QQBot（NC+NB）全部迁移到Oracle继续运营
+- `u.2x.nz` 因为使用了万恶的SaaS，导致新账号无该 **子域名** 的控制权，故迁移到 `umami.2x.nz` 并使用Oracle继续运营
 
 
