@@ -179,8 +179,13 @@ export interface WsStatusMessage {
   online: number;
   busy: boolean;
   active: number;
-  stage?: 'loading' | 'llm' | 'generating';
+  stage?: string;
   workflow?: string;
+  node?: string;
+  value?: number;
+  max?: number;
+  prompt_id?: string;
+  item_id?: number;
 }
 
 export interface WsOnlineMessage {

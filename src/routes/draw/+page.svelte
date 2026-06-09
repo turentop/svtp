@@ -368,11 +368,20 @@ let ttsTags = $state('');
     statusConn = connectStatusWs(url, handleStatusMessage, undefined, () => { globalBusy = false; });
   });
 
+  let progressStage = $state('');
+  let progressNode = $state('');
+  let progressValue = $state(0);
+  let progressMax = $state(0);
+
   function handleStatusMessage(msg: WsStatusEvent) {
     switch (msg.type) {
       case 'status':
         onlineCount = msg.online;
         globalBusy = msg.busy;
+        if (msg.stage) progressStage = msg.stage;
+        if (msg.node) progressNode = msg.node;
+        if (msg.value !== undefined) progressValue = msg.value;
+        if (msg.max !== undefined) progressMax = msg.max;
         break;
       case 'online':
         onlineCount = msg.count;
@@ -826,7 +835,14 @@ async function startGeneration(mode = 'wai') {
         </Badge>
       {/if}
       {#if globalBusy}
-        <Badge variant="default" class="text-xs animate-pulse">生成中</Badge>
+        <Badge variant="default" class="text-xs animate-pulse">
+          生成中
+          {#if progressStage === '生成中' && progressMax > 0}
+            ({progressValue}/{progressMax})
+          {:else if progressStage}
+            {progressStage}
+          {/if}
+        </Badge>
       {/if}
       {#if dsOutage}
         <Badge variant="destructive" class="text-xs" title="DeepSeek API 异常，LLM 翻译不可用">LLM 异常</Badge>
