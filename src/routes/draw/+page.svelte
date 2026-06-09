@@ -871,23 +871,26 @@ async function startGeneration(mode = 'wai') {
     </Dialog.Content>
   </Dialog.Root>
 
-  <!-- API 检测：offline 时加警告横幅，不阻断 UI -->
-  {#if apiStatusValue === 'offline'}
-    <div class="rounded-lg border border-amber-600/50 bg-amber-950/20 p-3 mb-4 space-y-1">
-      <div class="text-xs text-amber-500 flex items-center gap-2">
-        <Icon icon="mdi:alert-outline" class="size-3.5 shrink-0" />
-        <span>后端检测异常，功能可能受影响，正在自动重试...</span>
-      </div>
+  <!-- API 检测：初始化时全屏跑码，在线才显示页面 -->
+  {#if apiStatusValue === 'checking' || apiStatusValue === 'offline'}
+    <div class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background gap-4">
+      {#if apiStatusValue === 'checking'}
+        <Icon icon="mdi:loading" class="size-8 animate-spin text-muted-foreground" />
+        <p class="text-sm text-muted-foreground">正在检测 API 状态...</p>
+      {:else}
+        <Icon icon="mdi:cloud-alert" class="size-12 text-destructive" />
+        <p class="text-sm text-destructive font-medium">后端不可用</p>
+      {/if}
       {#if $redirectLogs.length > 0}
-        <div class="text-[10px] font-mono text-amber-700/70 max-h-20 overflow-y-auto space-y-0.5">
-          {#each $redirectLogs as log}
-            <div>{log}</div>
-          {/each}
+        <div class="max-w-md w-full px-4">
+          <div class="rounded-lg border border-border bg-muted/30 p-3 space-y-1 text-[10px] font-mono text-muted-foreground max-h-40 overflow-y-auto">
+            {#each $redirectLogs as log}
+              <div>{log}</div>
+            {/each}
+          </div>
         </div>
       {/if}
     </div>
-  {:else if apiStatusValue === 'checking'}
-    <div class="py-8 text-center text-sm text-muted-foreground">正在检测 API 状态...</div>
   {/if}
 
   <!-- Auth warning -->

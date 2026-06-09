@@ -94,14 +94,12 @@ function createEnvStore(): DrawEnvStore {
       const url = sanitizeBaseUrl(v, get(envStore));
       writeLocalStorage(DRAW_API_CUSTOM_BASE_URL_STORAGE_KEY, url);
       _redirectResolved = false;
-      _redirectFailAt = 0;
       apiStatus.set('checking');
       customBaseUrlStore.set(url);
     },
       reset: (env) => {
       writeLocalStorage(DRAW_API_CUSTOM_BASE_URL_STORAGE_KEY, '');
       _redirectResolved = false;
-      _redirectFailAt = 0;
       customBaseUrlStore.set(DRAW_API_BASE_URLS[env]);
     }
     },
@@ -109,7 +107,6 @@ function createEnvStore(): DrawEnvStore {
       const next = normalizeEnv(v);
       writeLocalStorage(DRAW_API_ENV_STORAGE_KEY, next);
       _redirectResolved = false;
-      _redirectFailAt = 0;
       envStore.set(next);
       customBaseUrlStore.set(DRAW_API_BASE_URLS[next]);
     },
@@ -121,7 +118,6 @@ function createEnvStore(): DrawEnvStore {
         return next;
       });
       _redirectResolved = false;
-      _redirectFailAt = 0;
       customBaseUrlStore.set(DRAW_API_BASE_URLS[next]);
     },
     getBaseUrl: (env) => DRAW_API_BASE_URLS[env]
