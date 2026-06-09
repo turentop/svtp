@@ -35,18 +35,21 @@
 </script>
 
 <div class="space-y-3">
-  <div class="flex items-center gap-2 font-medium">
-    <span>API 设置</span>
-    <span class="text-xs text-muted-foreground">
-      {currentEnv === 'prod' ? '生产' : '开发'}
-    </span>
-    <span class="ml-auto">
-      {#if currentEnv === 'prod'}
-        <Button size="sm" variant="outline" class="text-xs" onclick={toggle}>开发</Button>
-      {:else}
-        <Button size="sm" variant="default" class="text-xs" onclick={toggle}>生产</Button>
-      {/if}
-    </span>
+  <div class="flex items-center gap-2">
+    <span class="font-medium">API设置</span>
+    <span class="text-xs">-</span>
+    <button
+      class="text-xs px-2 py-0.5 rounded {currentEnv === 'prod' ? 'bg-primary text-primary-foreground' : 'border border-input text-muted-foreground'}"
+      onclick={() => { if (currentEnv !== 'prod') toggle(); }}
+    >
+      生产 {currentEnv === 'prod' ? '✅' : '□'}
+    </button>
+    <button
+      class="text-xs px-2 py-0.5 rounded {currentEnv === 'dev' ? 'bg-primary text-primary-foreground' : 'border border-input text-muted-foreground'}"
+      onclick={() => { if (currentEnv !== 'dev') toggle(); }}
+    >
+      开发 {currentEnv === 'dev' ? '✅' : '□'}
+    </button>
   </div>
 
   <div class="flex gap-2">
