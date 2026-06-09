@@ -271,10 +271,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
   background: var(--foreground);
   border-radius: 3px;
 }
-/* 隐藏 textarea 双向拉伸手柄，由 autoResize 接管；.resize-y 例外允许拖拽 */
-textarea:not(.resize-y) {
-  resize: none;
-}
-textarea.resize-y {
+/* textarea 支持下拉拖拽 */
+textarea {
   resize: vertical;
 }
