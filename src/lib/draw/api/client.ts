@@ -1,5 +1,5 @@
 import { forumAuth } from '$lib/forum/stores/auth';
-import { drawEnv, resolveApiRedirect, apiError } from '../stores/env';
+import { drawEnv, resolveApiRedirect, apiError, apiStatus } from '../stores/env';
 import { DrawApiError } from '../types';
 import type { DrawApiErrorPayload, DrawRecommendation } from '../types';
 import { get } from 'svelte/store';
