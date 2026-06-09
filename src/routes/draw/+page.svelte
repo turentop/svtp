@@ -229,9 +229,6 @@ let ttsTags = $state('');
     const unsub = apiError.subscribe((v) => {
         if (v) console.log('[FORK] apiError set to:', v);
       apiErrorMessage = v || '';
-      if (v && !v.includes('封禁') && !v.includes('BANNED')) {
-        forumToast.add('error', 'API 错误', v);
-      }
     });
     return unsub;
   });
@@ -870,28 +867,6 @@ async function startGeneration(mode = 'wai') {
       <EnvironmentSwitcher />
     </Dialog.Content>
   </Dialog.Root>
-
-  <!-- API 检测：初始化时全屏跑码，在线才显示页面 -->
-  {#if apiStatusValue === 'checking' || apiStatusValue === 'offline'}
-    <div class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background gap-4">
-      {#if apiStatusValue === 'checking'}
-        <Icon icon="mdi:loading" class="size-8 animate-spin text-muted-foreground" />
-        <p class="text-sm text-muted-foreground">正在检测 API 状态...</p>
-      {:else}
-        <Icon icon="mdi:cloud-alert" class="size-12 text-destructive" />
-        <p class="text-sm text-destructive font-medium">后端不可用</p>
-      {/if}
-      {#if $redirectLogs.length > 0}
-        <div class="max-w-md w-full px-4">
-          <div class="rounded-lg border border-border bg-muted/30 p-3 space-y-1 text-[10px] font-mono text-muted-foreground max-h-40 overflow-y-auto">
-            {#each $redirectLogs as log}
-              <div>{log}</div>
-            {/each}
-          </div>
-        </div>
-      {/if}
-    </div>
-  {/if}
 
   <!-- Auth warning -->
   {#if !isLoggedIn}
