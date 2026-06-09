@@ -54,6 +54,18 @@
     </Dialog.Header>
     <div class="overflow-y-auto min-h-0 flex-1">
       <WorkflowSelector {subdir} bind:value onselect={handleSelect} onpromptload={handlePromptLoad} showTitle={false} constrainHeight={false} />
+      <div class="sticky bottom-0 flex justify-center py-3 bg-popover border-t border-border/50">
+        <a
+          href="https://github.com/afoim/natureDrawImage/discussions/new?category=%E6%96%B0lora"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <Icon icon="mdi:plus-circle-outline" class="size-3.5" />
+          没找到你想要的 Lora？告诉我们
+          <Icon icon="mdi:open-in-new" class="size-3" />
+        </a>
+      </div>
     </div>
   </Dialog.Content>
 </Dialog.Root>
