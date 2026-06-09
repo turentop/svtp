@@ -133,6 +133,11 @@ export async function resolveApiRedirect(): Promise<void> {
   try {
     const resp = await fetch(baseUrl + '/health?_t=' + Date.now(), { method: 'GET' });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    // 检测重定向并保存后端真实地址（WebSocket 也需要连对地址）
+    const finalUrl = resp.url.replace(/\/health[\?&].*$/, '').replace(/\/health$/, '');
+    if (finalUrl !== baseUrl && finalUrl.startsWith('http')) {
+      drawEnv.customBaseUrl.set(finalUrl);
+    }
     apiStatus.set('online');
     apiError.set(null);
   } catch {
