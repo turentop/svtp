@@ -131,20 +131,15 @@ function createEnvStore(): DrawEnvStore {
 export const drawEnv: DrawEnvStore = createEnvStore();
 
 /**
- * 探测 API 端点是否有重定向（CDN / 负载均衡），
- * 失败后有 30s 冷却，避免高频重试。
+ * 页面初始化时探测 API 端点（重定向检测），只跑一次，定死。
+ * 除非用户手动改了 API 地址强刷页面，否则不再检测。
  */
 let _redirectResolved = false;
-let _redirectFailAt = 0;
-const REDIRECT_COOLDOWN = 30000;
-
 let _redirectPending: Promise<void> | null = null;
 
 export async function resolveApiRedirect(force = false): Promise<void> {
   if (_redirectResolved && !force) return;
   if (_redirectPending) return _redirectPending;
-  const now = Date.now();
-  if (!force && now - _redirectFailAt < REDIRECT_COOLDOWN) return;
   _redirectPending = (async () => {
     redirectLogs.set([]);
     apiStatus.set('checking');
@@ -155,13 +150,7 @@ export async function resolveApiRedirect(force = false): Promise<void> {
       const resp = await fetch(`${baseUrl}/health?_t=${Date.now()}`, { method: 'GET' });
       const finalUrl = resp.url.replace(/\/health[\?&].*$/, '').replace(/\/health$/, '');
       addRedirectLog(`[${(Date.now()-t0)}ms] 响应 status=${resp.status} url=${resp.url}`);
-      if (finalUrl !== baseUrl) {
-        addRedirectLog(`[${(Date.now()-t0)}ms] 检测到重定向 ${baseUrl} -> ${finalUrl}`);
-      }
       if (!resp.ok) { addRedirectLog(`[${(Date.now()-t0)}ms] 不 OK`); throw new Error('health check failed'); }
-      let body = '';
-      try { const clone = resp.clone(); body = await clone.text(); body = body.slice(0, 500); } catch {}
-      if (body) addRedirectLog(`[${(Date.now()-t0)}ms] 内容: ${body}`);
       if (finalUrl !== baseUrl && finalUrl.startsWith('http')) {
         addRedirectLog(`[${(Date.now()-t0)}ms] 切换至 ${finalUrl}`);
         drawEnv.customBaseUrl.set(finalUrl);
@@ -174,7 +163,7 @@ export async function resolveApiRedirect(force = false): Promise<void> {
       addRedirectLog(`[${(Date.now()-t0)}ms] API 在线`);
     } catch (e: any) {
       addRedirectLog(`[${(Date.now()-t0)}ms] 失败: ${e.message || ''}`);
-      _redirectFailAt = Date.now();
+      _redirectResolved = true; // 失败也定死，不再重试
       apiStatus.set('offline');
     } finally {
       _redirectPending = null;

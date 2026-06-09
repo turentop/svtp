@@ -56,7 +56,6 @@ export async function drawRequest<T>(
   path: string,
   options: DrawRequestOptions = {}
 ): Promise<T> {
-  await resolveApiRedirect();
   const headers = new Headers(options.headers);
   const method = (options.method || 'GET').toUpperCase();
   const token = forumAuth.getToken();
