@@ -17,6 +17,7 @@
   import PieChart from '$lib/components/draw/PieChart.svelte';
   import { getImageProxyUrl, getImageUrl, getThumbnailUrl, forkOutputImage, clearQueue, fetchDebugInfo } from '$lib/draw/api/client';
   import { pendingFork } from '$lib/draw/stores/fork';
+import { forumToast } from '$lib/forum/stores/toast';
 import { onMount, onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
 import ImageLightbox from '$lib/components/draw/ImageLightbox.svelte';
@@ -1928,12 +1929,7 @@ function formatTime(ts: number) {
               </Button>
             </div>
 
-            {#if debugError}
-              <Alert variant="destructive">
-                <Icon icon="mdi:alert-circle" class="size-4" />
-                <AlertDescription class="text-xs">{debugError}</AlertDescription>
-              </Alert>
-            {/if}
+
 
             {#if debugData}
               {#if debugData.stuck.length > 0}
