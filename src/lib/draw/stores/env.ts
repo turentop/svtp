@@ -117,28 +117,30 @@ function createEnvStore(): DrawEnvStore {
 
 export const drawEnv: DrawEnvStore = createEnvStore();
 
-let _done = false;
+let _redirectPromise: Promise<void> | null = null;
 
 export async function resolveApiRedirect(): Promise<void> {
-  if (_done) return;
-  _done = true;
+  if (_redirectPromise) return _redirectPromise;
   console.log('[API] resolveApiRedirect 开始');
   apiStatus.set('checking');
-  const baseUrl = get(drawEnv.baseUrl);
-  try {
-    const resp = await fetch(baseUrl + '/health?_t=' + Date.now(), { method: 'GET' });
-    console.log('[API] health 响应', resp.status, resp.url);
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const finalUrl = resp.url.replace(/\/health[\?&].*$/, '').replace(/\/health$/, '');
-    if (finalUrl !== baseUrl && finalUrl.startsWith('http')) {
-      console.log('[API] 检测到重定向', baseUrl, '->', finalUrl);
-      drawEnv.customBaseUrl.set(finalUrl);
+  _redirectPromise = (async () => {
+    const baseUrl = get(drawEnv.baseUrl);
+    try {
+      const resp = await fetch(baseUrl + '/health?_t=' + Date.now(), { method: 'GET' });
+      console.log('[API] health 响应', resp.status, resp.url);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const finalUrl = resp.url.replace(/\/health[\?&].*$/, '').replace(/\/health$/, '');
+      if (finalUrl !== baseUrl && finalUrl.startsWith('http')) {
+        console.log('[API] 检测到重定向', baseUrl, '->', finalUrl);
+        drawEnv.customBaseUrl.set(finalUrl);
+      }
+      console.log('[API] 设为 online');
+      apiStatus.set('online');
+      apiError.set(null);
+    } catch (e: any) {
+      console.log('[API] 失败', e.message);
+      apiStatus.set('offline');
     }
-    console.log('[API] 设为 online');
-    apiStatus.set('online');
-    apiError.set(null);
-  } catch (e: any) {
-    console.log('[API] 失败', e.message);
-    apiStatus.set('offline');
-  }
+  })();
+  return _redirectPromise;
 }
