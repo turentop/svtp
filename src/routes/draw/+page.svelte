@@ -299,7 +299,7 @@ let ttsTags = $state('');
 
   $effect(() => {
     if (isLoggedIn) {
-      resolveApiRedirect().then(() => loadWalletBalance());
+      loadWalletBalance();
       fetchPlans().then(r => plans = r.items).catch(() => {});
       fetchPointsConfig().then(r => pointsConfig = r).catch(() => {});
     } else {
@@ -631,19 +631,19 @@ async function startGeneration(mode = 'wai') {
 
   async function loadWalletBalance() {
     if (!isLoggedIn) return;
+    // 先等重定向完成再请求，避免用错 URL
+    await resolveApiRedirect();
     try {
       const r = await fetchWalletBalance();
       walletBalance = r.balance;
-      // 有余额时有 pending 订单 → 继续轮询
       if (walletTimer) return;
-      // 每 8 秒轮询一次余额（后台会查爱发电订单状态）
       walletTimer = setInterval(async () => {
         try {
           const r2 = await fetchWalletBalance();
           walletBalance = r2.balance;
         } catch {}
       }, 8000);
-    } catch { walletBalance = null; }
+    } catch {}
   }
 
   async function handleRecharge(plan: { url: string; points: number }) {
