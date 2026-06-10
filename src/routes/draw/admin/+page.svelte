@@ -14,6 +14,7 @@
   import { drawEnv, resolveApiRedirect } from '$lib/draw/stores/env';
   import { get } from 'svelte/store';
   import * as admin from '$lib/draw/api/admin';
+  import * as loraApi from '$lib/draw/api/lora';
   import PieChart from '$lib/components/draw/PieChart.svelte';
   import { getImageProxyUrl, getImageUrl, getThumbnailUrl, forkOutputImage, clearQueue, fetchDebugInfo } from '$lib/draw/api/client';
   import { pendingFork } from '$lib/draw/stores/fork';
@@ -220,6 +221,58 @@ let loadingMore = $state(false);
     { label: '关闭', options: ['off'] },
     { label: 'Level (Gemini 3 系列)', options: ['level_minimal', 'level_low', 'level_medium', 'level_high'] },
   ];
+
+  // Lora approval
+  let loraPending = $state<import('$lib/draw/types').LoraApplication[]>([]);
+  let loraLoading = $state(false);
+  let loraRejectId = $state<string | null>(null);
+  let loraRejectReason = $state('');
+
+  async function loadLoraPending() {
+    loraLoading = true;
+    try {
+      const res = await loraApi.getPendingLoraSubmissions();
+      loraPending = res.items;
+    } catch (e) {
+      showMsg('error', e instanceof Error ? e.message : '加载失败');
+    } finally {
+      loraLoading = false;
+    }
+  }
+
+  async function handleApproveLora(id: string) {
+    loading = true;
+    try {
+      await loraApi.approveLora(id);
+      showMsg('success', '已通过并创建 Lora 工作流');
+      loadLoraPending();
+    } catch (e) {
+      showMsg('error', e instanceof Error ? e.message : '操作失败');
+    } finally {
+      loading = false;
+    }
+  }
+
+  function startRejectLora(id: string) {
+    loraRejectId = id;
+    loraRejectReason = '';
+  }
+
+  async function handleRejectLora() {
+    if (!loraRejectId) return;
+    loading = true;
+    try {
+      await loraApi.rejectLora(loraRejectId, loraRejectReason);
+      showMsg('success', '已拒绝');
+      loraRejectId = null;
+      loraRejectReason = '';
+      loadLoraPending();
+    } catch (e) {
+      showMsg('error', e instanceof Error ? e.message : '操作失败');
+    } finally {
+      loading = false;
+    }
+  }
 
   // GC
   let gcResult = $state<Record<string, number> | null>(null);
@@ -1007,6 +1060,9 @@ function formatTime(ts: number) {
         </TabsTrigger>
         <TabsTrigger value="storage" class="text-xs">
           <Icon icon="mdi:harddisk" class="size-3.5 mr-1" />存储
+        </TabsTrigger>
+        <TabsTrigger value="lora-approval" class="text-xs">
+          <Icon icon="mdi:shape-plus-outline" class="size-3.5 mr-1" />Lora审批
         </TabsTrigger>
 
       </TabsList>
@@ -1979,6 +2035,78 @@ function formatTime(ts: number) {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            {/if}
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <!-- Lora Approval -->
+      <TabsContent value="lora-approval" class="mt-4">
+        <Card>
+          <CardHeader>
+            <CardTitle class="text-base flex items-center gap-2">
+              <Icon icon="mdi:shape-plus-outline" class="size-5" />
+              Lora 申请
+            </CardTitle>
+            <CardDescription>
+              共 {loraPending.length} 条待审核
+              <button onclick={loadLoraPending} class="text-xs text-primary hover:underline ml-2">刷新</button>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {#if loraLoading}
+              <div class="text-xs text-muted-foreground py-8 text-center">加载中...</div>
+            {:else if loraPending.length === 0}
+              <div class="text-xs text-muted-foreground py-8 text-center">暂无待审核的 Lora 申请</div>
+            {:else}
+              <div class="space-y-3">
+                {#each loraPending as item}
+                  <div class="border border-border rounded-lg p-4 space-y-2">
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="space-y-1">
+                        <div class="text-sm font-medium">{item.name}</div>
+                        <div class="text-xs text-muted-foreground flex flex-wrap gap-x-3 gap-y-1">
+                          <span>提交者: #{item.user_id}</span>
+                          <span>类型: {item.type}</span>
+                          <span>分类: {item.category}</span>
+                          <span>触发词: <code class="bg-muted px-1 rounded">{item.trigger}</code></span>
+                        </div>
+                        <div class="text-xs text-muted-foreground">
+                          链接: <a href={item.url} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline break-all">{item.url}</a>
+                        </div>
+                        <div class="text-[10px] text-muted-foreground">
+                          {new Date(item.created_at * 1000).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <Button size="sm" class="text-xs h-7" onclick={() => handleApproveLora(item.id)} disabled={loading}>
+                        <Icon icon="mdi:check" class="size-3.5 mr-1" />
+                        通过
+                      </Button>
+                      {#if loraRejectId === item.id}
+                        <div class="flex items-center gap-2 flex-1">
+                          <Input
+                            bind:value={loraRejectReason}
+                            placeholder="拒绝原因（选填）"
+                            class="h-7 text-xs flex-1"
+                            onkeydown={(e) => e.key === 'Enter' && handleRejectLora()}
+                          />
+                          <Button size="sm" variant="destructive" class="text-xs h-7" onclick={handleRejectLora} disabled={loading}>
+                            确认拒绝
+                          </Button>
+                          <Button size="sm" variant="ghost" class="text-xs h-7" onclick={() => (loraRejectId = null)}>取消</Button>
+                        </div>
+                      {:else}
+                        <Button size="sm" variant="destructive" class="text-xs h-7" onclick={() => startRejectLora(item.id)}>
+                          <Icon icon="mdi:close" class="size-3.5 mr-1" />
+                          拒绝
+                        </Button>
+                      {/if}
+                    </div>
+                  </div>
+                {/each}
               </div>
             {/if}
           </CardContent>

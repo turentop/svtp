@@ -291,3 +291,18 @@ export interface AdminLlmConfig {
   profiles: AdminLlmProfile[];
   active: number;
 }
+
+export interface LoraApplication {
+  id: string;
+  user_id: number;
+  url: string;
+  name: string;
+  category: string;
+  trigger: string;
+  type: 'WAI' | 'Anima';
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: number;
+  reviewed_by?: number | null;
+  reviewed_at?: number | null;
+  admin_reason?: string | null;
+}
