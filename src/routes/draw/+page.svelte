@@ -247,6 +247,17 @@ let ttsTags = $state('');
   });
 
   // Tab state — 从 URL hash 恢复，格式: #tab/subtab/subsubtab
+  function parseHash(): { main: string; sub: string; subsub: string } {
+    const parts = (location.hash?.slice(1) || '').split('/');
+    return { main: parts[0] || 'generate', sub: parts[1] || '', subsub: parts[2] || '' };
+  }
+  const initialHash = parseHash();
+  let activeTab = $state(initialHash.main);
+  let genSubTab = $state(['img2img','txt2img','saloon','tts','video'].includes(initialHash.sub) ? initialHash.sub : 'txt2img');
+  let genTxtSubTab = $state(['wai','anima','ernie','real'].includes(initialHash.subsub) ? initialHash.subsub : 'wai');
+  let imgSubTab = $state(['flux2','qwen'].includes(initialHash.subsub) ? initialHash.subsub : 'flux2');
+  let selectedMode = $state(genTxtSubTab);
+
   function applyHash(hash: string) {
     const parts = (hash?.slice(1) || '').split('/');
     const main = parts[0] || 'generate';
@@ -259,8 +270,6 @@ let ttsTags = $state('');
       else if (sub === 'img2img') imgSubTab = ['flux2','qwen'].includes(subsub) ? subsub : 'flux2';
     }
   }
-  applyHash(location.hash);
-  let selectedMode = $state(genTxtSubTab);
 
   // 监听浏览器前进/后退
   $effect(() => {
