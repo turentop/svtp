@@ -2,7 +2,7 @@
   import '../app.css';
   import '../app.css';
   import { page } from '$app/stores';
-  import { beforeNavigate, afterNavigate, goto } from '$app/navigation';
+  import { beforeNavigate, afterNavigate } from '$app/navigation';
   import { siteConfig } from '$lib/config/site';
   import BackToTop from '$lib/components/BackToTop.svelte';
   import NavBar from '$lib/components/NavBar.svelte';
@@ -52,12 +52,11 @@
     rafId = requestAnimationFrame(tick);
   });
 
-  // 修复浏览器前进/后退时 SvelteKit 静态站不刷新内容的问题
+  // popstate 时初始页 state=null 被 SvelteKit Router 跳过，直接用 reload 兜底
   $effect(() => {
+    const cur = () => window.location.pathname + window.location.search;
     const handler = () => {
-      if ($page.url.pathname + $page.url.search !== window.location.pathname + window.location.search) {
-        goto(window.location.pathname + window.location.search + window.location.hash, { noScroll: true });
-      }
+      if ($page.url.pathname + $page.url.search !== cur()) location.reload();
     };
     window.addEventListener('popstate', handler);
     return () => window.removeEventListener('popstate', handler);
